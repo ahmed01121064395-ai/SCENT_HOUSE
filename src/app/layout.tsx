@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AppProvider } from "@/context/AppContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import FloatingSocials from "@/components/FloatingSocials";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,6 +25,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AppProvider>
+          <Suspense fallback={null}>
+            <ScrollToTop />
+          </Suspense>
           <Header />
           <CartDrawer />
           <main className="main-content">{children}</main>
