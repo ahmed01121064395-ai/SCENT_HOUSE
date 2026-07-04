@@ -111,18 +111,51 @@ function ShopContent() {
     return undefined;
   };
 
+  // Determine Custom Title and Subtitle based on active section/category
+  const getHeaderInfo = () => {
+    if (viewWishlistOnly) {
+      return {
+        title: 'قائمة مفضلاتي',
+        sub: 'تصفح عطورك المفضلة التي قمت بإضافتها لقائمتك الخاصة'
+      };
+    }
+    const cat = searchParams.get('category');
+    if (cat === 'men') {
+      return {
+        title: 'رجولة تفوح عبقًا',
+        sub: 'تشكيلة عطور رجالية تجمع بين القوة والأناقة في كل رشة'
+      };
+    }
+    if (cat === 'women') {
+      return {
+        title: 'أنوثة تُروى بالعطر',
+        sub: 'عطور نسائية تحمل توقيعك الخاص في كل مكان تذهبين إليه'
+      };
+    }
+    if (cat === 'gifts') {
+      return {
+        title: 'هدايا تُروى بالعطر',
+        sub: 'عطرك… هدية لا تُنسى'
+      };
+    }
+    return {
+      title: 'اكتشف عالمنا العطري الكامل',
+      sub: 'تصفح كتالوج العطور الفخم واختر النفحات العطرية الملائمة لأسلوب حياتك'
+    };
+  };
+
+  const headerInfo = getHeaderInfo();
+
   return (
     <div id="view-shop" className="active">
-      {viewWishlistOnly && (
-        <div className="info-page-header">
-          <h1 id="shop-view-title" className="gold-text">
-            قائمة مفضلاتي
-          </h1>
-          <p>
-            تصفح عطورك المفضلة التي قمت بإضافتها لقائمتك الخاصة
-          </p>
-        </div>
-      )}
+      <div className="info-page-header">
+        <h1 id="shop-view-title" className="gold-text">
+          {headerInfo.title}
+        </h1>
+        <p>
+          {headerInfo.sub}
+        </p>
+      </div>
 
       <div className="section-wrapper">
         {/* Sort Controls (Search removed) */}
