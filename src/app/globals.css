@@ -280,7 +280,7 @@ header {
 .hero-section {
     position: relative;
     min-height: 100vh;
-    padding: 165px 0 70px 0; /* Adjusted for 35px announcement bar */
+    padding: 100px 0 70px 0; /* Reduced top padding to move content closer to header */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -305,6 +305,7 @@ header {
     z-index: 10;
     max-width: 800px;
     padding: 20px;
+    margin-top: -80px; /* Pulls content up towards the header navigation */
     text-align: center;
     animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
