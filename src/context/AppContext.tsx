@@ -16,6 +16,8 @@ export interface OrderInfo {
   orderId: string;
   orderDate: string;
   fullname: string;
+  phone: string;
+  phone2?: string;
   paymentMethodLabel: string;
   items: CartItem[];
   subtotal: number;
