@@ -185,95 +185,97 @@ function ShopContent() {
         </div>
 
         {/* Layout */}
-        <div className="shop-layout">
+        <div className="shop-layout" style={searchParams.get('category') === 'gifts' ? { gridTemplateColumns: '1fr' } : {}}>
           {/* Sidebar */}
-          <aside className="shop-sidebar">
-            {/* Category Filter - only shown when not on a specific category section */}
-            {!searchParams.get('category') && (
-              <div className="filter-group">
-                <h4 className="filter-title">التصنيفات</h4>
-                <div className="filter-options">
-                  <label className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedCats.includes('men')}
-                      onChange={() => handleCatChange('men')}
-                    />
-                    <span className="checkbox-box"></span>
-                    <span>عطور رجالية</span>
-                  </label>
-                  
-                  <label className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedCats.includes('women')}
-                      onChange={() => handleCatChange('women')}
-                    />
-                    <span className="checkbox-box"></span>
-                    <span>عطور نسائية</span>
-                  </label>
+          {searchParams.get('category') !== 'gifts' && (
+            <aside className="shop-sidebar">
+              {/* Category Filter - only shown when not on a specific category section */}
+              {!searchParams.get('category') && (
+                <div className="filter-group">
+                  <h4 className="filter-title">التصنيفات</h4>
+                  <div className="filter-options">
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedCats.includes('men')}
+                        onChange={() => handleCatChange('men')}
+                      />
+                      <span className="checkbox-box"></span>
+                      <span>عطور رجالية</span>
+                    </label>
+                    
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedCats.includes('women')}
+                        onChange={() => handleCatChange('women')}
+                      />
+                      <span className="checkbox-box"></span>
+                      <span>عطور نسائية</span>
+                    </label>
 
-                  <label className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedCats.includes('gifts')}
-                      onChange={() => handleCatChange('gifts')}
-                    />
-                    <span className="checkbox-box"></span>
-                    <span>بوكسات هدايا ومناسبات</span>
-                  </label>
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedCats.includes('gifts')}
+                        onChange={() => handleCatChange('gifts')}
+                      />
+                      <span className="checkbox-box"></span>
+                      <span>بوكسات هدايا ومناسبات</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Size Filter - only shown when category is not gifts */}
-            {!selectedCats.includes('gifts') && (
-              <div className="filter-group">
-                <h4 className="filter-title">الحجم المتوفر</h4>
-                <div className="filter-options">
-                  <label className="custom-radio">
-                    <input
-                      type="radio"
-                      name="size-filter"
-                      checked={selectedSizes.includes(30)}
-                      onChange={() => handleSizeChange(30)}
-                    />
-                    <span className="radio-circle"></span>
-                    <span className="english-num">30 ML</span>
-                  </label>
-                  
-                  <label className="custom-radio">
-                    <input
-                      type="radio"
-                      name="size-filter"
-                      checked={selectedSizes.includes(50)}
-                      onChange={() => handleSizeChange(50)}
-                    />
-                    <span className="radio-circle"></span>
-                    <span className="english-num">50 ML</span>
-                  </label>
+              {/* Size Filter - only shown when category is not gifts */}
+              {!selectedCats.includes('gifts') && (
+                <div className="filter-group">
+                  <h4 className="filter-title">الحجم المتوفر</h4>
+                  <div className="filter-options">
+                    <label className="custom-radio">
+                      <input
+                        type="radio"
+                        name="size-filter"
+                        checked={selectedSizes.includes(30)}
+                        onChange={() => handleSizeChange(30)}
+                      />
+                      <span className="radio-circle"></span>
+                      <span className="english-num">30 ML</span>
+                    </label>
+                    
+                    <label className="custom-radio">
+                      <input
+                        type="radio"
+                        name="size-filter"
+                        checked={selectedSizes.includes(50)}
+                        onChange={() => handleSizeChange(50)}
+                      />
+                      <span className="radio-circle"></span>
+                      <span className="english-num">50 ML</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Wishlist filter shortcut toggler */}
-            {wishlist.length > 0 && (
-              <div className="filter-group">
-                <button
-                  onClick={() => setViewWishlistOnly(!viewWishlistOnly)}
-                  className={`btn-drawer-full text-sm py-2 rounded border ${
-                    viewWishlistOnly
-                      ? 'bg-amber-600 border-amber-600 text-white'
-                      : 'border-yellow-600/40 text-yellow-500/90 hover:bg-yellow-600/10'
-                  }`}
-                  type="button"
-                >
-                  <i className="fa-solid fa-heart ml-2"></i>
-                  {viewWishlistOnly ? 'عرض كل العطور' : 'عرض المفضلة فقط'}
-                </button>
-              </div>
-            )}
-          </aside>
+              {/* Wishlist filter shortcut toggler */}
+              {wishlist.length > 0 && (
+                <div className="filter-group">
+                  <button
+                    onClick={() => setViewWishlistOnly(!viewWishlistOnly)}
+                    className={`btn-drawer-full text-sm py-2 rounded border ${
+                      viewWishlistOnly
+                        ? 'bg-amber-600 border-amber-600 text-white'
+                        : 'border-yellow-600/40 text-yellow-500/90 hover:bg-yellow-600/10'
+                    }`}
+                    type="button"
+                  >
+                    <i className="fa-solid fa-heart ml-2"></i>
+                    {viewWishlistOnly ? 'عرض كل العطور' : 'عرض المفضلة فقط'}
+                  </button>
+                </div>
+              )}
+            </aside>
+          )}
 
           {/* Grid list or No Results placeholder */}
           <div className="flex-1">
