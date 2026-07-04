@@ -18,7 +18,7 @@ export default function Contact() {
               <i className="fa-solid fa-phone"></i>
             </div>
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الهاتف وخدمة العملاء</h3>
-            <a href="tel:+201119935823" className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>+20 11 19935823</a>
+            <a href="tel:01095363169" className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>01095363169</a>
             <a href="tel:01005006426" className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>01005006426</a>
           </div>
 

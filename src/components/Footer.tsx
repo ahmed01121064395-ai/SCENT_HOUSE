@@ -46,7 +46,7 @@ export default function Footer() {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '10px', marginLeft: '10px' }}>|</span>
 
           <span style={{ fontSize: '0.85rem', color: 'var(--primary-gold)', display: 'flex', gap: '10px', direction: 'ltr' }}>
-            <span className="english-num">01119935823</span>
+            <span className="english-num">01095363169</span>
             <span>-</span>
             <span className="english-num">01005006426</span>
           </span>
