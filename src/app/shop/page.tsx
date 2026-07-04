@@ -11,7 +11,6 @@ function ShopContent() {
   const searchParams = useSearchParams();
 
   // Search, sort and filter states
-  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
@@ -49,16 +48,7 @@ function ShopContent() {
 
   // Filter and sort products
   const filteredProducts = products.filter(product => {
-    // 1. Search Query Filter
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (product.notes && Object.values(product.notes).some(n => n.toLowerCase().includes(searchQuery.toLowerCase()))) ||
-      (product.contents && product.contents.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    if (!matchesSearch) return false;
-
-    // 2. Category Filter
+    // 1. Category Filter
     if (selectedCats.length > 0) {
       const matchesCat = selectedCats.includes(product.category) ||
                          (product.category === 'unisex' && (selectedCats.includes('men') || selectedCats.includes('women')));
@@ -123,31 +113,20 @@ function ShopContent() {
 
   return (
     <div id="view-shop" className="active">
-      <div className="info-page-header">
-        <h1 id="shop-view-title" className="gold-text">
-          {viewWishlistOnly ? 'قائمة مفضلاتي' : 'معرض العطور الفاخرة'}
-        </h1>
-        <p>
-          {viewWishlistOnly
-            ? 'تصفح عطورك المفضلة التي قمت بإضافتها لقائمتك الخاصة'
-            : 'تصفح كتالوج العطور الفخم واختر النفحات العطرية الملائمة لأسلوب حياتك'}
-        </p>
-      </div>
+      {viewWishlistOnly && (
+        <div className="info-page-header">
+          <h1 id="shop-view-title" className="gold-text">
+            قائمة مفضلاتي
+          </h1>
+          <p>
+            تصفح عطورك المفضلة التي قمت بإضافتها لقائمتك الخاصة
+          </p>
+        </div>
+      )}
 
       <div className="section-wrapper">
-        {/* Search & Sort Controls */}
-        <div className="shop-main-controls">
-          <div className="search-box-wrap">
-            <input
-              type="text"
-              placeholder="البحث عن عطر، مكون أو بوكس..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-            <i className="fa-solid fa-magnifying-glass search-icon"></i>
-          </div>
-          
+        {/* Sort Controls (Search removed) */}
+        <div className="shop-main-controls" style={{ justifyContent: 'flex-end' }}>
           <div className="sort-container">
             <span>ترتيب حسب:</span>
             <select
