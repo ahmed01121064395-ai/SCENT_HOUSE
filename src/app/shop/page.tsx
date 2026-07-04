@@ -206,33 +206,35 @@ function ShopContent() {
               </div>
             )}
 
-            {/* Size Filter */}
-            <div className="filter-group">
-              <h4 className="filter-title">الحجم المتوفر</h4>
-              <div className="filter-options">
-                <label className="custom-radio">
-                  <input
-                    type="radio"
-                    name="size-filter"
-                    checked={selectedSizes.includes(30)}
-                    onChange={() => handleSizeChange(30)}
-                  />
-                  <span className="radio-circle"></span>
-                  <span className="english-num">30 ML</span>
-                </label>
-                
-                <label className="custom-radio">
-                  <input
-                    type="radio"
-                    name="size-filter"
-                    checked={selectedSizes.includes(50)}
-                    onChange={() => handleSizeChange(50)}
-                  />
-                  <span className="radio-circle"></span>
-                  <span className="english-num">50 ML</span>
-                </label>
+            {/* Size Filter - only shown when category is not gifts */}
+            {!selectedCats.includes('gifts') && (
+              <div className="filter-group">
+                <h4 className="filter-title">الحجم المتوفر</h4>
+                <div className="filter-options">
+                  <label className="custom-radio">
+                    <input
+                      type="radio"
+                      name="size-filter"
+                      checked={selectedSizes.includes(30)}
+                      onChange={() => handleSizeChange(30)}
+                    />
+                    <span className="radio-circle"></span>
+                    <span className="english-num">30 ML</span>
+                  </label>
+                  
+                  <label className="custom-radio">
+                    <input
+                      type="radio"
+                      name="size-filter"
+                      checked={selectedSizes.includes(50)}
+                      onChange={() => handleSizeChange(50)}
+                    />
+                    <span className="radio-circle"></span>
+                    <span className="english-num">50 ML</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Wishlist filter shortcut toggler */}
             {wishlist.length > 0 && (
