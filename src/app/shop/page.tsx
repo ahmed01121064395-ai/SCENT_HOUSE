@@ -168,41 +168,43 @@ function ShopContent() {
         <div className="shop-layout">
           {/* Sidebar */}
           <aside className="shop-sidebar">
-            {/* Category Filter */}
-            <div className="filter-group">
-              <h4 className="filter-title">التصنيفات</h4>
-              <div className="filter-options">
-                <label className="custom-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedCats.includes('men')}
-                    onChange={() => handleCatChange('men')}
-                  />
-                  <span className="checkbox-box"></span>
-                  <span>عطور رجالية</span>
-                </label>
-                
-                <label className="custom-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedCats.includes('women')}
-                    onChange={() => handleCatChange('women')}
-                  />
-                  <span className="checkbox-box"></span>
-                  <span>عطور نسائية</span>
-                </label>
+            {/* Category Filter - only shown when not on a specific category section */}
+            {!searchParams.get('category') && (
+              <div className="filter-group">
+                <h4 className="filter-title">التصنيفات</h4>
+                <div className="filter-options">
+                  <label className="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedCats.includes('men')}
+                      onChange={() => handleCatChange('men')}
+                    />
+                    <span className="checkbox-box"></span>
+                    <span>عطور رجالية</span>
+                  </label>
+                  
+                  <label className="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedCats.includes('women')}
+                      onChange={() => handleCatChange('women')}
+                    />
+                    <span className="checkbox-box"></span>
+                    <span>عطور نسائية</span>
+                  </label>
 
-                <label className="custom-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedCats.includes('gifts')}
-                    onChange={() => handleCatChange('gifts')}
-                  />
-                  <span className="checkbox-box"></span>
-                  <span>بوكسات هدايا ومناسبات</span>
-                </label>
+                  <label className="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedCats.includes('gifts')}
+                      onChange={() => handleCatChange('gifts')}
+                    />
+                    <span className="checkbox-box"></span>
+                    <span>بوكسات هدايا ومناسبات</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Size Filter */}
             <div className="filter-group">
