@@ -78,7 +78,7 @@ export default function Home() {
             <Link href="/shop" className="btn-premium inline-block text-center">
               تسوق الآن
             </Link>
-            <Link href="/shop?category=gifts" className="btn-outline-gold inline-block text-center">
+            <Link href="/shop" className="btn-outline-gold inline-block text-center">
               اكتشف المجموعة
             </Link>
           </div>
