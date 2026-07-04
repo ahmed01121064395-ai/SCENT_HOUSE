@@ -1039,6 +1039,46 @@ header {
     transform: translate(-50%, -50%);
 }
 
+/* Custom Radio styling */
+.custom-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.custom-radio input {
+    display: none;
+}
+
+.radio-circle {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-gold);
+    background: var(--bg-primary);
+    border-radius: 50%;
+    position: relative;
+    transition: var(--transition-quick);
+}
+
+.custom-radio input:checked + .radio-circle {
+    border-color: var(--primary-gold);
+}
+
+.custom-radio input:checked + .radio-circle::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--gold-gradient);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .custom-checkbox:hover {
     color: var(--primary-gold);
 }

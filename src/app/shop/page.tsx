@@ -43,7 +43,7 @@ function ShopContent() {
 
   const handleSizeChange = (size: number) => {
     setSelectedSizes(prev =>
-      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+      prev.includes(size) ? [] : [size]
     );
   };
 
@@ -210,23 +210,25 @@ function ShopContent() {
             <div className="filter-group">
               <h4 className="filter-title">الحجم المتوفر</h4>
               <div className="filter-options">
-                <label className="custom-checkbox">
+                <label className="custom-radio">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="size-filter"
                     checked={selectedSizes.includes(30)}
                     onChange={() => handleSizeChange(30)}
                   />
-                  <span className="checkbox-box"></span>
+                  <span className="radio-circle"></span>
                   <span className="english-num">30 ML</span>
                 </label>
                 
-                <label className="custom-checkbox">
+                <label className="custom-radio">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="size-filter"
                     checked={selectedSizes.includes(50)}
                     onChange={() => handleSizeChange(50)}
                   />
-                  <span className="checkbox-box"></span>
+                  <span className="radio-circle"></span>
                   <span className="english-num">50 ML</span>
                 </label>
               </div>
