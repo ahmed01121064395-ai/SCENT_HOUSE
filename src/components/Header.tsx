@@ -72,38 +72,6 @@ export default function Header() {
 
         {/* User Quick Actions */}
         <div className="nav-actions">
-          {/* Social media links */}
-          <a
-            href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="icon-btn"
-            style={{ color: '#E1306C', marginLeft: '8px' }}
-            title="إنستغرام"
-          >
-            <i className="fa-brands fa-instagram"></i>
-          </a>
-          <a
-            href="https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="icon-btn"
-            style={{ color: '#FE2C55', marginLeft: '8px' }}
-            title="تيك توك"
-          >
-            <i className="fa-brands fa-tiktok"></i>
-          </a>
-          <a
-            href="https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="icon-btn"
-            style={{ color: '#1877F2', marginLeft: '15px' }}
-            title="فيسبوك"
-          >
-            <i className="fa-brands fa-facebook-f"></i>
-          </a>
-
           {/* Wishlist Link */}
           <Link href="/shop?wishlist=true" className="icon-btn" title="المفضلة">
             <i className="fa-regular fa-heart"></i>
