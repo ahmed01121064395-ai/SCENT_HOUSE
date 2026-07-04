@@ -159,11 +159,19 @@ function ShopContent() {
 
       <div className="section-wrapper">
         {/* Sort Controls (Search removed) */}
-        <div className="shop-main-controls" style={{ justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px', padding: '0 5px' }}>
           <div className="sort-container">
-            <span>ترتيب حسب:</span>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>ترتيب حسب:</span>
             <select
               className="select-premium"
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                height: '34px',
+                minWidth: '140px',
+                background: 'var(--bg-secondary)',
+                borderRadius: '6px'
+              }}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
