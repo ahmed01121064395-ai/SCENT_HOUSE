@@ -64,7 +64,7 @@ export default function AdminOrders() {
 
       // If this order is currently expanded in the details modal, update it too
       if (expandedOrder && expandedOrder.id === orderId) {
-        setExpandedOrder(prev => ({ ...prev, status: newStatus }));
+        setExpandedOrder((prev: any) => ({ ...prev, status: newStatus }));
       }
     } catch (err: any) {
       alert(`خطأ في تحديث حالة الطلب: ${err.message}`);
