@@ -23,12 +23,7 @@ export default function Checkout() {
   const [phone2, setPhone2] = useState('');
   const [city, setCity] = useState('الفيوم');
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'online' | 'applepay' | 'cod'>('online');
-
-  // Credit Card states
-  const [cardNum, setCardNum] = useState('');
-  const [cardExp, setCardExp] = useState('');
-  const [cardCvv, setCardCvv] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'applepay' | 'cod'>('cod');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,9 +42,8 @@ export default function Checkout() {
       year: 'numeric', month: 'numeric', day: 'numeric'
     });
 
-    let paymentMethodLabel = 'مدى / بطاقة ائتمانية';
+    let paymentMethodLabel = 'الدفع عند الاستلام';
     if (paymentMethod === 'applepay') paymentMethodLabel = 'Apple Pay';
-    if (paymentMethod === 'cod') paymentMethodLabel = 'الدفع عند الاستلام';
 
     // ── Step 1: Insert into orders (column names match your real schema) ──
     const { data: orderRow, error: orderError } = await supabase
@@ -236,14 +230,7 @@ export default function Checkout() {
                   <i className="fa-regular fa-credit-card"></i> طريقة الدفع المفضلة
                 </h3>
                 
-                <div className="payment-method-selector grid grid-cols-3 gap-3">
-                  <div
-                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'online' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('online')}
-                  >
-                    <i className="fa-solid fa-globe"></i>
-                    <span className="payment-option-title text-xs mt-1 block">بطاقة ائتمانية</span>
-                  </div>
+                <div className="payment-method-selector grid grid-cols-2 gap-3">
                   <div
                     className={`payment-option-btn cursor-pointer ${paymentMethod === 'applepay' ? 'active' : ''}`}
                     onClick={() => setPaymentMethod('applepay')}
@@ -259,45 +246,6 @@ export default function Checkout() {
                     <span className="payment-option-title text-xs mt-1 block">عند الاستلام</span>
                   </div>
                 </div>
-
-                {/* Credit Card info input placeholder */}
-                {paymentMethod === 'online' && (
-                  <div id="card-payment-fields" className="form-row-2col mt-4">
-                    <div className="form-group-checkout col-span-2">
-                      <label className="block text-sm mb-1 text-gray-300">رقم البطاقة</label>
-                      <input
-                        type="text"
-                        placeholder="4000 1234 5678 9010"
-                        className="premium-input w-full english-num"
-                        value={cardNum}
-                        onChange={(e) => setCardNum(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-checkout">
-                      <label className="block text-sm mb-1 text-gray-300">تاريخ الانتهاء</label>
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        className="premium-input w-full english-num"
-                        value={cardExp}
-                        onChange={(e) => setCardExp(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="form-group-checkout">
-                      <label className="block text-sm mb-1 text-gray-300">رمز التحقق (CVV)</label>
-                      <input
-                        type="password"
-                        placeholder="***"
-                        className="premium-input w-full english-num"
-                        value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* DB Error display */}
                 {dbError && (

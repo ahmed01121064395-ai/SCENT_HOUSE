@@ -185,13 +185,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveCart(newCart);
   };
 
-  const toggleWishlist = (productId: number) => {
+  const toggleWishlist = async (productId: number) => {
     const index = wishlist.indexOf(productId);
     const newWishlist = [...wishlist];
+    
+    // Retrieve or generate a unique session ID for wishlist tracking
+    let sid = localStorage.getItem('scent_session_id');
+    if (!sid) {
+      sid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('scent_session_id', sid);
+    }
+
     if (index > -1) {
       newWishlist.splice(index, 1);
+      // Remove like/wishlist log from Supabase
+      await supabase
+        .from('product_likes')
+        .delete()
+        .eq('product_id', productId)
+        .eq('session_id', sid);
     } else {
       newWishlist.push(productId);
+      // Log like/wishlist addition to Supabase
+      await supabase
+        .from('product_likes')
+        .insert({ product_id: productId, session_id: sid });
     }
     saveWishlist(newWishlist);
   };

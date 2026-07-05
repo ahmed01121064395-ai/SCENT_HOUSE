@@ -1,11 +1,5 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AppProvider } from "@/context/AppContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
-import FloatingSocials from "@/components/FloatingSocials";
-import ScrollToTop from "@/components/ScrollToTop";
 import { Cairo, Cinzel, Montserrat } from 'next/font/google';
 import "./globals.css";
 
@@ -47,14 +41,7 @@ export default function RootLayout({
       </head>
       <body className={`${cairo.variable} ${cinzel.variable} ${montserrat.variable} antialiased`}>
         <AppProvider>
-          <Suspense fallback={null}>
-            <ScrollToTop />
-          </Suspense>
-          <Header />
-          <CartDrawer />
-          <main className="main-content">{children}</main>
-          <Footer />
-          <FloatingSocials />
+          {children}
         </AppProvider>
       </body>
     </html>

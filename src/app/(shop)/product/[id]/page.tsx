@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
@@ -245,13 +246,13 @@ export default function ProductDetails() {
           {/* Left: Gallery */}
           <div className="details-gallery">
             <div className="gallery-main">
-              <img
+              <Image
                 src={activeImage || product.image}
                 alt={product.name}
+                fill
                 className="gallery-main-img"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://placehold.co/400x500/121212/D4AF37?text=Perfume';
-                }}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
             </div>
             
@@ -263,8 +264,15 @@ export default function ProductDetails() {
                     key={i}
                     onClick={() => setActiveImage(img)}
                     className={`gallery-thumb-item ${(activeImage || product.image) === img ? 'active' : ''}`}
+                    style={{ position: 'relative' }}
                   >
-                    <img src={img} alt={`تفاصيل العطر ${i + 1}`} />
+                    <Image
+                      src={img}
+                      alt={`تفاصيل العطر ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="90px"
+                    />
                   </div>
                 ))}
               </div>

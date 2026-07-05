@@ -53,11 +53,9 @@ export default function Footer() {
         </div>
 
         {/* Trust badges / payment mock icons */}
-        <div className="footer-payments">
-          <i className="fa-brands fa-cc-visa" title="Visa"></i>
-          <i className="fa-brands fa-cc-mastercard" title="Mastercard"></i>
+        <div className="footer-payments flex items-center">
           <i className="fa-brands fa-apple-pay" title="Apple Pay"></i>
-          <i className="fa-solid fa-credit-card" title="Mada"></i>
+          <span className="text-[10px] text-gray-500 font-bold border border-gray-800 rounded px-1.5 py-0.5 mr-2">الدفع عند الاستلام (COD)</span>
         </div>
       </div>
     </footer>
