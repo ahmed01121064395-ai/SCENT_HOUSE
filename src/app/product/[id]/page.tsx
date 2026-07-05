@@ -8,6 +8,22 @@ import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/data/products';
 
+function getSizeImage(productName: string, sizeMl: number): string {
+  const name = productName.toLowerCase();
+  if (name.includes("غرام") || name.includes("gharam")) {
+    return "/images/gh.jpeg";
+  }
+  if (
+    name.includes("دلع") ||
+    name.includes("dala") ||
+    name.includes("مجد") ||
+    name.includes("majd")
+  ) {
+    return "/images/mm30ml.jpeg";
+  }
+  return sizeMl === 30 ? "/images/30ml.jpeg" : "/images/50ml.jpeg";
+}
+
 export default function ProductDetails() {
   const params = useParams();
   const router = useRouter();
@@ -56,15 +72,25 @@ export default function ProductDetails() {
       // Set default size (100ml for gift boxes, 50ml for perfumes)
       if (product.category === 'gifts') {
         setSelectedSizeMl(100);
+        setActiveImage(product.image);
       } else {
         setSelectedSizeMl(50);
+        // Set default size image on load
+        setActiveImage(getSizeImage(product.name, 50));
       }
-      setActiveImage(product.image);
       setQty(1);
       setBoxType('luxury');
       setGiftMessage('');
     }
   }, [product]);
+
+  // Update active image dynamically when size changes
+  useEffect(() => {
+    if (product && product.category !== 'gifts') {
+      const sizeImg = getSizeImage(product.name, selectedSizeMl);
+      setActiveImage(sizeImg);
+    }
+  }, [selectedSizeMl, product]);
 
   if (loading) {
     return (
@@ -97,6 +123,26 @@ export default function ProductDetails() {
   const relatedProducts = products
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
+
+  // Get dynamic gallery images
+  const galleryImages = (() => {
+    if (!product) return [];
+    if (product.category === 'gifts') return product.images || [product.image];
+
+    const sizeImg = getSizeImage(product.name, selectedSizeMl);
+    const baseImages = product.images || [product.image];
+    
+    // We want the size image to be the second image (index 1)
+    const gallery = [...baseImages];
+    if (gallery.length > 2) {
+      gallery[1] = sizeImg;
+    } else if (gallery.length === 2) {
+      gallery.splice(1, 0, sizeImg);
+    } else {
+      gallery.push(sizeImg);
+    }
+    return gallery;
+  })();
 
   const handleAddToCart = () => {
     addToCart(
@@ -167,9 +213,9 @@ export default function ProductDetails() {
             </div>
             
             {/* Gallery Thumbnails (only if product has multiple images) */}
-            {product.images && product.images.length > 0 && (
+            {galleryImages && galleryImages.length > 0 && (
               <div className="gallery-thumbs">
-                {product.images.map((img, i) => (
+                {galleryImages.map((img, i) => (
                   <div
                     key={i}
                     onClick={() => setActiveImage(img)}
