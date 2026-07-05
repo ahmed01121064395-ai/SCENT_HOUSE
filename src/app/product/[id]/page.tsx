@@ -34,7 +34,8 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
 
   // States
-  const [selectedSizeMl, setSelectedSizeMl] = useState<number>(50);
+  const [selectedSizeMl, setSelectedSizeMl] = useState<number | null>(null);
+  const [sizeError, setSizeError] = useState(false);
   const [qty, setQty] = useState(1);
   const [activeImage, setActiveImage] = useState('');
   const [boxType, setBoxType] = useState('luxury');
@@ -69,14 +70,13 @@ export default function ProductDetails() {
 
   useEffect(() => {
     if (product) {
-      // Set default size (100ml for gift boxes, 50ml for perfumes)
+      // Set default size (100ml for gift boxes, null for perfumes)
       if (product.category === 'gifts') {
         setSelectedSizeMl(100);
         setActiveImage(product.image);
       } else {
-        setSelectedSizeMl(50);
-        // Set default size image on load
-        setActiveImage(getSizeImage(product.name, 50));
+        setSelectedSizeMl(null);
+        setActiveImage(product.image);
       }
       setQty(1);
       setBoxType('luxury');
@@ -86,7 +86,7 @@ export default function ProductDetails() {
 
   // Update active image dynamically when size changes
   useEffect(() => {
-    if (product && product.category !== 'gifts') {
+    if (product && product.category !== 'gifts' && selectedSizeMl !== null) {
       const sizeImg = getSizeImage(product.name, selectedSizeMl);
       setActiveImage(sizeImg);
     }
@@ -129,10 +129,18 @@ export default function ProductDetails() {
     if (!product) return [];
     if (product.category === 'gifts') return product.images || [product.image];
 
-    const sizeImg = getSizeImage(product.name, selectedSizeMl);
     const baseImages = product.images || [product.image];
     
-    // We want the size image to be the second image (index 1)
+    // If no size is selected yet, we only show the original product photos
+    if (selectedSizeMl === null) {
+      if (baseImages.length >= 3) {
+        // Skip the size image at index 1
+        return [baseImages[0], ...baseImages.slice(2)];
+      }
+      return baseImages;
+    }
+
+    const sizeImg = getSizeImage(product.name, selectedSizeMl);
     const gallery = [...baseImages];
     if (gallery.length > 2) {
       gallery[1] = sizeImg;
@@ -145,9 +153,15 @@ export default function ProductDetails() {
   })();
 
   const handleAddToCart = () => {
+    if (product.category !== 'gifts' && selectedSizeMl === null) {
+      setSizeError(true);
+      setTimeout(() => setSizeError(false), 3000);
+      return;
+    }
+
     addToCart(
       product.id,
-      selectedSizeMl,
+      selectedSizeMl!,
       qty,
       product.category === 'gifts' ? boxType : undefined,
       product.category === 'gifts' ? giftMessage : undefined
@@ -186,6 +200,35 @@ export default function ProductDetails() {
       >
         <i className="fa-solid fa-circle-check" style={{ fontSize: '1.1rem' }}></i>
         تمت الإضافة إلى السلة
+      </div>
+
+      {/* Arabic Select Size Warning Toast */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '30px',
+          left: '50%',
+          transform: `translateX(-50%) translateY(${sizeError ? '0' : '20px'})`,
+          opacity: sizeError ? 1 : 0,
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
+          background: 'linear-gradient(135deg, #2b0b0b, #1d0505)',
+          border: '1px solid #ff4d4d',
+          borderRadius: '50px',
+          padding: '12px 28px',
+          color: '#ff4d4d',
+          fontWeight: 700,
+          fontSize: '1rem',
+          zIndex: 9999,
+          pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 8px 30px rgba(255, 77, 77, 0.25)',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '1.1rem' }}></i>
+        الرجاء اختيار الحجم أولاً
       </div>
 
       <div className="section-wrapper" style={{ marginTop: '30px' }}>
