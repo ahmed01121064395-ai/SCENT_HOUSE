@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
@@ -345,13 +346,12 @@ export default function Checkout() {
                   className="flex items-center gap-3 py-2 text-right justify-between border-b border-yellow-600/5 last:border-0"
                   key={`${item.product.id}-${item.size.ml}-${index}`}
                 >
-                  <img
+                  <Image
                     src={item.product.image}
                     alt={item.product.name}
-                    className="w-12 h-14 object-contain bg-[#121212] border border-yellow-600/10 rounded"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://placehold.co/100x120/121212/D4AF37?text=Perfume';
-                    }}
+                    width={48}
+                    height={56}
+                    className="object-contain bg-[#121212] border border-yellow-600/10 rounded"
                   />
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-white">{item.product.name.split(' - ')[0]}</h4>

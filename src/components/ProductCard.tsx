@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Product } from '@/data/products';
 import { useApp } from '@/context/AppContext';
 
@@ -49,13 +50,12 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
 
       {/* Product Image */}
       <div className="product-card-image-box">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
+          fill
           className="product-card-img"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://placehold.co/400x500/121212/D4AF37?text=Perfume';
-          }}
+          sizes="(max-width: 768px) 50vw, 25vw"
         />
       </div>
 

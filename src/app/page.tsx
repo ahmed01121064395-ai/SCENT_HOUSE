@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
 
@@ -170,7 +171,13 @@ export default function Home() {
             <div className="offer-card">
               <span className="offer-badge">وفر 200 جنيه!</span>
               <div className="offer-img-wrapper">
-                <img src="/images/1.jpg" alt="العرض الأول" className="offer-img" />
+                <Image
+                  src="/images/1.jpg"
+                  alt="العرض الأول"
+                  fill
+                  className="offer-img"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
               </div>
               <div className="offer-card-body">
                 <h3 className="offer-title gold-text">🔥 العرض الأول</h3>
@@ -197,7 +204,13 @@ export default function Home() {
             <div className="offer-card featured">
               <span className="offer-badge hot">☀️ الأكثر طلباً</span>
               <div className="offer-img-wrapper">
-                <img src="/images/2.jpeg" alt="عرض الصيف" className="offer-img" />
+                <Image
+                  src="/images/2.jpeg"
+                  alt="عرض الصيف"
+                  fill
+                  className="offer-img"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
               </div>
               <div className="offer-card-body">
                 <h3 className="offer-title gold-text">☀️ عرض الصيف</h3>
@@ -224,7 +237,13 @@ export default function Home() {
             <div className="offer-card">
               <span className="offer-badge save">وفر 300 جنيه!</span>
               <div className="offer-img-wrapper">
-                <img src="/images/3.jpeg" alt="عرض سنت هاوس الجبار" className="offer-img" />
+                <Image
+                  src="/images/3.jpeg"
+                  alt="عرض سنت هاوس الجبار"
+                  fill
+                  className="offer-img"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
               </div>
               <div className="offer-card-body">
                 <h3 className="offer-title gold-text">👑 عرض سنت هاوس الجبار</h3>
@@ -278,7 +297,13 @@ export default function Home() {
           <div className="reviews-scroller" ref={scrollerRef}>
             {testimonials.map((src, i) => (
               <div className="review-screenshot-card" key={i}>
-                <img src={src} alt={`رأي عميل ${i + 1}`} />
+                <Image
+                  src={src}
+                  alt={`رأي عميل ${i + 1}`}
+                  fill
+                  className="object-contain"
+                  sizes="280px"
+                />
               </div>
             ))}
           </div>
@@ -397,6 +422,8 @@ export default function Home() {
               muted
               loop
               playsInline
+              preload="metadata"
+              poster="/images/background.jpg"
               onClick={() => handleToggleSound(1)}
               style={{ cursor: 'pointer' }}
             ></video>
@@ -412,6 +439,8 @@ export default function Home() {
               muted
               loop
               playsInline
+              preload="metadata"
+              poster="/images/background.jpg"
               onClick={() => handleToggleSound(2)}
               style={{ cursor: 'pointer' }}
             ></video>

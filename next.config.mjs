@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  optimizeFonts: false,
+  // Configured for optimal performance
 };
 
 export default nextConfig;

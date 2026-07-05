@@ -6,7 +6,29 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import FloatingSocials from "@/components/FloatingSocials";
 import ScrollToTop from "@/components/ScrollToTop";
+import { Cairo, Cinzel, Montserrat } from 'next/font/google';
 import "./globals.css";
+
+const cairo = Cairo({
+  subsets: ['arabic'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-cairo',
+  display: 'swap',
+});
+
+const cinzel = Cinzel({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-cinzel',
+  display: 'swap',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Scent House | دار العطور الفاخرة",
@@ -23,7 +45,7 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>
-      <body className="antialiased">
+      <body className={`${cairo.variable} ${cinzel.variable} ${montserrat.variable} antialiased`}>
         <AppProvider>
           <Suspense fallback={null}>
             <ScrollToTop />

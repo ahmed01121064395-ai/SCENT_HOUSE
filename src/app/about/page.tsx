@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export default function About() {
   return (
@@ -30,13 +31,12 @@ export default function About() {
             </p>
           </div>
           <div className="about-panel-img-box">
-            <img
+            <Image
               src="/images/S1.jpg"
               alt="دار عطور Scent House"
+              width={500}
+              height={400}
               className="about-panel-img"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://placehold.co/500x480/121212/D4AF37?text=About+Us';
-              }}
             />
           </div>
         </div>

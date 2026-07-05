@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 
@@ -32,13 +33,13 @@ export default function Header() {
       <div className="header-container">
         {/* Brand Logo and Name */}
         <Link href="/" className="logo-container">
-          <img
+          <Image
             src="/images/LOGO.jpg"
             alt="شعار Scent House"
+            width={48}
+            height={48}
             className="logo-img"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/121212/D4AF37?text=Scent+House';
-            }}
+            priority
           />
           <span className="brand-title gold-text">SCENT HOUSE</span>
         </Link>

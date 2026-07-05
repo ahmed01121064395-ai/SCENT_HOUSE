@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 
@@ -81,13 +82,13 @@ export default function CartDrawer() {
 
                 return (
                   <div className="cart-item-row" key={`${item.product.id}-${item.size.ml}-${index}`}>
-                    <div className="cart-item-img-box">
-                      <img
+                    <div className="cart-item-img-box" style={{ position: 'relative' }}>
+                      <Image
                         src={item.product.image}
                         alt={item.product.name}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://placehold.co/100x120/121212/D4AF37?text=Perfume';
-                        }}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
                       />
                     </div>
                     <div className="cart-item-info">
