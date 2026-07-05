@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-arabic: var(--font-cairo), sans-serif;
-  --font-english: var(--font-montserrat), sans-serif;
-  --font-luxury: var(--font-cinzel), serif;
+  --font-arabic: 'Cairo', sans-serif;
+  --font-english: 'Montserrat', sans-serif;
+  --font-luxury: 'Cinzel', serif;
 }
 
 /* index.css - Scent House Luxury Theme */
