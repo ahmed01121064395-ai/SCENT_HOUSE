@@ -3310,6 +3310,7 @@ html[data-theme="monochrome_gold"] {
 html[data-theme="monochrome_gold"] body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
+    background-image: none !important;
 }
 
 /* Header link visibility */
