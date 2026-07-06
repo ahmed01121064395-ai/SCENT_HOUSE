@@ -761,15 +761,14 @@ header {
     align-items: center;
     justify-content: center;
     gap: 7px;
-    width: calc(100% - 32px);
-    margin: 0 16px 16px;
+    width: 100%;
     padding: 10px 0;
     background: var(--gold-gradient);
     color: #0A0A0A;
     border: none;
     border-radius: 8px;
     font-family: var(--font-arabic);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 800;
     letter-spacing: 0.3px;
     cursor: pointer;
@@ -799,7 +798,7 @@ header {
 }
 
 .buy-now-btn i {
-    font-size: 0.78rem;
+    font-size: 1rem;
 }
 
 /* ── Dual button row under product cards ── */
@@ -810,20 +809,20 @@ header {
     padding: 0 12px 14px;
 }
 
-/* "أضف للسلة" card button — outline gold style */
+/* "أضف للسلة" card button — identical size to buy-now-btn */
 .card-add-cart-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
     width: 100%;
-    padding: 9px 0;
+    padding: 10px 0;
     background: transparent;
     color: var(--primary-gold);
     border: 1px solid rgba(212, 175, 55, 0.45);
     border-radius: 8px;
     font-family: var(--font-arabic);
-    font-size: 0.83rem;
+    font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.22s ease;
@@ -840,7 +839,7 @@ header {
 }
 
 .card-add-cart-btn i {
-    font-size: 0.78rem;
+    font-size: 1rem;
 }
 
 /* About Scent House Panel */
@@ -1515,14 +1514,15 @@ header {
     flex-grow: 1;
 }
 
-/* Buy Now — full width gold on product detail page */
+/* Buy Now — full width gold on product detail page, same height as Add to Cart */
 .buy-now-btn-large {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
-    padding: 13px 0;
+    height: 48px;
+    padding: 0;
     background: var(--gold-gradient);
     color: #0A0A0A;
     border: none;
@@ -1558,7 +1558,7 @@ header {
 }
 
 .buy-now-btn-large i {
-    font-size: 0.85rem;
+    font-size: 1.2rem;
 }
 
 .btn-wishlist-large {

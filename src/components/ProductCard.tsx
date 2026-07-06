@@ -3,9 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { Product } from '@/data/products';
 import { useApp } from '@/context/AppContext';
+import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 interface ProductCardProps {
   product: Product;
@@ -13,7 +13,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, overridePrice }: ProductCardProps) {
-  const router = useRouter();
   const { wishlist, toggleWishlist, addToCart } = useApp();
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
 
@@ -42,22 +41,27 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultSizeMl = product.sizes && product.sizes.length > 0
-      ? product.sizes[0].ml
-      : 0;
+    const defaultSizeMl = defaultSize ? defaultSize.ml : 0;
     addToCart(product.id, defaultSizeMl, 1);
-    // addToCart already opens the drawer
   };
 
-  // Add to cart then go directly to checkout
+  // Buy Now → open WhatsApp directly, no cart involved
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultSizeMl = product.sizes && product.sizes.length > 0
-      ? product.sizes[0].ml
-      : 0;
-    addToCart(product.id, defaultSizeMl, 1);
-    router.push('/checkout');
+
+    const sizeMl  = defaultSize ? defaultSize.ml : 0;
+    const price   = defaultSize ? defaultSize.price : product.price;
+    const name    = product.name.split(' - ')[0];
+
+    const msg =
+      `مرحباً، أريد طلب:\n` +
+      `🌟 ${name}\n` +
+      `📦 الحجم: ${sizeMl} ML\n` +
+      `💰 السعر: ${price} جنيه\n` +
+      `\nأرجو تأكيد الطلب وتحديد موعد التوصيل 🙏`;
+
+    window.open(buildWhatsAppLink(msg), '_blank');
   };
 
   return (
@@ -112,9 +116,8 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
         </div>
       </div>
 
-      {/* Card Action Buttons */}
+      {/* Card Action Buttons — equal size, stacked */}
       <div className="product-card-btns">
-        {/* Add to Cart */}
         <button
           className="card-add-cart-btn"
           onClick={handleAddToCart}
@@ -125,14 +128,13 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
           <span>أضف للسلة</span>
         </button>
 
-        {/* Buy Now */}
         <button
           className="buy-now-btn"
           onClick={handleBuyNow}
           type="button"
-          title="اشتري الان مباشرة"
+          title="اشتري الان عبر واتساب"
         >
-          <i className="fa-solid fa-bolt"></i>
+          <i className="fa-brands fa-whatsapp"></i>
           <span>اشتري الان</span>
         </button>
       </div>
