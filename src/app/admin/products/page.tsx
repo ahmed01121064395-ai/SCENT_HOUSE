@@ -4,11 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Product, ProductSize } from '@/data/products';
 import Image from 'next/image';
+import { formatPriceVal } from '@/lib/formatters';
+import Toast from '@/components/Toast';
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [likesCountMap, setLikesCountMap] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Filter/Sort State
   const [search, setSearch] = useState('');
@@ -104,7 +109,7 @@ export default function AdminProducts() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (product: any) => {
+  const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setName(product.name);
     setCategory(product.category);
@@ -232,10 +237,12 @@ export default function AdminProducts() {
       }
 
       setIsModalOpen(false);
+      setToast({ message: editingProduct ? 'تم تحديث المنتج بنجاح' : 'تم إضافة المنتج بنجاح', type: 'success' });
       fetchProducts();
-    } catch (err: any) {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ المنتج.';
       console.error(err);
-      setFormError(err.message || 'حدث خطأ أثناء حفظ المنتج.');
+      setFormError(errMsg);
     } finally {
       setSubmitLoading(false);
     }
@@ -252,9 +259,11 @@ export default function AdminProducts() {
         .eq('id', id);
 
       if (error) throw error;
+      setToast({ message: 'تم حذف المنتج بنجاح', type: 'success' });
       fetchProducts();
-    } catch (err: any) {
-      alert(`خطأ في حذف المنتج: ${err.message}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';
+      setToast({ message: `خطأ في حذف المنتج: ${errMsg}`, type: 'error' });
     }
   };
 
@@ -423,7 +432,7 @@ export default function AdminProducts() {
                       {/* Prices */}
                       <td className="py-3 px-6 text-center">
                         <div className="flex flex-wrap gap-1 justify-center">
-                          {(p.sizes || []).map((sz: any, i: number) => (
+                          {(p.sizes || []).map((sz, i: number) => (
                             <span key={i} className="bg-gray-800/60 border border-gray-800 rounded-lg py-0.5 px-2 text-[10px] font-bold text-gray-300 font-english">
                               {sz.ml}ml: {sz.price}
                             </span>
@@ -511,7 +520,7 @@ export default function AdminProducts() {
                     </div>
                     <div>
                       <span className="text-[10px] text-gray-500 block mb-0.5">السعر الأساسي</span>
-                      <span className="font-black font-english text-[#D4AF37]">{p.price}ج</span>
+                      <span className="font-black font-english text-[#D4AF37]">{formatPriceVal(p.price)}ج</span>
                     </div>
                   </div>
 
@@ -583,7 +592,7 @@ export default function AdminProducts() {
                   <select
                     className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-gray-300 focus:ring-1 focus:ring-opacity-20 text-right"
                     value={category}
-                    onChange={(e: any) => setCategory(e.target.value)}
+                    onChange={(e) => setCategory(e.target.value)}
                   >
                     <option value="men">رجالي</option>
                     <option value="women">نسائي</option>
@@ -803,6 +812,13 @@ export default function AdminProducts() {
             </form>
           </div>
         </div>
+      )}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
 
     </div>

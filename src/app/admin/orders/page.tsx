@@ -4,9 +4,44 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/data/products';
 import Image from 'next/image';
+import { getStatusBadgeStyle } from '@/lib/orderStatus';
+import { formatPriceVal, formatPriceFull } from '@/lib/formatters';
+import Toast from '@/components/Toast';
+
+interface Order {
+  id: string;
+  orderId: string;
+  created_at: string;
+  grandTotal: number;
+  status: string;
+  fullname: string;
+  phone: string;
+  phone2?: string;
+  city: string;
+  address: string;
+  paymentMethodLabel: string;
+  subtotal: number;
+  discount: number;
+  vat: number;
+}
+
+interface OrderItem {
+  id: string;
+  order_id: string;
+  productId: number;
+  quantity: number;
+  size?: {
+    ml: number;
+    price: number;
+  };
+  productName: string;
+  productImage: string;
+  boxType?: string;
+  giftMessage?: string;
+}
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +50,12 @@ export default function AdminOrders() {
   const [selectedStatus, setSelectedStatus] = useState('all');
 
   // Expanded Order State
-  const [expandedOrder, setExpandedOrder] = useState<any | null>(null);
-  const [orderItems, setOrderItems] = useState<any[]>([]);
+  const [expandedOrder, setExpandedOrder] = useState<Order | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Fetch orders and products
   async function fetchOrdersData() {
@@ -64,15 +102,17 @@ export default function AdminOrders() {
 
       // If this order is currently expanded in the details modal, update it too
       if (expandedOrder && expandedOrder.id === orderId) {
-        setExpandedOrder((prev: any) => ({ ...prev, status: newStatus }));
+        setExpandedOrder((prev) => prev ? { ...prev, status: newStatus } : null);
       }
-    } catch (err: any) {
-      alert(`خطأ في تحديث حالة الطلب: ${err.message}`);
+      setToast({ message: 'تم تحديث حالة الطلب بنجاح', type: 'success' });
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء التحديث.';
+      setToast({ message: `خطأ في تحديث حالة الطلب: ${errMsg}`, type: 'error' });
     }
   };
 
   // Expand order detail & load its items
-  const handleExpandOrder = async (order: any) => {
+  const handleExpandOrder = async (order: Order) => {
     setExpandedOrder(order);
     setOrderItems([]);
     setItemsLoading(true);
@@ -129,23 +169,7 @@ export default function AdminOrders() {
 
   const filteredOrders = getFilteredOrders();
 
-  // Status Badge color classes
-  const getStatusBadgeStyle = (status: string) => {
-    switch (status) {
-      case 'جديد':
-        return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
-      case 'قيد التجهيز':
-        return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-      case 'تم الشحن':
-        return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
-      case 'تم التسليم':
-        return 'bg-green-500/10 text-green-400 border border-green-500/20';
-      case 'ملغي':
-        return 'bg-red-500/10 text-red-400 border border-red-500/20';
-      default:
-        return 'bg-gray-500/10 text-gray-400 border border-gray-500/20';
-    }
-  };
+
 
   return (
     <div className="space-y-8 select-none">
@@ -228,7 +252,7 @@ export default function AdminOrders() {
                     <td className="py-4 px-6 text-gray-400">{o.city}</td>
                     {/* Grand Total */}
                     <td className="py-4 px-6 text-center font-black text-gray-200">
-                      <span className="font-english ml-0.5">{o.grandTotal}</span>
+                      <span className="font-english ml-0.5">{formatPriceVal(o.grandTotal)}</span>
                       <span className="text-[10px] text-gray-500 font-normal">جنيه</span>
                     </td>
                     {/* Payment Method */}
@@ -296,7 +320,7 @@ export default function AdminOrders() {
                   <div className="flex justify-between items-center pt-1.5 border-t border-gray-800/40">
                     <span className="text-gray-500">إجمالي الفاتورة:</span>
                     <span className="font-black text-[#D4AF37] font-english text-sm">
-                      {o.grandTotal} جنيه
+                      {formatPriceFull(o.grandTotal)}
                     </span>
                   </div>
                 </div>
@@ -442,8 +466,8 @@ export default function AdminOrders() {
                         </div>
 
                         <div className="text-left shrink-0">
-                          <span className="text-xs font-bold text-gray-400 block font-english">{item.size?.price}ج × {item.quantity}</span>
-                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{item.size?.price * item.quantity} جنيه</span>
+                          <span className="text-xs font-bold text-gray-400 block font-english">{formatPriceVal(item.size?.price)}ج × {item.quantity}</span>
+                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{formatPriceFull(item.size?.price * item.quantity)}</span>
                         </div>
                       </div>
                     ))}
@@ -455,17 +479,17 @@ export default function AdminOrders() {
               <div className="bg-[#1A1A1A] border border-gray-800 p-4 rounded-2xl space-y-2.5 font-english">
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>سعر المنتجات الفرعي:</span>
-                  <span>{expandedOrder.subtotal} جنيه</span>
+                  <span>{formatPriceFull(expandedOrder.subtotal)}</span>
                 </div>
                 {expandedOrder.discount > 0 && (
                   <div className="flex justify-between text-xs text-green-400">
                     <span>خصم الكوبون المطبق:</span>
-                    <span>-{expandedOrder.discount} جنيه</span>
+                    <span>-{formatPriceFull(expandedOrder.discount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>ضريبة القيمة المضافة (15%):</span>
-                  <span>{expandedOrder.vat} جنيه</span>
+                  <span>{formatPriceFull(expandedOrder.vat)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>رسوم التغليف الفاخر والشحن:</span>
@@ -473,7 +497,7 @@ export default function AdminOrders() {
                 </div>
                 <div className="flex justify-between text-sm font-black text-white pt-2.5 border-t border-gray-800">
                   <span className="font-cairo">الإجمالي الكلي للفاتورة:</span>
-                  <span className="text-[#D4AF37] text-base">{expandedOrder.grandTotal} جنيه</span>
+                  <span className="text-[#D4AF37] text-base">{formatPriceFull(expandedOrder.grandTotal)}</span>
                 </div>
               </div>
 
@@ -491,6 +515,13 @@ export default function AdminOrders() {
 
           </div>
         </div>
+      )}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
 
     </div>

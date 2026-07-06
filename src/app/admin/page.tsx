@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Product } from '@/data/products';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatLongDate, formatWeekdayShortDate, formatPriceVal } from '@/lib/formatters';
 
 interface DashboardStats {
   newOrders: number;
@@ -100,7 +101,7 @@ export default function AdminDashboard() {
             return oDate >= day && oDate < nextDay;
           }).length;
 
-          const label = day.toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric' });
+          const label = formatWeekdayShortDate(day);
           return { label, count };
         });
 
@@ -155,7 +156,7 @@ export default function AdminDashboard() {
           <i className="fa-regular fa-clock ml-2 text-[#D4AF37]"></i>
           <span>التاريخ الحالي: </span>
           <span className="text-white font-english font-semibold">
-            {new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {formatLongDate(new Date())}
           </span>
         </div>
       </div>
@@ -212,7 +213,7 @@ export default function AdminDashboard() {
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">مبيعات هذا الشهر</p>
               <div className="flex items-baseline gap-1 mt-2">
-                <h3 className="text-3xl font-extrabold font-english text-[#D4AF37]">{stats.monthlySales.toLocaleString()}</h3>
+                <h3 className="text-3xl font-extrabold font-english text-[#D4AF37]">{formatPriceVal(stats.monthlySales)}</h3>
                 <span className="text-[10px] font-bold text-gray-500">جنيه</span>
               </div>
             </div>

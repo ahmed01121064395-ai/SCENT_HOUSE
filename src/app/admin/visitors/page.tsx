@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { formatShortDate } from '@/lib/formatters';
 
 interface VisitorsStats {
   todayCount: number;
@@ -65,7 +66,7 @@ export default function AdminVisitors() {
           }).length;
 
           // Label format: e.g., '5/7' or 'الأحد 5'
-          const label = day.toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' });
+          const label = formatShortDate(day);
           return { label, count };
         });
 

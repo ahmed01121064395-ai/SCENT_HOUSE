@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
+import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 export default function Home() {
   const { products } = useApp();
@@ -190,7 +191,7 @@ export default function Home() {
                   <span className="new-price gold-text">900 جنيه</span>
                 </div>
                 <a
-                  href="https://wa.me/201095363169?text=%D8%A3%D8%B1%D9%82%D8%A8%20%D9%81%D9%8E%D9%8A%20%D8%B7%D9%84%D8%A8%20%D8%A7%D9%84%D8%B9%D8%B1%D8%B6%20%D8%A7%D9%84%D8%A3%D9%88%D9%84"
+                  href={buildWhatsAppLink('أرغب في طلب العرض الأول')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-premium btn-offer"
@@ -223,7 +224,7 @@ export default function Home() {
                   <span className="new-price gold-text">800 جنيه</span>
                 </div>
                 <a
-                  href="https://wa.me/201095363169?text=%D8%A3%D8%B1%D9%82%D8%A8%20%D9%81%D9%8E%D9%8A%20%D8%B7%D9%84%D8%A8%20%D8%B9%D8%B1%D8%B6%20%D8%A7%D9%84%D8%B5%D9%8A%D9%81"
+                  href={buildWhatsAppLink('أرغب في طلب عرض الصيف')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-premium btn-offer"
@@ -256,7 +257,7 @@ export default function Home() {
                   <span className="new-price gold-text">1300 جنيه</span>
                 </div>
                 <a
-                  href="https://wa.me/201095363169?text=%D8%A3%D8%B1%D9%82%D8%A8%20%D9%81%D9%8E%D9%8A%20%D8%B7%D9%84%D8%A8%20%D8%B9%D8%B1%D8%B6%20%D8%B3%D9%86%D8%AA%20%D9%87%D8%A7%D9%88%D8%B3%20%D8%A7%D9%84%D8%AC%D8%A8%D8%A7%D8%B1"
+                  href={buildWhatsAppLink('أرغب في طلب عرض سنت هاوس الجبار')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-premium btn-offer"
@@ -277,7 +278,7 @@ export default function Home() {
               <span className="emoji">⏳</span>
               <span>الكمية محدودة والعروض سارية لفترة محدودة.</span>
             </div>
-            <a href="https://wa.me/201095363169" target="_blank" rel="noopener noreferrer" className="bottom-cta-btn inline-flex items-center justify-center">
+            <a href={buildWhatsAppLink('')} target="_blank" rel="noopener noreferrer" className="bottom-cta-btn inline-flex items-center justify-center">
               <span className="emoji">📞</span>
               <span>للطلب: 01095363169</span>
             </a>

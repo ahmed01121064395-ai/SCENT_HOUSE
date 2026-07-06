@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-arabic: 'Cairo', sans-serif;
-  --font-english: 'Montserrat', sans-serif;
-  --font-luxury: 'Cinzel', serif;
+  --font-arabic: var(--font-cairo), 'Cairo', sans-serif;
+  --font-english: var(--font-montserrat), 'Montserrat', sans-serif;
+  --font-luxury: var(--font-cinzel), 'Cinzel', serif;
 }
 
 /* index.css - Scent House Luxury Theme */
@@ -33,9 +33,9 @@
     --glow-gold: 0 0 15px rgba(212, 175, 55, 0.25);
     --glow-gold-strong: 0 0 25px rgba(212, 175, 55, 0.45);
     
-    --font-arabic: 'Cairo', sans-serif;
-    --font-english: 'Montserrat', sans-serif;
-    --font-luxury: 'Cinzel', serif;
+    --font-arabic: var(--font-cairo), 'Cairo', sans-serif;
+    --font-english: var(--font-montserrat), 'Montserrat', sans-serif;
+    --font-luxury: var(--font-cinzel), 'Cinzel', serif;
     
     --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-quick: all 0.2s ease;

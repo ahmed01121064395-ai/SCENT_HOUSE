@@ -37,8 +37,9 @@ export default function AdminSettings() {
         setNewPassword('');
         setConfirmPassword('');
       }
-    } catch (err: any) {
-      setMessage({ text: err?.message || 'حدث خطأ غير متوقع.', isError: true });
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';
+      setMessage({ text: errMsg, isError: true });
     } finally {
       setLoading(false);
     }

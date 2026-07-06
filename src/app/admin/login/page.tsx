@@ -51,8 +51,9 @@ export default function AdminLogin() {
       } else {
         router.push('/admin');
       }
-    } catch (err: any) {
-      setError(err?.message || 'حدث خطأ أثناء الاتصال بالخادم.');
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء الاتصال بالخادم.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
