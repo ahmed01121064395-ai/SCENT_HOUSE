@@ -314,10 +314,10 @@ export default function Checkout() {
                     alt={item.product.name}
                     width={48}
                     height={56}
-                    className="object-contain bg-[#121212] border border-yellow-600/10 rounded"
+                    className="object-contain bg-[var(--bg-secondary)] border border-yellow-600/10 rounded"
                   />
                   <div className="flex-1">
-                    <h4 className="text-sm font-bold text-white">{item.product.name.split(' - ')[0]}</h4>
+                    <h4 className="text-sm font-bold text-[var(--text-primary)]">{item.product.name.split(' - ')[0]}</h4>
                     <span className="text-xs text-gray-400">
                       الحجم: <span className="english-num">{item.size.ml}</span> مل × <span className="english-num">{item.quantity}</span>
                     </span>
@@ -351,7 +351,7 @@ export default function Checkout() {
                 <span className="text-green-500">مجاني</span>
               </div>
 
-              <div className="summary-item-line total flex justify-between py-2 border-t border-yellow-600/10 mt-2 font-bold text-white text-lg">
+              <div className="summary-item-line total flex justify-between py-2 border-t border-yellow-600/10 mt-2 font-bold text-[var(--text-primary)] text-lg">
                 <span>المجموع الإجمالي:</span>
                 <span className="gold-text">
                   <span className="english-num">{grandTotal}</span> جنيه

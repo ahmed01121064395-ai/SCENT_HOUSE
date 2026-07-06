@@ -3288,5 +3288,259 @@ footer {
     }
 }
 
+/* ── Monochrome Gold Light Theme Overrides ── */
+html[data-theme="monochrome_gold"] {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F7F7F7;
+    --bg-tertiary: #EDEDED;
+    --bg-glass: rgba(255, 255, 255, 0.82);
+
+    --text-primary: #0F0F0F;
+    --text-secondary: #333333;
+    --text-muted: #666666;
+
+    --border-color: rgba(212, 175, 55, 0.25);
+    --border-gold: rgba(212, 175, 55, 0.5);
+
+    --glow-gold: 0 4px 18px rgba(212, 175, 55, 0.12);
+    --glow-gold-strong: 0 6px 28px rgba(212, 175, 55, 0.22);
+}
+
+/* Adjustments for monochrome_gold theme readability */
+html[data-theme="monochrome_gold"] body {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+}
+
+/* Header link visibility */
+html[data-theme="monochrome_gold"] .header-wrapper {
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="monochrome_gold"] .nav-link {
+    color: #333333;
+}
+
+html[data-theme="monochrome_gold"] .nav-link:hover,
+html[data-theme="monochrome_gold"] .nav-link.active {
+    color: var(--primary-gold);
+}
+
+/* Hero section overlay and elements */
+html[data-theme="monochrome_gold"] .hero-section {
+    background-color: #FAFAFA;
+}
+
+html[data-theme="monochrome_gold"] .hero-overlay {
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.94) 90%);
+}
+
+html[data-theme="monochrome_gold"] .hero-title {
+    background: var(--gold-text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="monochrome_gold"] .hero-slogan {
+    color: #2F2F2F;
+    text-shadow: none;
+}
+
+html[data-theme="monochrome_gold"] .feature-item span {
+    color: #333333;
+}
+
+/* Product Card */
+html[data-theme="monochrome_gold"] .product-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="monochrome_gold"] .product-card-title {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .product-card-notes {
+    color: var(--text-muted);
+}
+
+html[data-theme="monochrome_gold"] .product-card:hover {
+    border-color: var(--primary-gold);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.18);
+}
+
+/* Product Detail note cards */
+html[data-theme="monochrome_gold"] .note-display-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="monochrome_gold"] .note-card-header span {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .note-card-content {
+    color: var(--text-secondary);
+}
+
+/* Form and Quantity controls */
+html[data-theme="monochrome_gold"] .qty-control {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="monochrome_gold"] .qty-btn {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .qty-input {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .size-option-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="monochrome_gold"] .size-option-btn.active {
+    background: var(--primary-gold);
+    color: #0A0A0A;
+    border-color: var(--primary-gold);
+}
+
+/* Checkout and Confirmation Cards */
+html[data-theme="monochrome_gold"] .checkout-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="monochrome_gold"] .premium-input {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .premium-input::placeholder {
+    color: #888888;
+}
+
+html[data-theme="monochrome_gold"] .select-premium {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .invoice-table tr {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="monochrome_gold"] .invoice-table th,
+html[data-theme="monochrome_gold"] .invoice-table td {
+    color: var(--text-secondary);
+}
+
+/* Cart Drawer */
+html[data-theme="monochrome_gold"] .cart-drawer {
+    background: #FFFFFF;
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .cart-drawer-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="monochrome_gold"] .cart-drawer-header h3 {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .cart-item-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="monochrome_gold"] .cart-item-name {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .cart-item-meta {
+    color: var(--text-muted);
+}
+
+html[data-theme="monochrome_gold"] .cart-item-price {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .cart-drawer-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #F9F9F9;
+}
+
+html[data-theme="monochrome_gold"] .cart-summary-line {
+    color: var(--text-secondary);
+}
+
+html[data-theme="monochrome_gold"] .cart-summary-total {
+    color: var(--text-primary);
+}
+
+/* About Panel & Footer */
+html[data-theme="monochrome_gold"] .about-panel {
+    background: #FDFDFD;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="monochrome_gold"] .about-desc {
+    color: var(--text-secondary);
+}
+
+html[data-theme="monochrome_gold"] .footer-container {
+    background-color: #FFFFFF;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="monochrome_gold"] .footer-section h4 {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .footer-links a {
+    color: #444444;
+}
+
+html[data-theme="monochrome_gold"] .footer-links a:hover {
+    color: var(--primary-gold);
+}
+
+html[data-theme="monochrome_gold"] .footer-bottom {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    color: #666666;
+}
+
+/* Reviews and Values */
+html[data-theme="monochrome_gold"] .value-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="monochrome_gold"] .value-title {
+    color: var(--text-primary);
+}
+
+html[data-theme="monochrome_gold"] .review-screenshot-card img {
+    background: #F5F5F5;
+}
+
+html[data-theme="monochrome_gold"] .scroller-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+}
+
+html[data-theme="monochrome_gold"] .scroller-btn:hover {
+    background: var(--primary-gold);
+    color: #FFFFFF;
+}
+
+
 
 

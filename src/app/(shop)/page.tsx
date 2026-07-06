@@ -378,7 +378,7 @@ export default function Home() {
           
           {/* TikTok Card */}
           <div className="value-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '15px', minHeight: '140px' }}>
-            <div className="value-icon" style={{ color: '#FFFFFF', fontSize: '2rem', marginBottom: '5px' }}>
+            <div className="value-icon" style={{ color: 'var(--text-primary)', fontSize: '2rem', marginBottom: '5px' }}>
               <i className="fa-brands fa-tiktok"></i>
             </div>
             <h4 className="value-title" style={{ fontSize: '1rem', marginBottom: '10px' }}>@scenthouse06</h4>

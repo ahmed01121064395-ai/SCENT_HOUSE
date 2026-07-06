@@ -33,14 +33,14 @@ export default function Confirmation() {
           </p>
           
           {/* Invoice Info Card */}
-          <div className="bg-[#121212] border border-yellow-600/10 rounded-lg p-6 text-right max-w-md mx-auto my-6">
+          <div className="bg-[var(--bg-secondary)] border border-yellow-600/10 rounded-lg p-6 text-right max-w-md mx-auto my-6">
             <h4 className="gold-text font-bold border-b border-yellow-600/15 pb-2 mb-3 text-lg">
               تفاصيل الفاتورة الإلكترونية:
             </h4>
             
             <div className="cart-summary-line flex justify-between py-1 text-sm">
               <span className="text-gray-400">رقم الفاتورة:</span>
-              <span className="english-num font-bold text-[#D4AF37]">
+              <span className="english-num font-bold text-[var(--primary-gold)]">
                 #{lastPlacedOrder.orderId}
               </span>
             </div>
@@ -98,7 +98,7 @@ export default function Confirmation() {
           </div>
 
           {/* Invoice Pricing Totals */}
-          <div className="max-w-2xl mx-auto border-t border-yellow-600/10 pt-4 flex justify-between items-center text-right font-bold text-white mb-8">
+          <div className="max-w-2xl mx-auto border-t border-yellow-600/10 pt-4 flex justify-between items-center text-right font-bold text-[var(--text-primary)] mb-8">
             <span>المجموع الكلي للفاتورة:</span>
             <span className="gold-text text-xl font-mono">
               <span className="english-num">{lastPlacedOrder.grandTotal}</span> جنيه
