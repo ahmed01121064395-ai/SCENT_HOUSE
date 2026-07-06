@@ -3,9 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/data/products';
 import { useApp } from '@/context/AppContext';
-import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +13,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, overridePrice }: ProductCardProps) {
+  const router = useRouter();
   const { wishlist, toggleWishlist, addToCart } = useApp();
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
 
@@ -45,23 +46,13 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     addToCart(product.id, defaultSizeMl, 1);
   };
 
-  // Buy Now → open WhatsApp directly, no cart involved
+  // Buy Now → add to cart then go directly to /checkout
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const sizeMl  = defaultSize ? defaultSize.ml : 0;
-    const price   = defaultSize ? defaultSize.price : product.price;
-    const name    = product.name.split(' - ')[0];
-
-    const msg =
-      `مرحباً، أريد طلب:\n` +
-      `🌟 ${name}\n` +
-      `📦 الحجم: ${sizeMl} ML\n` +
-      `💰 السعر: ${price} جنيه\n` +
-      `\nأرجو تأكيد الطلب وتحديد موعد التوصيل 🙏`;
-
-    window.open(buildWhatsAppLink(msg), '_blank');
+    const defaultSizeMl = defaultSize ? defaultSize.ml : 0;
+    addToCart(product.id, defaultSizeMl, 1);
+    router.push('/checkout');
   };
 
   return (
@@ -132,9 +123,9 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
           className="buy-now-btn"
           onClick={handleBuyNow}
           type="button"
-          title="اشتري الان عبر واتساب"
+          title="اشتري الان مباشرة"
         >
-          <i className="fa-brands fa-whatsapp"></i>
+          <i className="fa-solid fa-bolt"></i>
           <span>اشتري الان</span>
         </button>
       </div>

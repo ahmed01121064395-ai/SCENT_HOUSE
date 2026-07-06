@@ -8,7 +8,6 @@ import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/data/products';
-import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 function getSizeImage(productName: string, sizeMl: number): string {
   const name = productName.toLowerCase();
@@ -174,38 +173,19 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
-    // Validate size selection for perfumes
     if (product.category !== 'gifts' && selectedSizeMl === null) {
       setSizeError(true);
       setTimeout(() => setSizeError(false), 3000);
       return;
     }
-
-    // Build WhatsApp message with full order details
-    const productName = product.name.split(' - ')[0];
-    const sizeLabel = product.category === 'gifts'
-      ? 'بوكس هدايا'
-      : `${selectedSizeMl} ML`;
-    const unitPrice = sizeObj.price;
-    const totalPrice = unitPrice * qty;
-
-    let msg =
-      `مرحباً، أريد إتمام الشراء:\n` +
-      `🌟 ${productName}\n` +
-      `📦 الحجم: ${sizeLabel}\n` +
-      `🔢 الكمية: ${qty}\n` +
-      `💰 السعر الإجمالي: ${totalPrice} جنيه`;
-
-    if (product.category === 'gifts' && boxType) {
-      msg += `\n🎁 نوع التغليف: ${boxType}`;
-    }
-    if (product.category === 'gifts' && giftMessage) {
-      msg += `\n✍️ رسالة الإهداء: ${giftMessage}`;
-    }
-
-    msg += `\n\nأرجو تأكيد الطلب وتحديد موعد التوصيل 🙏`;
-
-    window.open(buildWhatsAppLink(msg), '_blank');
+    addToCart(
+      product.id,
+      selectedSizeMl!,
+      qty,
+      product.category === 'gifts' ? boxType : undefined,
+      product.category === 'gifts' ? giftMessage : undefined
+    );
+    router.push('/checkout');
   };
 
   return (
@@ -468,13 +448,13 @@ export default function ProductDetails() {
                 </button>
               </div>
 
-              {/* Row 2: Buy Now — opens WhatsApp directly */}
+              {/* Row 2: Buy Now — goes directly to checkout */}
               <button
                 className="buy-now-btn-large"
                 onClick={handleBuyNow}
                 type="button"
               >
-                <i className="fa-brands fa-whatsapp"></i> اشتري الان
+                <i className="fa-solid fa-bolt"></i> اشتري الان
               </button>
 
               {/* Wishlist */}
