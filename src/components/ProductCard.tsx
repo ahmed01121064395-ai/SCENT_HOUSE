@@ -23,10 +23,14 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     <div className="product-card-badge">جديد بالدار</div>
   ) : null;
 
-  // We show 50ml price (or 100ml for gift boxes) by default on the card
+  // Show first size price on card (with originalPrice if available)
+  const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
   const displayPrice = overridePrice !== undefined
     ? overridePrice
-    : (product.sizes && product.sizes.length > 0 ? product.sizes[0].price : product.price);
+    : (defaultSize ? defaultSize.price : product.price);
+  const displayOriginalPrice = overridePrice !== undefined
+    ? undefined
+    : (defaultSize?.originalPrice);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -91,9 +95,16 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
           {product.notes ? `مقدمة العطر: ${product.notes.top}` : `محتويات البوكس: ${product.contents}`}
         </p>
         <div className="product-card-footer">
-          <span className="product-card-price">
-            <span className="english-num">{displayPrice}</span> <span>جنيه</span>
-          </span>
+          <div className="product-card-price-block">
+            {displayOriginalPrice && (
+              <span className="product-card-original-price">
+                <span className="english-num">{displayOriginalPrice}</span> جنيه
+              </span>
+            )}
+            <span className="product-card-price">
+              <span className="english-num">{displayPrice}</span> <span>جنيه</span>
+            </span>
+          </div>
           <div className="product-card-rating">
             <i className="fa-solid fa-star"></i>
             <span className="english-num">{product.rating}</span>

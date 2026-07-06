@@ -7,6 +7,7 @@ export interface ProductNote {
 export interface ProductSize {
   ml: number;
   price: number;
+  originalPrice?: number;
 }
 
 export interface Product {
@@ -48,8 +49,8 @@ export const productsDatabase: Product[] = [
       base: "خشب الصندل، المسك الأبيض، نجيل الهند"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   {
@@ -71,8 +72,8 @@ export const productsDatabase: Product[] = [
       base: "أخشاب الأرز، العنبر الكشميري، المسك الملكي"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   {
@@ -94,8 +95,8 @@ export const productsDatabase: Product[] = [
       base: "مسك الرمان، بودرة ناعمة، لمحة كراميل دافئة"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   {
@@ -117,8 +118,8 @@ export const productsDatabase: Product[] = [
       base: "خشب الصندل، العنبر الكشميري، المسك الأبيض النقي"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   {
@@ -140,8 +141,8 @@ export const productsDatabase: Product[] = [
       base: "فانيليا دافئة + خشب + مسك (ثبات عالي جدًا ودفا بيكمل معاك طول اليوم)"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   {
@@ -163,8 +164,8 @@ export const productsDatabase: Product[] = [
       base: "فانيليا دافئة + مسك ثابت (ثبات ودفا يفضل على الجلد)"
     },
     sizes: [
-      { ml: 50, price: 600 },
-      { ml: 30, price: 350 }
+      { ml: 50, price: 650, originalPrice: 800 },
+      { ml: 30, price: 400, originalPrice: 500 }
     ]
   },
   // Gift Boxes

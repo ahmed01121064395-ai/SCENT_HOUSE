@@ -301,9 +301,16 @@ export default function ProductDetails() {
             <h1 className="details-title gold-text">{product.name.split(' - ')[0]}</h1>
 
             <div className="details-price-bar">
-              <span className="details-price">
-                <span className="english-num">{sizeObj.price * qty}</span> جنيه
-              </span>
+              <div className="details-price-block">
+                {sizeObj.originalPrice && (
+                  <span className="details-original-price">
+                    <span className="english-num">{sizeObj.originalPrice * qty}</span> جنيه
+                  </span>
+                )}
+                <span className="details-price">
+                  <span className="english-num">{sizeObj.price * qty}</span> جنيه
+                </span>
+              </div>
               <div className="product-card-rating">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <i
