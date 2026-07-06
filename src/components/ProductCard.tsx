@@ -34,15 +34,25 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     toggleWishlist(product.id);
   };
 
-  const handleBuyNow = (e: React.MouseEvent) => {
+  // Add to cart then open the cart drawer
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Add product with default size (first size) and quantity 1
     const defaultSizeMl = product.sizes && product.sizes.length > 0
       ? product.sizes[0].ml
       : 0;
     addToCart(product.id, defaultSizeMl, 1);
-    // Go straight to checkout — skip the cart drawer
+    // addToCart already opens the drawer
+  };
+
+  // Add to cart then go directly to checkout
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const defaultSizeMl = product.sizes && product.sizes.length > 0
+      ? product.sizes[0].ml
+      : 0;
+    addToCart(product.id, defaultSizeMl, 1);
     router.push('/checkout');
   };
 
@@ -91,16 +101,30 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
         </div>
       </div>
 
-      {/* Buy Now Button */}
-      <button
-        className="buy-now-btn"
-        onClick={handleBuyNow}
-        type="button"
-        title="اشتري الان مباشرة"
-      >
-        <i className="fa-solid fa-bolt"></i>
-        <span>اشتري الان</span>
-      </button>
+      {/* Card Action Buttons */}
+      <div className="product-card-btns">
+        {/* Add to Cart */}
+        <button
+          className="card-add-cart-btn"
+          onClick={handleAddToCart}
+          type="button"
+          title="أضف للسلة"
+        >
+          <i className="fa-solid fa-bag-shopping"></i>
+          <span>أضف للسلة</span>
+        </button>
+
+        {/* Buy Now */}
+        <button
+          className="buy-now-btn"
+          onClick={handleBuyNow}
+          type="button"
+          title="اشتري الان مباشرة"
+        >
+          <i className="fa-solid fa-bolt"></i>
+          <span>اشتري الان</span>
+        </button>
+      </div>
     </Link>
   );
 }

@@ -172,6 +172,22 @@ export default function ProductDetails() {
     setTimeout(() => setShowToast(false), 2500);
   };
 
+  const handleBuyNow = () => {
+    if (product.category !== 'gifts' && selectedSizeMl === null) {
+      setSizeError(true);
+      setTimeout(() => setSizeError(false), 3000);
+      return;
+    }
+    addToCart(
+      product.id,
+      selectedSizeMl!,
+      qty,
+      product.category === 'gifts' ? boxType : undefined,
+      product.category === 'gifts' ? giftMessage : undefined
+    );
+    router.push('/checkout');
+  };
+
   return (
     <div id="view-product" className="active">
       {/* Arabic Add-to-Cart Toast */}
@@ -390,37 +406,51 @@ export default function ProductDetails() {
 
             {/* Quantity control & Add to Cart button */}
             <div className="purchase-actions">
-              <div className="qty-control">
+              {/* Row 1: qty + add-to-cart side by side */}
+              <div className="purchase-actions-row">
+                <div className="qty-control">
+                  <button
+                    className="qty-btn"
+                    onClick={() => setQty(Math.max(1, qty - 1))}
+                    type="button"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={qty}
+                    readOnly
+                    className="qty-input"
+                  />
+                  <button
+                    className="qty-btn"
+                    onClick={() => setQty(qty + 1)}
+                    type="button"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Add to Cart */}
                 <button
-                  className="qty-btn"
-                  onClick={() => setQty(Math.max(1, qty - 1))}
+                  className="btn-premium btn-add-cart-large"
+                  onClick={handleAddToCart}
                   type="button"
                 >
-                  -
-                </button>
-                <input
-                  type="text"
-                  value={qty}
-                  readOnly
-                  className="qty-input"
-                />
-                <button
-                  className="qty-btn"
-                  onClick={() => setQty(qty + 1)}
-                  type="button"
-                >
-                  +
+                  <i className="fa-solid fa-bag-shopping"></i> إضافة إلى السلة
                 </button>
               </div>
 
+              {/* Row 2: Buy Now — full width gold */}
               <button
-                className="btn-premium btn-add-cart-large"
-                onClick={handleAddToCart}
+                className="buy-now-btn-large"
+                onClick={handleBuyNow}
                 type="button"
               >
-                <i className="fa-solid fa-bag-shopping"></i> إضافة إلى السلة
+                <i className="fa-solid fa-bolt"></i> اشتري الان
               </button>
 
+              {/* Wishlist */}
               <button
                 className={`btn-wishlist-large ${isWishlisted}`}
                 onClick={() => toggleWishlist(product.id)}
