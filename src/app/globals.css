@@ -3330,6 +3330,7 @@ html[data-theme="monochrome_gold"] .nav-link.active {
 /* Hero section overlay and elements */
 html[data-theme="monochrome_gold"] .hero-section {
     background-color: #FAFAFA;
+    background-image: none !important;
 }
 
 html[data-theme="monochrome_gold"] .hero-overlay {
