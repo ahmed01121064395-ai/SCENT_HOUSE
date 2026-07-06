@@ -3496,12 +3496,12 @@ html[data-theme="monochrome_gold"] .about-desc {
     color: var(--text-secondary);
 }
 
-html[data-theme="monochrome_gold"] .footer-container {
+html[data-theme="monochrome_gold"] footer {
     background-color: #FFFFFF;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-html[data-theme="monochrome_gold"] .footer-section h4 {
+html[data-theme="monochrome_gold"] .footer-column h4 {
     color: var(--text-primary);
 }
 
@@ -3517,6 +3517,21 @@ html[data-theme="monochrome_gold"] .footer-bottom {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     color: #666666;
 }
+
+/* Tailwind text-gray overrides in light theme to ensure high contrast and readability */
+html[data-theme="monochrome_gold"] .text-gray-200 {
+    color: #2A2A2A !important;
+}
+html[data-theme="monochrome_gold"] .text-gray-300 {
+    color: #4A4A4A !important;
+}
+html[data-theme="monochrome_gold"] .text-gray-400 {
+    color: #5A5A5A !important;
+}
+html[data-theme="monochrome_gold"] .text-gray-500 {
+    color: #6C6C6C !important;
+}
+
 
 /* Reviews and Values */
 html[data-theme="monochrome_gold"] .value-card {
