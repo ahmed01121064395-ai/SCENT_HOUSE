@@ -737,6 +737,53 @@ header {
     transform: translateY(-5px);
 }
 
+/* ── Buy Now Button ── */
+.buy-now-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+    padding: 10px 0;
+    background: var(--gold-gradient);
+    color: #0A0A0A;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-arabic);
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 3px 14px rgba(212, 175, 55, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.buy-now-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.buy-now-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(212, 175, 55, 0.45);
+    filter: brightness(1.08);
+}
+
+.buy-now-btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.buy-now-btn i {
+    font-size: 0.78rem;
+}
+
 /* About Scent House Panel */
 .about-panel {
     background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);

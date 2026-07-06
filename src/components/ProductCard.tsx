@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/data/products';
 import { useApp } from '@/context/AppContext';
 
@@ -12,7 +13,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, overridePrice }: ProductCardProps) {
-  const { wishlist, toggleWishlist } = useApp();
+  const router = useRouter();
+  const { wishlist, toggleWishlist, addToCart } = useApp();
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
 
   const badgeHtml = product.isBestSeller ? (
@@ -32,10 +34,22 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     toggleWishlist(product.id);
   };
 
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Add product with default size (first size) and quantity 1
+    const defaultSizeMl = product.sizes && product.sizes.length > 0
+      ? product.sizes[0].ml
+      : 0;
+    addToCart(product.id, defaultSizeMl, 1);
+    // Go straight to checkout — skip the cart drawer
+    router.push('/checkout');
+  };
+
   return (
     <Link href={`/product/${product.id}`} className="product-card" style={{ cursor: 'pointer' }}>
       {badgeHtml}
-      
+
       {/* Wishlist Button */}
       <div className="product-card-wishlist">
         <button
@@ -76,6 +90,17 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
           </div>
         </div>
       </div>
+
+      {/* Buy Now Button */}
+      <button
+        className="buy-now-btn"
+        onClick={handleBuyNow}
+        type="button"
+        title="اشتري الان مباشرة"
+      >
+        <i className="fa-solid fa-bolt"></i>
+        <span>اشتري الان</span>
+      </button>
     </Link>
   );
 }
