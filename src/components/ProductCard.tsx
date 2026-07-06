@@ -14,7 +14,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, overridePrice }: ProductCardProps) {
   const router = useRouter();
-  const { wishlist, toggleWishlist, addToCart } = useApp();
+  const { wishlist, toggleWishlist, addToCart, buyNow } = useApp();
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
 
   const badgeHtml = product.isBestSeller ? (
@@ -46,12 +46,12 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     addToCart(product.id, defaultSizeMl, 1);
   };
 
-  // Buy Now → add to cart then go directly to /checkout
+  // Buy Now → add to cart silently (no drawer), then go directly to /checkout
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const defaultSizeMl = defaultSize ? defaultSize.ml : 0;
-    addToCart(product.id, defaultSizeMl, 1);
+    buyNow(product.id, defaultSizeMl, 1);
     router.push('/checkout');
   };
 

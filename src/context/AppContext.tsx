@@ -33,6 +33,9 @@ interface AppContextType {
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
   addToCart: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => void;
+  buyNow: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => void;
+  buyNowItem: CartItem | null;
+  setBuyNowItem: (item: CartItem | null) => void;
   removeFromCart: (productId: number, sizeMl: number) => void;
   updateCartQuantity: (productId: number, sizeMl: number, quantity: number) => void;
   toggleWishlist: (productId: number) => void;
@@ -57,6 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [couponCode, setCouponCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [lastPlacedOrder, setLastPlacedOrder] = useState<OrderInfo | null>(null);
+  const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
 
   // Fetch real product data from Supabase
   useEffect(() => {
@@ -166,6 +170,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCartOpen(true); // Open drawer on add
   };
 
+  // buyNow: sets the temporary checkout item and does NOT open the drawer or change persistent cart
+  const buyNow = (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const sizeObj = product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    setBuyNowItem({
+      product,
+      size: sizeObj,
+      quantity,
+      boxType,
+      giftMessage
+    });
+  };
+
   const removeFromCart = (productId: number, sizeMl: number) => {
     const newCart = cart.filter(item => !(item.product.id === productId && item.size.ml === sizeMl));
     saveCart(newCart);
@@ -248,6 +267,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isCartOpen,
       setCartOpen,
       addToCart,
+      buyNow,
+      buyNowItem,
+      setBuyNowItem,
       removeFromCart,
       updateCartQuantity,
       toggleWishlist,

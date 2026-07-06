@@ -19,7 +19,8 @@ export default function CartDrawer() {
     discountPercent,
     cartSubtotal,
     cartDiscount,
-    cartTotal
+    cartTotal,
+    setBuyNowItem
   } = useApp();
 
   const [promoInput, setPromoInput] = useState('');
@@ -41,6 +42,7 @@ export default function CartDrawer() {
 
   const handleCheckoutClick = () => {
     setCartOpen(false);
+    setBuyNowItem(null);
     router.push('/checkout');
   };
 

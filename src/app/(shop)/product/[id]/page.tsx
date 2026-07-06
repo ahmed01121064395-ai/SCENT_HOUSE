@@ -28,7 +28,7 @@ function getSizeImage(productName: string, sizeMl: number): string {
 export default function ProductDetails() {
   const params = useParams();
   const router = useRouter();
-  const { products, wishlist, toggleWishlist, addToCart } = useApp();
+  const { products, wishlist, toggleWishlist, addToCart, buyNow } = useApp();
 
   const productId = parseInt(params.id as string);
   const [product, setProduct] = useState<Product | null>(null);
@@ -178,7 +178,8 @@ export default function ProductDetails() {
       setTimeout(() => setSizeError(false), 3000);
       return;
     }
-    addToCart(
+    // Use buyNow (no drawer) then go straight to checkout
+    buyNow(
       product.id,
       selectedSizeMl!,
       qty,

@@ -12,9 +12,11 @@ export default function Checkout() {
     cart,
     cartSubtotal,
     cartDiscount,
-    cartTotal,
+    discountPercent,
     setLastPlacedOrder,
-    clearCart
+    clearCart,
+    buyNowItem,
+    setBuyNowItem
   } = useApp();
 
   // Form states
@@ -29,12 +31,21 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dbError, setDbError] = useState('');
 
-  // Calculations (no VAT)
-  const grandTotal = cartTotal;
+  // Determine active checkout items (buyNowItem takes precedence)
+  const checkoutItems = buyNowItem ? [buyNowItem] : cart;
+
+  // Calculations
+  const subtotal = buyNowItem
+    ? buyNowItem.size.price * buyNowItem.quantity
+    : cartSubtotal;
+  const discount = buyNowItem
+    ? Math.round(subtotal * (discountPercent / 100))
+    : cartDiscount;
+  const grandTotal = subtotal - discount;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cart.length === 0) return;
+    if (checkoutItems.length === 0) return;
     setIsSubmitting(true);
     setDbError('');
 
@@ -56,8 +67,8 @@ export default function Checkout() {
         city,
         address,
         paymentMethodLabel,   // matches "paymentMethodLabel" column
-        subtotal: cartSubtotal,
-        discount: cartDiscount,
+        subtotal: subtotal,
+        discount: discount,
         vat: 0,
         grandTotal,            // matches "grandTotal" column
         status: 'جديد',        // matches CHECK constraint values
@@ -72,8 +83,8 @@ export default function Checkout() {
       return;
     }
 
-    // ── Step 2: Insert each cart item into order_items ──
-    const itemRows = cart.map(item => ({
+    // ── Step 2: Insert each checkout item into order_items ──
+    const itemRows = checkoutItems.map(item => ({
       order_id: orderRow.id,              // UUID FK to orders.id
       productId: Number(item.product.id), // INTEGER FK to products.id
       size: { ml: item.size.ml, price: item.size.price }, // JSONB
@@ -97,19 +108,23 @@ export default function Checkout() {
       phone,
       phone2,
       paymentMethodLabel,
-      items: [...cart],
-      subtotal: cartSubtotal,
-      discount: cartDiscount,
+      items: [...checkoutItems],
+      subtotal: subtotal,
+      discount: discount,
       vat: 0,
       grandTotal
     });
 
-    // Clear cart and redirect
-    clearCart();
+    // Clear buyNowItem if it exists, otherwise clear cart
+    if (buyNowItem) {
+      setBuyNowItem(null);
+    } else {
+      clearCart();
+    }
     router.push('/confirmation');
   };
 
-  if (cart.length === 0) {
+  if (checkoutItems.length === 0) {
     return (
       <div className="text-center py-48 text-gray-400">
         <i className="fa-solid fa-cart-shopping text-4xl mb-4 gold-text"></i>
@@ -289,7 +304,7 @@ export default function Checkout() {
 
             {/* List of items */}
             <div className="checkout-mini-list border-b border-yellow-600/10 pb-4 max-h-[250px] overflow-y-auto">
-              {cart.map((item, index) => (
+              {checkoutItems.map((item, index) => (
                 <div
                   className="flex items-center gap-3 py-2 text-right justify-between border-b border-yellow-600/5 last:border-0"
                   key={`${item.product.id}-${item.size.ml}-${index}`}
@@ -318,15 +333,15 @@ export default function Checkout() {
               <div className="summary-item-line flex justify-between py-1 text-sm text-gray-300">
                 <span>سعر المنتجات:</span>
                 <span>
-                  <span className="english-num">{cartSubtotal}</span> جنيه
+                  <span className="english-num">{subtotal}</span> جنيه
                 </span>
               </div>
               
-              {cartDiscount > 0 && (
+              {discount > 0 && (
                 <div className="summary-item-line flex justify-between py-1 text-sm text-green-500">
                   <span>كود الخصم المطبق:</span>
                   <span>
-                    -<span className="english-num">{cartDiscount}</span> جنيه
+                    -<span className="english-num">{discount}</span> جنيه
                   </span>
                 </div>
               )}
