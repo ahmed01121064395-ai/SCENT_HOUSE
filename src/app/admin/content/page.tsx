@@ -75,6 +75,7 @@ export default function AdminContent() {
   // PRODUCTS MANAGEMENT STATES (NEW!)
   // ────────────────────────────────────────────────────────────────
   const [productsList, setProductsList] = useState<any[]>([]);
+  const [dbErrors, setDbErrors] = useState<string[]>([]);
   
   // Product Form states
   const [prodName, setProdName] = useState('');
@@ -156,6 +157,7 @@ export default function AdminContent() {
   async function fetchInitialData() {
     try {
       setLoading(true);
+      setDbErrors([]); // reset errors
       
       // Load Stage 1 Settings
       try {
@@ -164,7 +166,9 @@ export default function AdminContent() {
           .select('*')
           .eq('id', 1)
           .maybeSingle();
-        if (!sErr && settingsData) {
+        if (sErr) {
+          setDbErrors(prev => [...prev, `إعدادات الموقع: ${sErr.message}`]);
+        } else if (settingsData) {
           setAnnouncementBarText(settingsData.announcement_bar_text || '');
           setHeroTitle(settingsData.hero_title || '');
           setHeroSubtitle(settingsData.hero_subtitle || '');
@@ -184,54 +188,82 @@ export default function AdminContent() {
           setGiftCategoryTitle(settingsData.gift_category_title || '');
           setGiftCategorySubtitle(settingsData.gift_category_subtitle || '');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading site settings:', err);
+        setDbErrors(prev => [...prev, `إعدادات الموقع: ${err.message || err}`]);
       }
 
       // Load Stage 2 settings lists: features
       try {
-        const { data: fData } = await supabase.from('homepage_features').select('*').order('display_order');
-        if (fData) setFeaturesList(fData);
-      } catch (err) {
+        const { data: fData, error: fErr } = await supabase.from('homepage_features').select('*').order('display_order');
+        if (fErr) {
+          setDbErrors(prev => [...prev, `مميزات المتجر: ${fErr.message}`]);
+        } else if (fData) {
+          setFeaturesList(fData);
+        }
+      } catch (err: any) {
         console.error('Error loading features:', err);
+        setDbErrors(prev => [...prev, `مميزات المتجر: ${err.message || err}`]);
       }
 
       // Load Stage 2 settings lists: testimonials
       try {
-        const { data: tData } = await supabase.from('testimonials').select('*').order('display_order');
-        if (tData) setTestimonialsList(tData);
-      } catch (err) {
+        const { data: tData, error: tErr } = await supabase.from('testimonials').select('*').order('display_order');
+        if (tErr) {
+          setDbErrors(prev => [...prev, `آراء العملاء: ${tErr.message}`]);
+        } else if (tData) {
+          setTestimonialsList(tData);
+        }
+      } catch (err: any) {
         console.error('Error loading testimonials:', err);
+        setDbErrors(prev => [...prev, `آراء العملاء: ${err.message || err}`]);
       }
 
       // Load Stage 2 settings lists: coupons
       try {
-        const { data: cData } = await supabase.from('coupons').select('*').order('code');
-        if (cData) setCouponsList(cData);
-      } catch (err) {
+        const { data: cData, error: cErr } = await supabase.from('coupons').select('*').order('code');
+        if (cErr) {
+          setDbErrors(prev => [...prev, `الكوبونات: ${cErr.message}`]);
+        } else if (cData) {
+          setCouponsList(cData);
+        }
+      } catch (err: any) {
         console.error('Error loading coupons:', err);
+        setDbErrors(prev => [...prev, `الكوبونات: ${err.message || err}`]);
       }
 
       // Load Stage 2 settings lists: boxTypes
       try {
-        const { data: bData } = await supabase.from('gift_box_types').select('*').order('display_order');
-        if (bData) setBoxTypesList(bData);
-      } catch (err) {
+        const { data: bData, error: bErr } = await supabase.from('gift_box_types').select('*').order('display_order');
+        if (bErr) {
+          setDbErrors(prev => [...prev, `علب الهدايا: ${bErr.message}`]);
+        } else if (bData) {
+          setBoxTypesList(bData);
+        }
+      } catch (err: any) {
         console.error('Error loading gift box types:', err);
+        setDbErrors(prev => [...prev, `علب الهدايا: ${err.message || err}`]);
       }
 
       // Load Stage 3 special offers
       try {
-        const { data: oData } = await supabase.from('special_offers').select('*').order('display_order');
-        if (oData) setOffersList(oData);
-      } catch (err) {
+        const { data: oData, error: oErr } = await supabase.from('special_offers').select('*').order('display_order');
+        if (oErr) {
+          setDbErrors(prev => [...prev, `عروض المتجر: ${oErr.message}`]);
+        } else if (oData) {
+          setOffersList(oData);
+        }
+      } catch (err: any) {
         console.error('Error loading special offers:', err);
+        setDbErrors(prev => [...prev, `عروض المتجر: ${err.message || err}`]);
       }
 
       // Load Stage 3 About Content
       try {
         const { data: aboutData, error: aErr } = await supabase.from('about_content').select('*').eq('id', 1).maybeSingle();
-        if (!aErr && aboutData) {
+        if (aErr) {
+          setDbErrors(prev => [...prev, `صفحة من نحن: ${aErr.message}`]);
+        } else if (aboutData) {
           setAboutTitle(aboutData.title || '');
           setAboutSubtitle(aboutData.subtitle || '');
           setAboutHistoryBadge(aboutData.history_badge || '');
@@ -260,23 +292,28 @@ export default function AdminContent() {
             setValue3Icon(vals[2].icon || '');
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading about content:', err);
+        setDbErrors(prev => [...prev, `صفحة من نحن: ${err.message || err}`]);
       }
 
       // Load Products List (NEW!)
       try {
         const { data: pData, error: pErr } = await supabase.from('products').select('*').order('id', { ascending: true });
-        if (!pErr && pData) {
+        if (pErr) {
+          setDbErrors(prev => [...prev, `المنتجات: ${pErr.message}`]);
+        } else if (pData) {
           setProductsList(pData);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading products list:', err);
+        setDbErrors(prev => [...prev, `المنتجات: ${err.message || err}`]);
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error in fetchInitialData:', err);
       showToast('خطأ في تحميل البيانات', 'error');
+      setDbErrors(prev => [...prev, `أخرى: ${err.message || err}`]);
     } finally {
       setLoading(false);
     }
@@ -652,6 +689,18 @@ export default function AdminContent() {
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+
+      {dbErrors.length > 0 && (
+        <div className="bg-red-950/20 border border-red-900/40 text-red-400 p-4 rounded-xl text-xs space-y-1 mb-4">
+          <p className="font-bold flex items-center gap-1 mb-1">
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            تنبيه: حدثت أخطاء أثناء تحميل بعض الجداول من قاعدة البيانات:
+          </p>
+          {dbErrors.map((err, i) => (
+            <p key={i}>- {err}</p>
+          ))}
+        </div>
       )}
 
       {/* Page Title */}
