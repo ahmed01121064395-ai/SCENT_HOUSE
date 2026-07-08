@@ -302,14 +302,16 @@ export default function AdminContent() {
       // Load Products List (NEW!)
       try {
         const { data: pData, error: pErr } = await supabase.from('products').select('*').order('id', { ascending: true });
-        if (pErr) {
-          setDbErrors(prev => [...prev, `المنتجات: ${pErr.message}`]);
-        } else if (pData) {
+        setDbErrors(prev => [
+          ...prev, 
+          `المنتجات - المسترجعة: ${pData ? pData.length : 'null'} صف | الخطأ: ${pErr ? pErr.message : 'لا يوجد'}`
+        ]);
+        if (!pErr && pData) {
           setProductsList(pData);
         }
       } catch (err: any) {
         console.error('Error loading products list:', err);
-        setDbErrors(prev => [...prev, `المنتجات: ${err.message || err}`]);
+        setDbErrors(prev => [...prev, `المنتجات Exception: ${err.message || err}`]);
       }
 
     } catch (err: any) {
