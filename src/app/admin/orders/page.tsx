@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Product } from '@/data/products';
+import { Product, productsDatabase } from '@/data/products';
 import Image from 'next/image';
 import { getStatusBadgeStyle } from '@/lib/orderStatus';
 import { formatPriceVal, formatPriceFull } from '@/lib/formatters';
@@ -127,7 +127,8 @@ export default function AdminOrders() {
       
       // Map item productIds to product catalog for name and image resolution
       const mappedItems = (itemsData || []).map(item => {
-        const prod = products.find(p => p.id === item.productId);
+        const prod = products.find(p => Number(p.id) === Number(item.productId)) ||
+                     productsDatabase.find(p => Number(p.id) === Number(item.productId));
         return {
           ...item,
           productName: prod ? prod.name.split(' - ')[0] : `عطر (كود: ${item.productId})`,
@@ -168,7 +169,8 @@ export default function AdminOrders() {
       if (itemsErr) throw itemsErr;
 
       const mappedItems = (itemsData || []).map(item => {
-        const prod = products.find(p => p.id === item.productId);
+        const prod = products.find(p => Number(p.id) === Number(item.productId)) ||
+                     productsDatabase.find(p => Number(p.id) === Number(item.productId));
         return {
           ...item,
           productName: prod ? prod.name.split(' - ')[0] : `عطر (كود: ${item.productId})`
@@ -185,7 +187,7 @@ export default function AdminOrders() {
         const sizeStr = item.size?.ml ? `${item.size.ml} مل` : '';
         const name = item.productName || '';
         const qty = item.quantity || 1;
-        const price = item.price || 0;
+        const price = item.size?.price || 0;
         itemListText += `• ${name} ${sizeStr ? `(${sizeStr})` : ''} - العدد: ${qty} - السعر: ${price} جنيه\n`;
       });
 
