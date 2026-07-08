@@ -232,6 +232,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }
     loadRealProducts();
+
+    // Subscribe to products table real-time changes
+    const channel = supabase
+      .channel('products-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        async () => {
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('id', { ascending: true });
+          if (!error && data) {
+            setProducts(data as Product[]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, []);
 
   // Load state from localStorage on mount

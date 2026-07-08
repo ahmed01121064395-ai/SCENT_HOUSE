@@ -84,6 +84,26 @@ export default function AdminProducts() {
 
   useEffect(() => {
     fetchProducts();
+
+    // Subscribe to products table real-time changes
+    const channel = supabase
+      .channel('admin-products-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        () => {
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
   }, []);
 
   const openAddModal = () => {
