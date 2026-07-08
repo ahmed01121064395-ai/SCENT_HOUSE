@@ -20,7 +20,8 @@ export default function CartDrawer() {
     cartSubtotal,
     cartDiscount,
     cartTotal,
-    setBuyNowItem
+    setBuyNowItem,
+    giftBoxTypes
   } = useApp();
 
   const [promoInput, setPromoInput] = useState('');
@@ -75,9 +76,10 @@ export default function CartDrawer() {
             <div className="cart-items-wrapper">
               {cart.map((item, index) => {
                 const sizeLabel = item.product.category === 'gifts' ? 'صندوق فاخر' : `${item.size.ml} ML`;
+                const boxTypeName = giftBoxTypes.find(g => g.code === item.boxType)?.name || (item.boxType === 'luxury' || item.boxType === 'royal' ? 'ملكي فاخر' : 'بسيط');
                 const customBadge = item.boxType ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--primary-gold)', marginTop: '3px' }}>
-                    <i className="fa-solid fa-gift"></i> التغليف: {item.boxType === 'luxury' || item.boxType === 'royal' ? 'ملكي فاخر' : 'بسيط'}
+                    <i className="fa-solid fa-gift"></i> التغليف: {boxTypeName}
                     {item.giftMessage && ` - رسالة: ${item.giftMessage}`}
                   </div>
                 ) : null;

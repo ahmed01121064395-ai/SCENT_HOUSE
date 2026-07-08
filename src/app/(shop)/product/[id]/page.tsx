@@ -28,7 +28,7 @@ function getSizeImage(productName: string, sizeMl: number): string {
 export default function ProductDetails() {
   const params = useParams();
   const router = useRouter();
-  const { products, wishlist, toggleWishlist, addToCart, buyNow } = useApp();
+  const { products, wishlist, toggleWishlist, addToCart, buyNow, giftBoxTypes } = useApp();
 
   const productId = parseInt(params.id as string);
   const [product, setProduct] = useState<Product | null>(null);
@@ -341,11 +341,19 @@ export default function ProductDetails() {
                     value={boxType}
                     onChange={(e) => setBoxType(e.target.value)}
                   >
-                    <option value="luxury">بوكس فاخر بقفل مغناطيسي</option>
-                    <option value="birthday">بوكس مناسبات يوم ميلاد</option>
-                    <option value="anniversary">بوكس مناسبات ذكرى زواج</option>
-                    <option value="men">بوكس إهداء رجالي أسود وذهبي</option>
-                    <option value="women">بوكس إهداء نسائي مخملي</option>
+                    {giftBoxTypes && giftBoxTypes.length > 0 ? (
+                      giftBoxTypes.map((b: any) => (
+                        <option key={b.code} value={b.code}>{b.name}</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="luxury">بوكس فاخر بقفل مغناطيسي</option>
+                        <option value="birthday">بوكس مناسبات يوم ميلاد</option>
+                        <option value="anniversary">بوكس مناسبات ذكرى زواج</option>
+                        <option value="men">بوكس إهداء رجالي أسود وذهبي</option>
+                        <option value="women">بوكس إهداء نسائي مخملي</option>
+                      </>
+                    )}
                   </select>
                 </div>
 

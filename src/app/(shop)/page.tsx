@@ -8,7 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 export default function Home() {
-  const { products, settings } = useApp();
+  const { products, settings, homepageFeatures, testimonials: dbTestimonials } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Video volume state
@@ -53,20 +53,22 @@ export default function Home() {
   };
 
   // Testimonials Images
-  const testimonials = [
-    "/images/WhatsApp%20Image%202026-06-11%20at%202.09.04%20PM.jpeg",
-    "/images/WhatsApp%20Image%202026-06-11%20at%202.09.04%20PMtryutu.jpeg",
-    "/images/WhatsApp%20Image%202026-06-11%20at%202.09.05%20PM.jpeg",
-    "/images/WhatsApp%20Image%202026-06-11%20at%202.09.05%20PMrewteewr.jpeg",
-    "/images/WhatsApp%20Image%202026-06-11%20at%202.09.06%20PM.jpeg",
-    "/images/WhatsApp%20Image%202026-06-21%20at%203.18.59%20AM.jpeg",
-    "/images/WhatsApp%20Image%202026-06-21%20at%203.19.00%20AM.jpeg",
-    "/images/890.jpeg",
-    "/images/ertget.jpeg",
-    "/images/m.jpeg",
-    "/images/n.jpeg",
-    "/images/wqe.jpeg"
-  ];
+  const testimonials = dbTestimonials && dbTestimonials.length > 0
+    ? dbTestimonials.map((t: any) => t.image_url)
+    : [
+        "/images/WhatsApp%20Image%202026-06-11%20at%202.09.04%20PM.jpeg",
+        "/images/WhatsApp%20Image%202026-06-11%20at%202.09.04%20PMtryutu.jpeg",
+        "/images/WhatsApp%20Image%202026-06-11%20at%202.09.05%20PM.jpeg",
+        "/images/WhatsApp%20Image%202026-06-11%20at%202.09.05%20PMrewteewr.jpeg",
+        "/images/WhatsApp%20Image%202026-06-11%20at%202.09.06%20PM.jpeg",
+        "/images/WhatsApp%20Image%202026-06-21%20at%203.18.59%20AM.jpeg",
+        "/images/WhatsApp%20Image%202026-06-21%20at%203.19.00%20AM.jpeg",
+        "/images/890.jpeg",
+        "/images/ertget.jpeg",
+        "/images/m.jpeg",
+        "/images/n.jpeg",
+        "/images/wqe.jpeg"
+      ];
 
   return (
     <div id="view-home" className="active">
@@ -89,22 +91,33 @@ export default function Home() {
         {/* Bottom Feature Bar */}
         <div className="hero-features-bar">
           <div className="hero-features-container">
-            <div className="feature-item">
-              <i className="fa-solid fa-gem font-gold"></i>
-              <span>مكونات طبيعية نادرة ومختارة</span>
-            </div>
-            <div className="feature-item">
-              <i className="fa-solid fa-crown font-gold"></i>
-              <span>فخامة وروائح لا تضاهى</span>
-            </div>
-            <div className="feature-item">
-              <i className="fa-solid fa-hourglass-half font-gold"></i>
-              <span>ثبات وتأثير عالي يدوم طويلاً</span>
-            </div>
-            <div className="feature-item">
-              <i className="fa-solid fa-truck-fast font-gold"></i>
-              <span>شحن وتوصيل فاخر وسريع</span>
-            </div>
+            {homepageFeatures && homepageFeatures.length > 0 ? (
+              homepageFeatures.map((f: any, idx: number) => (
+                <div className="feature-item" key={f.id || idx}>
+                  <i className={`fa-solid ${f.icon} font-gold`}></i>
+                  <span>{f.title}</span>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="feature-item">
+                  <i className="fa-solid fa-gem font-gold"></i>
+                  <span>مكونات طبيعية نادرة ومختارة</span>
+                </div>
+                <div className="feature-item">
+                  <i className="fa-solid fa-crown font-gold"></i>
+                  <span>فخامة وروائح لا تضاهى</span>
+                </div>
+                <div className="feature-item">
+                  <i className="fa-solid fa-hourglass-half font-gold"></i>
+                  <span>ثبات وتأثير عالي يدوم طويلاً</span>
+                </div>
+                <div className="feature-item">
+                  <i className="fa-solid fa-truck-fast font-gold"></i>
+                  <span>شحن وتوصيل فاخر وسريع</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

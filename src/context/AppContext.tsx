@@ -52,6 +52,11 @@ interface AppContextType {
   setTheme: (theme: 'current' | 'monochrome_gold') => void;
   settings: SiteSettings | null;
   refreshSettings: () => Promise<void>;
+  coupons: any[];
+  homepageFeatures: any[];
+  testimonials: any[];
+  giftBoxTypes: any[];
+  refreshStage2Data: () => Promise<void>;
 }
 
 export interface SiteSettings {
@@ -90,6 +95,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<'current' | 'monochrome_gold'>('current');
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [homepageFeatures, setHomepageFeatures] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [giftBoxTypes, setGiftBoxTypes] = useState<any[]>([]);
+
   const refreshSettings = async () => {
     const { data, error } = await supabase
       .from('site_settings')
@@ -100,6 +110,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSettings(data as SiteSettings);
     }
   };
+
+  const refreshStage2Data = async () => {
+    try {
+      const { data: cData } = await supabase.from('coupons').select('*').order('code');
+      if (cData) setCoupons(cData);
+
+      const { data: fData } = await supabase.from('homepage_features').select('*').order('display_order');
+      if (fData) setHomepageFeatures(fData);
+
+      const { data: tData } = await supabase.from('testimonials').select('*').order('display_order');
+      if (tData) setTestimonials(tData);
+
+      const { data: gData } = await supabase.from('gift_box_types').select('*').order('display_order');
+      if (gData) setGiftBoxTypes(gData);
+    } catch (err) {
+      console.error('Error fetching Stage 2 settings:', err);
+    }
+  };
+
+  // Load Stage 2 data on mount
+  useEffect(() => {
+    refreshStage2Data();
+
+    // Subscribe to Stage 2 tables realtime changes
+    const fChannel = supabase.channel('features-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'homepage_features' }, () => { refreshStage2Data(); }).subscribe();
+    const tChannel = supabase.channel('testimonials-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, () => { refreshStage2Data(); }).subscribe();
+    const cChannel = supabase.channel('coupons-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'coupons' }, () => { refreshStage2Data(); }).subscribe();
+    const gChannel = supabase.channel('giftbox-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'gift_box_types' }, () => { refreshStage2Data(); }).subscribe();
+
+    return () => {
+      fChannel.unsubscribe();
+      tChannel.unsubscribe();
+      cChannel.unsubscribe();
+      gChannel.unsubscribe();
+    };
+  }, []);
 
   // Fetch theme and subscribe to changes in real-time
   useEffect(() => {
@@ -374,14 +420,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const applyCoupon = (code: string): boolean => {
     const cleaned = code.trim().toUpperCase();
-    if (cleaned === 'SCENT10') {
-      setCouponCode(cleaned);
-      setDiscountPercent(10);
-      return true;
-    }
-    if (cleaned === 'ROYAL20') {
-      setCouponCode(cleaned);
-      setDiscountPercent(20);
+    const match = coupons.find(c => c.code.toUpperCase() === cleaned && c.is_active);
+    if (match) {
+      setCouponCode(match.code);
+      setDiscountPercent(match.discount_percent);
       return true;
     }
     return false;
@@ -424,7 +466,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       theme,
       setTheme,
       settings,
-      refreshSettings
+      refreshSettings,
+      coupons,
+      homepageFeatures,
+      testimonials,
+      giftBoxTypes,
+      refreshStage2Data
     }}>
       {children}
     </AppContext.Provider>
