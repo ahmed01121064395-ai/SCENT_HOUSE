@@ -1802,16 +1802,14 @@ header {
 .cart-item-remove-btn {
     background: none;
     border: none;
-    color: #E63946;
+    color: var(--text-muted);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
     transition: var(--transition-quick);
-    padding: 4px;
 }
 
 .cart-item-remove-btn:hover {
-    color: #FF4D5A;
-    transform: scale(1.1);
+    color: #E63946;
 }
 
 .cart-drawer-footer {

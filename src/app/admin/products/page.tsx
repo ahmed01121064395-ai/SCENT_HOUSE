@@ -468,7 +468,7 @@ export default function AdminProducts() {
                             onClick={() => handleDeleteProduct(p.id, p.name)}
                             className="bg-red-950/20 text-red-400 hover:text-red-300 py-1.5 px-3 rounded-lg text-xs font-bold border border-red-900/30 cursor-pointer"
                           >
-                            حذف
+                            إزالة من الموقع
                           </button>
                         </div>
                       </td>
@@ -536,7 +536,7 @@ export default function AdminProducts() {
                       onClick={() => handleDeleteProduct(p.id, p.name)}
                       className="flex-1 bg-red-950/20 text-red-400 py-2 px-4 rounded-xl text-xs font-bold border border-red-900/30 text-center cursor-pointer"
                     >
-                      حذف
+                      إزالة من الموقع
                     </button>
                   </div>
 
@@ -792,7 +792,7 @@ export default function AdminProducts() {
                     }}
                     className="bg-red-950/20 text-red-400 hover:text-red-300 hover:bg-red-950/40 py-2.5 px-5 rounded-xl text-xs md:text-sm border border-red-900/30 cursor-pointer font-bold transition-all"
                   >
-                    حذف هذا المنتج
+                    إزالة المنتج من الموقع
                   </button>
                 ) : (
                   <div></div>
