@@ -19,7 +19,6 @@ export default function AdminProducts() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
-  const [filterLowStock, setFilterLowStock] = useState(false);
 
   // Modal forms states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -289,11 +288,6 @@ export default function AdminProducts() {
       list = list.filter(p => p.category === selectedCategory);
     }
 
-    // Low stock filter (< 5)
-    if (filterLowStock) {
-      list = list.filter(p => (p.stock || 0) < 5);
-    }
-
     // Sort
     list.sort((a, b) => {
       const likesA = likesCountMap[a.id] || 0;
@@ -332,7 +326,7 @@ export default function AdminProducts() {
       </div>
 
       {/* Filters Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#121212] border border-gray-800 p-4 rounded-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#121212] border border-gray-800 p-4 rounded-2xl">
         {/* Search */}
         <div className="relative">
           <input
@@ -370,19 +364,6 @@ export default function AdminProducts() {
           <option value="stock">مستوى المخزون</option>
           <option value="likes">عدد الإعجابات (المفضلة)</option>
         </select>
-
-        {/* Low Stock Toggle */}
-        <button
-          onClick={() => setFilterLowStock(!filterLowStock)}
-          className={`py-2 px-3 rounded-xl border text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
-            filterLowStock
-              ? 'bg-red-950/20 border-red-500/30 text-red-400'
-              : 'bg-[#1A1A1A] border-gray-800 text-gray-400'
-          }`}
-        >
-          <i className="fa-solid fa-triangle-exclamation ml-1.5 text-xs"></i>
-          <span>تصفية مخزون منخفض فقط (&lt; 5)</span>
-        </button>
       </div>
 
       {/* Products Content */}
