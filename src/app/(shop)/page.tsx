@@ -133,8 +133,8 @@ export default function Home() {
           <Link href="/shop?category=men" className="category-card block">
             <div className="category-card-bg" style={{ backgroundImage: "url('/images/MEN.jpg')" }}></div>
             <div className="category-card-overlay">
-              <h3 className="category-card-title">العطور الرجالية</h3>
-              <p className="category-card-desc">قوة، ثقة وجاذبية عطرية كلاسيكية</p>
+              <h3 className="category-card-title">{settings?.men_category_title || "العطور الرجالية"}</h3>
+              <p className="category-card-desc">{settings?.men_category_subtitle || "قوة، ثقة وجاذبية عطرية كلاسيكية"}</p>
               <span className="category-card-link">تسوق الآن <i className="fa-solid fa-chevron-left"></i></span>
             </div>
           </Link>
@@ -142,8 +142,8 @@ export default function Home() {
           <Link href="/shop?category=women" className="category-card block">
             <div className="category-card-bg" style={{ backgroundImage: "url('/images/WOMEN.jpg')" }}></div>
             <div className="category-card-overlay">
-              <h3 className="category-card-title">العطور النسائية</h3>
-              <p className="category-card-desc">سحر، نعومة ورقة في كل التفاصيل</p>
+              <h3 className="category-card-title">{settings?.women_category_title || "العطور النسائية"}</h3>
+              <p className="category-card-desc">{settings?.women_category_subtitle || "سحر، نعومة ورقة في كل التفاصيل"}</p>
               <span className="category-card-link">تسوق الآن <i className="fa-solid fa-chevron-left"></i></span>
             </div>
           </Link>
@@ -151,8 +151,8 @@ export default function Home() {
           <Link href="/shop?category=gifts" className="category-card block">
             <div className="category-card-bg" style={{ backgroundImage: "url('/images/GIFT%20BOX.jpg')" }}></div>
             <div className="category-card-overlay">
-              <h3 className="category-card-title">بوكسات الهدايا</h3>
-              <p className="category-card-desc">تغليف فاخر وبوكسات مناسبات مخصصة لأحبائك</p>
+              <h3 className="category-card-title">{settings?.gift_category_title || "بوكسات الهدايا"}</h3>
+              <p className="category-card-desc">{settings?.gift_category_subtitle || "تغليف فاخر وبوكسات مناسبات مخصصة لأحبائك"}</p>
               <span className="category-card-link">اكتشف التغليف <i className="fa-solid fa-chevron-left"></i></span>
             </div>
           </Link>
