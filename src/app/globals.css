@@ -3578,6 +3578,54 @@ html[data-theme="monochrome_gold"] .scroller-btn:hover {
     color: #FFFFFF;
 }
 
+/* Special Offers Section Light Theme Overrides */
+html[data-theme="monochrome_gold"] .offers-section {
+    background: var(--bg-primary) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-card {
+    background: var(--bg-secondary) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-card:hover {
+    box-shadow: 0 20px 40px rgba(139, 105, 20, 0.08) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-card.featured {
+    border-color: var(--primary-gold) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-card.featured:hover {
+    box-shadow: 0 25px 50px rgba(139, 105, 20, 0.15) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-img-wrapper {
+    background: #EAE6DC !important;
+    border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="monochrome_gold"] .offer-details {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+html[data-theme="monochrome_gold"] .detail-item {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="monochrome_gold"] .offers-bottom-bar {
+    background: rgba(139, 105, 20, 0.05) !important;
+    border-color: rgba(139, 105, 20, 0.15) !important;
+}
+
+html[data-theme="monochrome_gold"] .offers-bottom-bar .bottom-item {
+    color: var(--text-primary) !important;
+}
+
+
 
 
 
