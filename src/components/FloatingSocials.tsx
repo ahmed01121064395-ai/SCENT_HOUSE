@@ -2,8 +2,11 @@
 
 import React from 'react';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { useApp } from '@/context/AppContext';
 
 export default function FloatingSocials() {
+  const { settings } = useApp();
+
   return (
     <div className="floating-social-bar">
       <a
@@ -17,7 +20,7 @@ export default function FloatingSocials() {
         <i className="fa-brands fa-whatsapp"></i>
       </a>
       <a
-        href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
+        href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
         target="_blank"
         rel="noopener noreferrer"
         className="floating-social-btn"
@@ -27,7 +30,7 @@ export default function FloatingSocials() {
         <i className="fa-brands fa-instagram"></i>
       </a>
       <a
-        href="https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"
+        href={settings?.tiktok_url || "https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"}
         target="_blank"
         rel="noopener noreferrer"
         className="floating-social-btn"

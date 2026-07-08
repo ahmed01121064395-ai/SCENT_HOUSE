@@ -50,6 +50,30 @@ interface AppContextType {
   setLastPlacedOrder: (order: OrderInfo | null) => void;
   theme: 'current' | 'monochrome_gold';
   setTheme: (theme: 'current' | 'monochrome_gold') => void;
+  settings: SiteSettings | null;
+  refreshSettings: () => Promise<void>;
+}
+
+export interface SiteSettings {
+  active_theme: 'current' | 'monochrome_gold';
+  announcement_bar_text: string;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_video_1_url: string;
+  hero_video_2_url: string;
+  facebook_url: string;
+  instagram_url: string;
+  tiktok_url: string;
+  contact_phone_1: string;
+  contact_phone_2: string;
+  contact_address: string;
+  working_hours: string;
+  men_category_title: string;
+  men_category_subtitle: string;
+  women_category_title: string;
+  women_category_subtitle: string;
+  gift_category_title: string;
+  gift_category_subtitle: string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -64,17 +88,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lastPlacedOrder, setLastPlacedOrder] = useState<OrderInfo | null>(null);
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
   const [theme, setThemeState] = useState<'current' | 'monochrome_gold'>('current');
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  const refreshSettings = async () => {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('*')
+      .eq('id', 1)
+      .single();
+    if (!error && data) {
+      setSettings(data as SiteSettings);
+    }
+  };
 
   // Fetch theme and subscribe to changes in real-time
   useEffect(() => {
     async function initTheme() {
       const { data, error } = await supabase
         .from('site_settings')
-        .select('active_theme')
+        .select('*')
         .eq('id', 1)
         .single();
         
       if (!error && data) {
+        setSettings(data as SiteSettings);
         const activeTheme = data.active_theme as 'current' | 'monochrome_gold';
         setThemeState(activeTheme);
         
@@ -101,7 +138,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           filter: 'id=eq.1'
         },
         (payload) => {
-          if (payload.new && payload.new.active_theme) {
+          if (payload.new) {
+            setSettings(payload.new as SiteSettings);
             const activeTheme = payload.new.active_theme as 'current' | 'monochrome_gold';
             setThemeState(activeTheme);
             
@@ -358,7 +396,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       lastPlacedOrder,
       setLastPlacedOrder,
       theme,
-      setTheme
+      setTheme,
+      settings,
+      refreshSettings
     }}>
       {children}
     </AppContext.Provider>

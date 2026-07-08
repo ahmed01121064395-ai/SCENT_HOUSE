@@ -7,7 +7,7 @@ import { Product } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 
 function ShopContent() {
-  const { products, wishlist } = useApp();
+  const { products, wishlist, settings } = useApp();
   const searchParams = useSearchParams();
 
   // Search, sort and filter states
@@ -122,20 +122,20 @@ function ShopContent() {
     const cat = searchParams.get('category');
     if (cat === 'men') {
       return {
-        title: 'رجولة تفوح عبقًا',
-        sub: 'تشكيلة عطور رجالية تجمع بين القوة والأناقة في كل رشة'
+        title: settings?.men_category_title || 'رجولة تفوح عبقًا',
+        sub: settings?.men_category_subtitle || 'تشكيلة عطور رجالية تجمع بين القوة والأناقة في كل رشة'
       };
     }
     if (cat === 'women') {
       return {
-        title: 'أنوثة تُروى بالعطر',
-        sub: 'عطور نسائية تحمل توقيعك الخاص في كل مكان تذهبين إليه'
+        title: settings?.women_category_title || 'أنوثة تُروى بالعطر',
+        sub: settings?.women_category_subtitle || 'عطور نسائية تحمل توقيعك الخاص في كل مكان تذهبين إليه'
       };
     }
     if (cat === 'gifts') {
       return {
-        title: 'هدايا تُروى بالعطر',
-        sub: 'عطرك… هدية لا تُنسى'
+        title: settings?.gift_category_title || 'هدايا تُروى بالعطر',
+        sub: settings?.gift_category_subtitle || 'عطرك… هدية لا تُنسى'
       };
     }
     return {

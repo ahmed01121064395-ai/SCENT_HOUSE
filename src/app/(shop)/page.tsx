@@ -8,7 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 export default function Home() {
-  const { products } = useApp();
+  const { products, settings } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Video volume state
@@ -74,8 +74,8 @@ export default function Home() {
       <div className="hero-section" style={{ backgroundImage: "url('/images/background.jpg')" }}>
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1 className="hero-title gold-text">عطرٌ يليقُ بفخامتِك</h1>
-          <p className="hero-slogan">اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع</p>
+          <h1 className="hero-title gold-text">{settings?.hero_title || "عطرٌ يليقُ بفخامتِك"}</h1>
+          <p className="hero-slogan">{settings?.hero_subtitle || "اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع"}</p>
           <div className="hero-buttons">
             <Link href="/shop" className="btn-premium inline-block text-center">
               تسوق الآن
@@ -280,7 +280,7 @@ export default function Home() {
             </div>
             <a href={buildWhatsAppLink('')} target="_blank" rel="noopener noreferrer" className="bottom-cta-btn inline-flex items-center justify-center">
               <span className="emoji">📞</span>
-              <span>للطلب: 01095363169</span>
+              <span>للطلب: {settings?.contact_phone_1 || "01095363169"}</span>
             </a>
           </div>
         </div>
@@ -349,7 +349,7 @@ export default function Home() {
             </div>
             <h4 className="value-title" style={{ fontSize: '1rem', marginBottom: '10px' }}>Scent House</h4>
             <a
-              href="https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"
+              href={settings?.facebook_url || "https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline-gold"
@@ -366,7 +366,7 @@ export default function Home() {
             </div>
             <h4 className="value-title" style={{ fontSize: '1rem', marginBottom: '10px' }}>scent.house9</h4>
             <a
-              href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
+              href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline-gold"
@@ -383,7 +383,7 @@ export default function Home() {
             </div>
             <h4 className="value-title" style={{ fontSize: '1rem', marginBottom: '10px' }}>@scenthouse06</h4>
             <a
-              href="https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"
+              href={settings?.tiktok_url || "https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline-gold"
@@ -402,7 +402,7 @@ export default function Home() {
           <p>
             أبرز لقطات عطورنا وجلسات التصوير الحصرية عبر إنستغرام{' '}
             <a
-              href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
+              href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
               target="_blank"
               rel="noopener noreferrer"
               className="gold-text"
@@ -418,7 +418,7 @@ export default function Home() {
           <div className="hero-video-card">
             <video
               ref={video1Ref}
-              src="/videos/v1.mp4"
+              src={settings?.hero_video_1_url || "/videos/v1.mp4"}
               autoPlay
               muted
               loop
@@ -435,7 +435,7 @@ export default function Home() {
           <div className="hero-video-card">
             <video
               ref={video2Ref}
-              src="/videos/v2.mp4"
+              src={settings?.hero_video_2_url || "/videos/v2.mp4"}
               autoPlay
               muted
               loop

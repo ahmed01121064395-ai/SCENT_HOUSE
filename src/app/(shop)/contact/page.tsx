@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useApp } from '@/context/AppContext';
 
 export default function Contact() {
+  const { settings } = useApp();
+
   return (
     <div id="view-contact" className="active">
       <div className="info-page-header">
@@ -18,8 +21,12 @@ export default function Contact() {
               <i className="fa-solid fa-phone"></i>
             </div>
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الهاتف وخدمة العملاء</h3>
-            <a href="tel:01095363169" className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>01095363169</a>
-            <a href="tel:01005006426" className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>01005006426</a>
+            <a href={`tel:${settings?.contact_phone_1 || "01095363169"}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>
+              {settings?.contact_phone_1 || "01095363169"}
+            </a>
+            <a href={`tel:${settings?.contact_phone_2 || "01005006426"}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
+              {settings?.contact_phone_2 || "01005006426"}
+            </a>
           </div>
 
           {/* Card 2: Social Media */}
@@ -30,7 +37,7 @@ export default function Contact() {
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>تابعنا على وسائل التواصل</h3>
             <div style={{ display: 'flex', gap: '20px', fontSize: '1.8rem', marginTop: '10px' }}>
               <a
-                href="https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"
+                href={settings?.facebook_url || "https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#1877F2' }}
@@ -39,7 +46,7 @@ export default function Contact() {
                 <i className="fa-brands fa-facebook-f"></i>
               </a>
               <a
-                href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
+                href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#E1306C' }}
@@ -48,7 +55,7 @@ export default function Contact() {
                 <i className="fa-brands fa-instagram"></i>
               </a>
               <a
-                href="https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"
+                href={settings?.tiktok_url || "https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#FE2C55' }}
@@ -65,8 +72,12 @@ export default function Contact() {
               <i className="fa-solid fa-location-dot"></i>
             </div>
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الموقع ومقر الدار</h3>
-            <p style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '8px' }}>الفيوم مركز طامية خلف مسجد النصر</p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>السبت - الخميس: 9:00 ص - 10:00 م</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '8px' }}>
+              {settings?.contact_address || "الفيوم مركز طامية خلف مسجد النصر"}
+            </p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              {settings?.working_hours || "السبت - الخميس: 9:00 ص - 10:00 م"}
+            </p>
           </div>
         </div>
       </div>

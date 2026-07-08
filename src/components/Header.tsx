@@ -8,7 +8,7 @@ import { useApp } from '@/context/AppContext';
 
 export default function Header() {
   const pathname = usePathname();
-  const { cart, wishlist, setCartOpen } = useApp();
+  const { cart, wishlist, setCartOpen, settings } = useApp();
 
   const isLinkActive = (href: string) => {
     if (href === '/' && pathname === '/') return 'active';
@@ -21,11 +21,8 @@ export default function Header() {
       {/* Top Premium Announcement Bar */}
       <div className="announcement-bar">
         <div className="announcement-content">
-          <span className="desktop-only">
-            ✨ شحن سريع ومجاني لجميع طلبات العروض! 🎁 استخدم كوبون <strong className="gold-text">SCENT10</strong> لخصم 10% عند الدفع!
-          </span>
-          <span className="mobile-only">
-            ✨ شحن مجاني + خصم 10% بكود: <strong className="gold-text">SCENT10</strong> 🎁
+          <span>
+            {settings?.announcement_bar_text || "✨ شحن سريع ومجاني لجميع طلبات العروض! 🎁 استخدم كوبون SCENT10 لخصم 10% عند الدفع!"}
           </span>
         </div>
       </div>

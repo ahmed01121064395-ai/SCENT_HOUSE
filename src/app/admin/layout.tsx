@@ -160,6 +160,11 @@ export default function AdminLayout({
               <span>إحصائيات الزوار</span>
             </Link>
 
+            <Link href="/admin/content" className={getLinkClass('/admin/content')}>
+              <i className="fa-solid fa-pen-to-square text-base"></i>
+              <span>إدارة المحتوى</span>
+            </Link>
+
             <Link href="/admin/settings" className={getLinkClass('/admin/settings')}>
               <i className="fa-solid fa-gears text-base"></i>
               <span>إعدادات الحساب</span>
@@ -235,6 +240,11 @@ export default function AdminLayout({
         <Link href="/admin/visitors" className={getLinkClass('/admin/visitors')}>
           <i className="fa-solid fa-users text-sm"></i>
           <span className="text-[10px] mt-0.5">الزوار</span>
+        </Link>
+
+        <Link href="/admin/content" className={getLinkClass('/admin/content')}>
+          <i className="fa-solid fa-pen-to-square text-sm"></i>
+          <span className="text-[10px] mt-0.5">المحتوى</span>
         </Link>
 
         <Link href="/admin/settings" className={getLinkClass('/admin/settings')}>

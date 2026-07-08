@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useApp } from '@/context/AppContext';
 
 export default function Footer() {
+  const { settings } = useApp();
+
   return (
     <footer>
       {/* Bottom bar copyright */}
@@ -16,7 +19,7 @@ export default function Footer() {
         <div style={{ display: 'flex', gap: '15px', fontSize: '1.1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>تابعنا:</span>
           <a
-            href="https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"
+            href={settings?.facebook_url || "https://www.facebook.com/share/14eGj7rQq88/?mibextid=wwXIfr"}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: '#1877F2' }}
@@ -25,7 +28,7 @@ export default function Footer() {
             <i className="fa-brands fa-facebook-f"></i>
           </a>
           <a
-            href="https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"
+            href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: '#E1306C' }}
@@ -34,7 +37,7 @@ export default function Footer() {
             <i className="fa-brands fa-instagram"></i>
           </a>
           <a
-            href="https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"
+            href={settings?.tiktok_url || "https://www.tiktok.com/@scenthouse06?_r=1&_t=ZS-976Aee7qkxs"}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: '#FE2C55' }}
@@ -46,9 +49,13 @@ export default function Footer() {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '10px', marginLeft: '10px' }}>|</span>
 
           <span style={{ fontSize: '0.85rem', color: 'var(--primary-gold)', display: 'flex', gap: '10px', direction: 'ltr' }}>
-            <span className="english-num">01095363169</span>
+            <a href={`tel:${settings?.contact_phone_1 || "01095363169"}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
+              {settings?.contact_phone_1 || "01095363169"}
+            </a>
             <span>-</span>
-            <span className="english-num">01005006426</span>
+            <a href={`tel:${settings?.contact_phone_2 || "01005006426"}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
+              {settings?.contact_phone_2 || "01005006426"}
+            </a>
           </span>
         </div>
 
