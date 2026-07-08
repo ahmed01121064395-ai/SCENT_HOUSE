@@ -75,6 +75,8 @@ export default function AdminProducts() {
       setLikesCountMap(likeMap);
     } catch (err) {
       console.error('Error fetching products:', err);
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';
+      setToast({ message: `خطأ في تحميل المنتجات: ${errMsg}`, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -252,7 +254,7 @@ export default function AdminProducts() {
   };
 
   const handleDeleteProduct = async (id: number, productName: string) => {
-    const confirmDelete = window.confirm(`هل أنت متأكد من حذف المنتج (${productName.split(' - ')[0]}) نهائياً من قاعدة البيانات؟`);
+    const confirmDelete = window.confirm(`هل أنت متأكد من حذف المنتج (${(productName || '').split(' - ')[0]}) نهائياً من قاعدة البيانات؟`);
     if (!confirmDelete) return;
 
     try {
@@ -297,7 +299,7 @@ export default function AdminProducts() {
       if (sortBy === 'price-desc') return b.price - a.price;
       if (sortBy === 'stock') return (a.stock || 0) - (b.stock || 0);
       if (sortBy === 'likes') return likesB - likesA;
-      return a.name.localeCompare(b.name, 'ar');
+      return (a.name || '').localeCompare(b.name || '', 'ar');
     });
 
     return list;
@@ -404,13 +406,13 @@ export default function AdminProducts() {
                       {/* Image */}
                       <td className="py-3 px-6">
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-800">
-                          <Image src={p.image} alt={p.name} fill className="object-cover" />
+                          <Image src={p.image || 'https://placehold.co/100x100/121212/D4AF37?text=Perfume'} alt={p.name || 'عطر'} fill className="object-cover" />
                         </div>
                       </td>
                       {/* Name */}
                       <td className="py-3 px-6 font-bold text-gray-100">
-                        {p.name.split(' - ')[0]}
-                        <span className="block text-[10px] text-gray-500 font-normal font-english">{p.name.split(' - ')[1] || ''}</span>
+                        {(p.name || '').split(' - ')[0]}
+                        <span className="block text-[10px] text-gray-500 font-normal font-english">{(p.name || '').split(' - ')[1] || ''}</span>
                       </td>
                       {/* Category */}
                       <td className="py-3 px-6 text-gray-400">{p.categoryNameAr}</td>
@@ -481,11 +483,11 @@ export default function AdminProducts() {
 
                   <div className="flex gap-3 items-center">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-800">
-                      <Image src={p.image} alt={p.name} fill className="object-cover" />
+                      <Image src={p.image || 'https://placehold.co/100x100/121212/D4AF37?text=Perfume'} alt={p.name || 'عطر'} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-gray-100 truncate">{p.name.split(' - ')[0]}</h3>
-                      <p className="text-[10px] text-gray-500 truncate font-english">{p.name.split(' - ')[1] || ''}</p>
+                      <h3 className="text-sm font-bold text-gray-100 truncate">{(p.name || '').split(' - ')[0]}</h3>
+                      <p className="text-[10px] text-gray-500 truncate font-english">{(p.name || '').split(' - ')[1] || ''}</p>
                       <p className="text-[10px] text-[#D4AF37] mt-1">{p.categoryNameAr}</p>
                     </div>
                   </div>
