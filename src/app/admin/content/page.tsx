@@ -158,90 +158,125 @@ export default function AdminContent() {
       setLoading(true);
       
       // Load Stage 1 Settings
-      const { data: settingsData, error: sErr } = await supabase
-        .from('site_settings')
-        .select('*')
-        .eq('id', 1)
-        .single();
-      if (sErr) throw sErr;
-
-      if (settingsData) {
-        setAnnouncementBarText(settingsData.announcement_bar_text || '');
-        setHeroTitle(settingsData.hero_title || '');
-        setHeroSubtitle(settingsData.hero_subtitle || '');
-        setHeroVideo1Url(settingsData.hero_video_1_url || '');
-        setHeroVideo2Url(settingsData.hero_video_2_url || '');
-        setFacebookUrl(settingsData.facebook_url || '');
-        setInstagramUrl(settingsData.instagram_url || '');
-        setTiktokUrl(settingsData.tiktok_url || '');
-        setContactPhone1(settingsData.contact_phone_1 || '');
-        setContactPhone2(settingsData.contact_phone_2 || '');
-        setContactAddress(settingsData.contact_address || '');
-        setWorkingHours(settingsData.working_hours || '');
-        setMenCategoryTitle(settingsData.men_category_title || '');
-        setMenCategorySubtitle(settingsData.men_category_subtitle || '');
-        setWomenCategoryTitle(settingsData.women_category_title || '');
-        setWomenCategorySubtitle(settingsData.women_category_subtitle || '');
-        setGiftCategoryTitle(settingsData.gift_category_title || '');
-        setGiftCategorySubtitle(settingsData.gift_category_subtitle || '');
+      try {
+        const { data: settingsData, error: sErr } = await supabase
+          .from('site_settings')
+          .select('*')
+          .eq('id', 1)
+          .maybeSingle();
+        if (!sErr && settingsData) {
+          setAnnouncementBarText(settingsData.announcement_bar_text || '');
+          setHeroTitle(settingsData.hero_title || '');
+          setHeroSubtitle(settingsData.hero_subtitle || '');
+          setHeroVideo1Url(settingsData.hero_video_1_url || '');
+          setHeroVideo2Url(settingsData.hero_video_2_url || '');
+          setFacebookUrl(settingsData.facebook_url || '');
+          setInstagramUrl(settingsData.instagram_url || '');
+          setTiktokUrl(settingsData.tiktok_url || '');
+          setContactPhone1(settingsData.contact_phone_1 || '');
+          setContactPhone2(settingsData.contact_phone_2 || '');
+          setContactAddress(settingsData.contact_address || '');
+          setWorkingHours(settingsData.working_hours || '');
+          setMenCategoryTitle(settingsData.men_category_title || '');
+          setMenCategorySubtitle(settingsData.men_category_subtitle || '');
+          setWomenCategoryTitle(settingsData.women_category_title || '');
+          setWomenCategorySubtitle(settingsData.women_category_subtitle || '');
+          setGiftCategoryTitle(settingsData.gift_category_title || '');
+          setGiftCategorySubtitle(settingsData.gift_category_subtitle || '');
+        }
+      } catch (err) {
+        console.error('Error loading site settings:', err);
       }
 
-      // Load Stage 2 settings lists
-      const { data: fData } = await supabase.from('homepage_features').select('*').order('display_order');
-      if (fData) setFeaturesList(fData);
+      // Load Stage 2 settings lists: features
+      try {
+        const { data: fData } = await supabase.from('homepage_features').select('*').order('display_order');
+        if (fData) setFeaturesList(fData);
+      } catch (err) {
+        console.error('Error loading features:', err);
+      }
 
-      const { data: tData } = await supabase.from('testimonials').select('*').order('display_order');
-      if (tData) setTestimonialsList(tData);
+      // Load Stage 2 settings lists: testimonials
+      try {
+        const { data: tData } = await supabase.from('testimonials').select('*').order('display_order');
+        if (tData) setTestimonialsList(tData);
+      } catch (err) {
+        console.error('Error loading testimonials:', err);
+      }
 
-      const { data: cData } = await supabase.from('coupons').select('*').order('code');
-      if (cData) setCouponsList(cData);
+      // Load Stage 2 settings lists: coupons
+      try {
+        const { data: cData } = await supabase.from('coupons').select('*').order('code');
+        if (cData) setCouponsList(cData);
+      } catch (err) {
+        console.error('Error loading coupons:', err);
+      }
 
-      const { data: bData } = await supabase.from('gift_box_types').select('*').order('display_order');
-      if (bData) setBoxTypesList(bData);
+      // Load Stage 2 settings lists: boxTypes
+      try {
+        const { data: bData } = await supabase.from('gift_box_types').select('*').order('display_order');
+        if (bData) setBoxTypesList(bData);
+      } catch (err) {
+        console.error('Error loading gift box types:', err);
+      }
 
       // Load Stage 3 special offers
-      const { data: oData } = await supabase.from('special_offers').select('*').order('display_order');
-      if (oData) setOffersList(oData);
+      try {
+        const { data: oData } = await supabase.from('special_offers').select('*').order('display_order');
+        if (oData) setOffersList(oData);
+      } catch (err) {
+        console.error('Error loading special offers:', err);
+      }
 
       // Load Stage 3 About Content
-      const { data: aboutData } = await supabase.from('about_content').select('*').eq('id', 1).single();
-      if (aboutData) {
-        setAboutTitle(aboutData.title || '');
-        setAboutSubtitle(aboutData.subtitle || '');
-        setAboutHistoryBadge(aboutData.history_badge || '');
-        setAboutHistoryTitle(aboutData.history_title || '');
-        setAboutHistoryDesc(aboutData.history_description || '');
-        setAboutVisionTitle(aboutData.vision_title || '');
-        setAboutVisionDesc(aboutData.vision_description || '');
-        setAboutMissionTitle(aboutData.mission_title || '');
-        setAboutMissionDesc(aboutData.mission_description || '');
-        setAboutCoverImageUrl(aboutData.cover_image || '');
+      try {
+        const { data: aboutData, error: aErr } = await supabase.from('about_content').select('*').eq('id', 1).maybeSingle();
+        if (!aErr && aboutData) {
+          setAboutTitle(aboutData.title || '');
+          setAboutSubtitle(aboutData.subtitle || '');
+          setAboutHistoryBadge(aboutData.history_badge || '');
+          setAboutHistoryTitle(aboutData.history_title || '');
+          setAboutHistoryDesc(aboutData.history_description || '');
+          setAboutVisionTitle(aboutData.vision_title || '');
+          setAboutVisionDesc(aboutData.vision_description || '');
+          setAboutMissionTitle(aboutData.mission_title || '');
+          setAboutMissionDesc(aboutData.mission_description || '');
+          setAboutCoverImageUrl(aboutData.cover_image || '');
 
-        const vals = Array.isArray(aboutData.values_list) ? aboutData.values_list : [];
-        if (vals[0]) {
-          setValue1Title(vals[0].title || '');
-          setValue1Desc(vals[0].desc || '');
-          setValue1Icon(vals[0].icon || '');
+          const vals = Array.isArray(aboutData.values_list) ? aboutData.values_list : [];
+          if (vals[0]) {
+            setValue1Title(vals[0].title || '');
+            setValue1Desc(vals[0].desc || '');
+            setValue1Icon(vals[0].icon || '');
+          }
+          if (vals[1]) {
+            setValue2Title(vals[1].title || '');
+            setValue2Desc(vals[1].desc || '');
+            setValue2Icon(vals[1].icon || '');
+          }
+          if (vals[2]) {
+            setValue3Title(vals[2].title || '');
+            setValue3Desc(vals[2].desc || '');
+            setValue3Icon(vals[2].icon || '');
+          }
         }
-        if (vals[1]) {
-          setValue2Title(vals[1].title || '');
-          setValue2Desc(vals[1].desc || '');
-          setValue2Icon(vals[1].icon || '');
-        }
-        if (vals[2]) {
-          setValue3Title(vals[2].title || '');
-          setValue3Desc(vals[2].desc || '');
-          setValue3Icon(vals[2].icon || '');
-        }
+      } catch (err) {
+        console.error('Error loading about content:', err);
       }
 
       // Load Products List (NEW!)
-      const { data: pData } = await supabase.from('products').select('*').order('id', { ascending: true });
-      if (pData) setProductsList(pData);
+      try {
+        const { data: pData, error: pErr } = await supabase.from('products').select('*').order('id', { ascending: true });
+        if (!pErr && pData) {
+          setProductsList(pData);
+        }
+      } catch (err) {
+        console.error('Error loading products list:', err);
+      }
 
     } catch (err) {
-      console.error('Error fetching settings:', err);
-      showToast('خطأ في تحميل البيانات الأساسية', 'error');
+      console.error('Error in fetchInitialData:', err);
+      showToast('خطأ في تحميل البيانات', 'error');
     } finally {
       setLoading(false);
     }
