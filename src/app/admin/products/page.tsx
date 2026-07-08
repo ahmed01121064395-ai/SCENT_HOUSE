@@ -228,10 +228,14 @@ export default function AdminProducts() {
 
         if (updateError) throw updateError;
       } else {
-        // Insert product
+        // Insert product (auto-assign next ID to prevent Postgres sequence desync conflicts)
+        const nextId = Math.max(...products.map(p => Number(p.id)), 0) + 1;
         const { error: insertError } = await supabase
           .from('products')
-          .insert([productPayload]);
+          .insert([{
+            ...productPayload,
+            id: nextId
+          }]);
 
         if (insertError) throw insertError;
       }
