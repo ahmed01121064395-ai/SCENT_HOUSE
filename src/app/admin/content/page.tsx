@@ -1140,11 +1140,13 @@ export default function AdminContent() {
           <div className="flex items-center justify-between border-b border-gray-900 pb-3">
             <div>
               <h3 className="text-sm md:text-base font-bold text-gray-200">
-                {activeTab === 'men_products' && 'إدارة العطور الرجالية والمشتركة'}
-                {activeTab === 'women_products' && 'إدارة العطور النسائية والمشتركة'}
-                {activeTab === 'gift_products' && 'إدارة صناديق وبوكسات الهدايا'}
+                {activeTab === 'men_products' && `إدارة العطور الرجالية والمشتركة (${getFilteredProducts().length})`}
+                {activeTab === 'women_products' && `إدارة العطور النسائية والمشتركة (${getFilteredProducts().length})`}
+                {activeTab === 'gift_products' && `إدارة صناديق وبوكسات الهدايا (${getFilteredProducts().length})`}
               </h3>
-              <p className="text-[10px] text-gray-500 mt-0.5">إضافة، تعديل، حذف، وتغيير صور المنتجات المعروضة في هذا القسم</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">
+                إجمالي المنتجات المكتشفة: {productsList.length} | المعروض في هذا القسم: {getFilteredProducts().length}
+              </p>
             </div>
             <button
               onClick={() => openModal('product')}
