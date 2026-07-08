@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Toast from '@/components/Toast';
@@ -1145,7 +1147,7 @@ export default function AdminContent() {
                 {activeTab === 'gift_products' && `إدارة صناديق وبوكسات الهدايا (${getFilteredProducts().length})`}
               </h3>
               <p className="text-[10px] text-gray-500 mt-0.5">
-                إجمالي المنتجات المكتشفة: {productsList.length} | المعروض في هذا القسم: {getFilteredProducts().length}
+                قاعدة البيانات: {process.env.NEXT_PUBLIC_SUPABASE_URL} | إجمالي المنتجات المكتشفة: {productsList.length} | المعروض في هذا القسم: {getFilteredProducts().length}
               </p>
             </div>
             <button
