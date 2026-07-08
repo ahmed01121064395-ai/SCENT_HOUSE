@@ -16,7 +16,8 @@ export default function Checkout() {
     setLastPlacedOrder,
     clearCart,
     buyNowItem,
-    setBuyNowItem
+    setBuyNowItem,
+    removeFromCart
   } = useApp();
 
   // Form states
@@ -317,9 +318,25 @@ export default function Checkout() {
                   />
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-[var(--text-primary)]">{item.product.name.split(' - ')[0]}</h4>
-                    <span className="text-xs text-gray-400">
-                      الحجم: <span className="english-num">{item.size.ml}</span> مل × <span className="english-num">{item.quantity}</span>
-                    </span>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-gray-400">
+                        الحجم: <span className="english-num">{item.size.ml}</span> مل × <span className="english-num">{item.quantity}</span>
+                      </span>
+                      <button
+                        onClick={() => {
+                          if (buyNowItem) {
+                            setBuyNowItem(null);
+                          } else {
+                            removeFromCart(item.product.id, item.size.ml);
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold cursor-pointer transition-colors"
+                        title="إزالة هذا الصنف من الطلب"
+                        type="button"
+                      >
+                        إزالة
+                      </button>
+                    </div>
                   </div>
                   <div className="text-left font-mono text-sm">
                     <span className="english-num">{item.size.price * item.quantity}</span> ج.م

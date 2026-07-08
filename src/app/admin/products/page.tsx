@@ -782,14 +782,30 @@ export default function AdminProducts() {
               </div>
 
               {/* Submit Buttons */}
-              <div className="border-t border-gray-800 pt-5 flex gap-3 shrink-0 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-800 text-gray-300 hover:text-white font-bold py-2.5 px-5 rounded-xl text-xs md:text-sm border border-gray-700 cursor-pointer"
-                >
-                  إلغاء
-                </button>
+              <div className="border-t border-gray-800 pt-5 flex gap-3 shrink-0 justify-between items-center">
+                {editingProduct ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleDeleteProduct(editingProduct.id, name);
+                      setIsModalOpen(false);
+                    }}
+                    className="bg-red-950/20 text-red-400 hover:text-red-300 hover:bg-red-950/40 py-2.5 px-5 rounded-xl text-xs md:text-sm border border-red-900/30 cursor-pointer font-bold transition-all"
+                  >
+                    حذف هذا المنتج
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-gray-800 text-gray-300 hover:text-white font-bold py-2.5 px-5 rounded-xl text-xs md:text-sm border border-gray-700 cursor-pointer"
+                  >
+                    إلغاء
+                  </button>
                 <button
                   type="submit"
                   disabled={submitLoading}
@@ -807,6 +823,7 @@ export default function AdminProducts() {
                     </>
                   )}
                 </button>
+                </div>
               </div>
 
             </form>
