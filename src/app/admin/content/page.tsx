@@ -130,6 +130,27 @@ export default function AdminContent() {
 
   useEffect(() => {
     fetchInitialData();
+
+    // Subscribe to all tables to keep the CMS dashboard real-time synced
+    const sChannel = supabase.channel('cms-settings-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, () => { fetchInitialData(); }).subscribe();
+    const fChannel = supabase.channel('cms-features-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'homepage_features' }, () => { fetchInitialData(); }).subscribe();
+    const tChannel = supabase.channel('cms-testimonials-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, () => { fetchInitialData(); }).subscribe();
+    const cChannel = supabase.channel('cms-coupons-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'coupons' }, () => { fetchInitialData(); }).subscribe();
+    const bChannel = supabase.channel('cms-boxtypes-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'gift_box_types' }, () => { fetchInitialData(); }).subscribe();
+    const oChannel = supabase.channel('cms-offers-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'special_offers' }, () => { fetchInitialData(); }).subscribe();
+    const aChannel = supabase.channel('cms-about-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'about_content' }, () => { fetchInitialData(); }).subscribe();
+    const pChannel = supabase.channel('cms-products-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => { fetchInitialData(); }).subscribe();
+
+    return () => {
+      sChannel.unsubscribe();
+      fChannel.unsubscribe();
+      tChannel.unsubscribe();
+      cChannel.unsubscribe();
+      bChannel.unsubscribe();
+      oChannel.unsubscribe();
+      aChannel.unsubscribe();
+      pChannel.unsubscribe();
+    };
   }, []);
 
   async function fetchInitialData() {
