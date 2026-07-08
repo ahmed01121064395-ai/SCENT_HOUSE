@@ -302,16 +302,14 @@ export default function AdminContent() {
       // Load Products List (NEW!)
       try {
         const { data: pData, error: pErr } = await supabase.from('products').select('*').order('id', { ascending: true });
-        setDbErrors(prev => [
-          ...prev, 
-          `المنتجات - المسترجعة: ${pData ? pData.length : 'null'} صف | الخطأ: ${pErr ? pErr.message : 'لا يوجد'}`
-        ]);
-        if (!pErr && pData) {
+        if (pErr) {
+          setDbErrors(prev => [...prev, `المنتجات: ${pErr.message}`]);
+        } else if (pData) {
           setProductsList(pData);
         }
       } catch (err: any) {
         console.error('Error loading products list:', err);
-        setDbErrors(prev => [...prev, `المنتجات Exception: ${err.message || err}`]);
+        setDbErrors(prev => [...prev, `المنتجات: ${err.message || err}`]);
       }
 
     } catch (err: any) {
@@ -1149,7 +1147,7 @@ export default function AdminContent() {
                 {activeTab === 'gift_products' && `إدارة صناديق وبوكسات الهدايا (${getFilteredProducts().length})`}
               </h3>
               <p className="text-[10px] text-gray-500 mt-0.5">
-                قاعدة البيانات: {process.env.NEXT_PUBLIC_SUPABASE_URL} | إجمالي المنتجات المكتشفة: {productsList.length} | المعروض في هذا القسم: {getFilteredProducts().length}
+                إضافة، تعديل، حذف، وتخصيص تفاصيل المنتجات المعروضة في هذا القسم بالمتجر
               </p>
             </div>
             <button
