@@ -178,12 +178,11 @@ export default function Checkout() {
                     />
                   </div>
                   <div className="form-group-checkout">
-                    <label className="block text-sm mb-1 text-gray-300">رقم الهاتف الثاني (whats app)</label>
+                    <label className="block text-sm mb-1 text-gray-300">رقم هاتف إضافي (اختياري)</label>
                     <input
                       type="tel"
                       placeholder="01xxxxxxxxx"
                       className="premium-input w-full"
-                      required
                       value={phone2}
                       onChange={(e) => setPhone2(e.target.value)}
                     />

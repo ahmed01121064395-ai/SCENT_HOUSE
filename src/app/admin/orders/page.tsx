@@ -143,6 +143,76 @@ export default function AdminOrders() {
     }
   };
 
+  // Helper to format Egyptian phone numbers for WhatsApp
+  const formatCustomerPhoneForWhatsApp = (phoneStr: string): string => {
+    let digits = phoneStr.replace(/\D/g, '');
+    if (digits.startsWith('01')) {
+      digits = '20' + digits.substring(1);
+    } else if (digits.startsWith('1') && digits.length === 10) {
+      digits = '20' + digits;
+    }
+    return digits;
+  };
+
+  // Helper to load order items and open WhatsApp confirmation link
+  const handleSendWhatsApp = async (order: Order, phoneStr: string) => {
+    if (!phoneStr) return;
+
+    try {
+      // 1. Fetch order items for accurate itemization
+      const { data: itemsData, error: itemsErr } = await supabase
+        .from('order_items')
+        .select('*')
+        .eq('order_id', order.id);
+
+      if (itemsErr) throw itemsErr;
+
+      const mappedItems = (itemsData || []).map(item => {
+        const prod = products.find(p => p.id === item.productId);
+        return {
+          ...item,
+          productName: prod ? prod.name.split(' - ')[0] : `عطر (كود: ${item.productId})`
+        };
+      });
+
+      // 2. Generate Arabic text message
+      const customerName = order.fullname;
+      const invoiceNumber = order.orderId;
+      const total = order.grandTotal;
+
+      let itemListText = '';
+      mappedItems.forEach((item) => {
+        const sizeStr = item.size?.ml ? `${item.size.ml} مل` : '';
+        const name = item.productName || '';
+        const qty = item.quantity || 1;
+        const price = item.price || 0;
+        itemListText += `• ${name} ${sizeStr ? `(${sizeStr})` : ''} - العدد: ${qty} - السعر: ${price} جنيه\n`;
+      });
+
+      const message = `مرحباً ${customerName} 🌸
+
+نود تأكيد طلبك من دار العطور (Scent House)
+رقم الفاتورة: ${invoiceNumber}
+
+تفاصيل الطلب:
+${itemListText}
+الإجمالي الكلي: ${total} جنيه
+
+للتأكيد يرجى الرد بكلمة: تأكيد
+لإلغاء الطلب يرجى الرد بكلمة: إلغاء
+
+شكراً لثقتكم في دار العطور 🤍`;
+
+      const waPhone = formatCustomerPhoneForWhatsApp(phoneStr);
+      const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+      
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Error generating WhatsApp message:', err);
+      setToast({ message: 'حدث خطأ أثناء تجهيز رسالة الواتساب', type: 'error' });
+    }
+  };
+
   // Filter orders
   const getFilteredOrders = () => {
     let list = [...orders];
@@ -247,7 +317,40 @@ export default function AdminOrders() {
                     {/* Customer Name */}
                     <td className="py-4 px-6 font-bold text-gray-200">{o.fullname}</td>
                     {/* Phone */}
-                    <td className="py-4 px-6 text-gray-300 font-english">{o.phone}</td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col gap-1.5 justify-center">
+                        <div className="flex items-center gap-2">
+                          {o.phone ? (
+                            <>
+                              <span className="text-gray-300 font-english text-xs md:text-sm">{o.phone}</span>
+                              <button
+                                onClick={() => handleSendWhatsApp(o, o.phone)}
+                                className="text-green-500 hover:text-green-400 cursor-pointer flex items-center justify-center p-0.5 hover:bg-green-500/10 rounded"
+                                title="تأكيد الهاتف الأول عبر واتساب"
+                                type="button"
+                              >
+                                <i className="fa-brands fa-whatsapp text-sm"></i>
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-gray-500 text-xs">لا يوجد رقم هاتف</span>
+                          )}
+                        </div>
+                        {o.phone2 && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400 font-english text-[11px] md:text-xs">{o.phone2}</span>
+                            <button
+                              onClick={() => handleSendWhatsApp(o, o.phone2!)}
+                              className="text-emerald-500 hover:text-emerald-400 cursor-pointer flex items-center justify-center p-0.5 hover:bg-emerald-500/10 rounded"
+                              title="تأكيد الهاتف الثاني عبر واتساب"
+                              type="button"
+                            >
+                              <i className="fa-brands fa-whatsapp text-xs"></i>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     {/* City */}
                     <td className="py-4 px-6 text-gray-400">{o.city}</td>
                     {/* Grand Total */}
@@ -405,12 +508,46 @@ export default function AdminOrders() {
                     <span className="font-bold text-gray-200">{expandedOrder.city}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block mb-0.5">رقم الجوال الأول</span>
-                    <span className="font-bold text-gray-200 font-english">{expandedOrder.phone}</span>
+                    <span className="text-gray-500 block mb-0.5">رقم الهاتف الأول</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {expandedOrder.phone ? (
+                        <>
+                          <span className="font-bold text-gray-200 font-english">{expandedOrder.phone}</span>
+                          <button
+                            onClick={() => handleSendWhatsApp(expandedOrder, expandedOrder.phone)}
+                            className="text-green-500 hover:text-green-400 flex items-center gap-1.5 text-xs bg-green-500/10 hover:bg-green-500/20 py-1.5 px-3 rounded-xl border border-green-500/20 transition-all cursor-pointer font-bold"
+                            title="تأكيد الهاتف الأول عبر واتساب"
+                            type="button"
+                          >
+                            <i className="fa-brands fa-whatsapp text-sm"></i>
+                            <span>تأكيد الطلب</span>
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-gray-500 text-xs">لا يوجد رقم هاتف</span>
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <span className="text-gray-500 block mb-0.5">رقم الجوال الاحتياطي</span>
-                    <span className="font-bold text-gray-200 font-english">{expandedOrder.phone2 || '—'}</span>
+                    <span className="text-gray-500 block mb-0.5">رقم الهاتف الثاني (whats app)</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {expandedOrder.phone2 ? (
+                        <>
+                          <span className="font-bold text-gray-200 font-english">{expandedOrder.phone2}</span>
+                          <button
+                            onClick={() => handleSendWhatsApp(expandedOrder, expandedOrder.phone2!)}
+                            className="text-emerald-500 hover:text-emerald-400 flex items-center gap-1.5 text-xs bg-emerald-500/10 hover:bg-emerald-500/20 py-1.5 px-3 rounded-xl border border-emerald-500/20 transition-all cursor-pointer font-bold"
+                            title="تأكيد الهاتف الثاني عبر واتساب"
+                            type="button"
+                          >
+                            <i className="fa-brands fa-whatsapp text-sm"></i>
+                            <span>تأكيد الطلب</span>
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-gray-500 font-bold">—</span>
+                      )}
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <span className="text-gray-500 block mb-0.5">العنوان السكني المفصل</span>
