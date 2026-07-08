@@ -6,7 +6,7 @@ import Toast from '@/components/Toast';
 import Image from 'next/image';
 
 export default function AdminContent() {
-  const [activeTab, setActiveTab] = useState<'settings' | 'features' | 'testimonials' | 'coupons' | 'boxTypes' | 'offers' | 'about'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'men_products' | 'women_products' | 'gift_products' | 'features' | 'testimonials' | 'coupons' | 'boxTypes' | 'offers' | 'about'>('settings');
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [savingSection, setSavingSection] = useState<string | null>(null);
@@ -71,12 +71,37 @@ export default function AdminContent() {
   const [value3Desc, setValue3Desc] = useState('');
   const [value3Icon, setValue3Icon] = useState('');
 
+  // ────────────────────────────────────────────────────────────────
+  // PRODUCTS MANAGEMENT STATES (NEW!)
+  // ────────────────────────────────────────────────────────────────
+  const [productsList, setProductsList] = useState<any[]>([]);
+  
+  // Product Form states
+  const [prodName, setProdName] = useState('');
+  const [prodCategory, setProdCategory] = useState<'men' | 'women' | 'unisex' | 'gifts'>('men');
+  const [prodPrice, setProdPrice] = useState('');
+  const [prodStock, setProdStock] = useState('15');
+  const [prodDescription, setProdDescription] = useState('');
+  const [prodTopNotes, setProdTopNotes] = useState('');
+  const [prodHeartNotes, setProdHeartNotes] = useState('');
+  const [prodBaseNotes, setProdBaseNotes] = useState('');
+  const [prodContents, setProdContents] = useState('');
+  const [prodIsBestSeller, setProdIsBestSeller] = useState(false);
+  const [prodIsNew, setProdIsNew] = useState(true);
+  const [prodSize30Checked, setProdSize30Checked] = useState(false);
+  const [prodSize30Price, setProdSize30Price] = useState('');
+  const [prodSize50Checked, setProdSize50Checked] = useState(true);
+  const [prodSize50Price, setProdSize50Price] = useState('');
+  const [prodSize100Checked, setProdSize100Checked] = useState(false);
+  const [prodSize100Price, setProdSize100Price] = useState('');
+  const [prodImageFile, setProdImageFile] = useState<File | null>(null);
+
   // Modals / Forms
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer' | null>(null);
+  const [modalType, setModalType] = useState<'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer' | 'product' | null>(null);
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
-  // Form inputs
+  // Modal input states
   const [featureIcon, setFeatureIcon] = useState('fa-gem');
   const [featureTitle, setFeatureTitle] = useState('');
   const [featureOrder, setFeatureOrder] = useState('1');
@@ -167,7 +192,7 @@ export default function AdminContent() {
         setAboutHistoryDesc(aboutData.history_description || '');
         setAboutVisionTitle(aboutData.vision_title || '');
         setAboutVisionDesc(aboutData.vision_description || '');
-        setAboutMissionTitle(aboutData.vision_title || '');
+        setAboutMissionTitle(aboutData.mission_title || '');
         setAboutMissionDesc(aboutData.mission_description || '');
         setAboutCoverImageUrl(aboutData.cover_image || '');
 
@@ -189,9 +214,13 @@ export default function AdminContent() {
         }
       }
 
+      // Load Products List (NEW!)
+      const { data: pData } = await supabase.from('products').select('*').order('id', { ascending: true });
+      if (pData) setProductsList(pData);
+
     } catch (err) {
       console.error('Error fetching settings:', err);
-      showToast('خطأ في تحميل بيانات الإعدادات والمحتوى', 'error');
+      showToast('خطأ في تحميل البيانات الأساسية', 'error');
     } finally {
       setLoading(false);
     }
@@ -226,7 +255,7 @@ export default function AdminContent() {
   // ────────────────────────────────────────────────────────────────
   // MODAL CRUD OPEN
   // ────────────────────────────────────────────────────────────────
-  const openModal = (type: 'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer', item: any = null) => {
+  const openModal = (type: 'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer' | 'product', item: any = null) => {
     setModalType(type);
     setEditingItem(item);
     
@@ -255,6 +284,38 @@ export default function AdminContent() {
       setOfferWhatsappText(item ? item.whatsapp_text : '');
       setOfferOrder(item ? String(item.display_order) : '1');
       setOfferActive(item ? item.is_active : true);
+    } else if (type === 'product') {
+      setProdName(item ? item.name : '');
+      
+      // Determine tab-category pre-selection
+      let currentCat: 'men' | 'women' | 'unisex' | 'gifts' = 'men';
+      if (activeTab === 'women_products') currentCat = 'women';
+      if (activeTab === 'gift_products') currentCat = 'gifts';
+      setProdCategory(item ? item.category : currentCat);
+      
+      setProdPrice(item ? String(item.price) : '');
+      setProdStock(item ? String(item.stock || 15) : '15');
+      setProdDescription(item ? item.description || '' : '');
+      setProdTopNotes(item ? item.notes?.top || '' : '');
+      setProdHeartNotes(item ? item.notes?.heart || '' : '');
+      setProdBaseNotes(item ? item.notes?.base || '' : '');
+      setProdContents(item ? item.contents || '' : '');
+      setProdIsBestSeller(item ? !!item.isBestSeller : false);
+      setProdIsNew(item ? !!item.isNew : true);
+
+      // Sizes mapping
+      const sizesArray = item ? (item.sizes || []) : [];
+      const s30 = sizesArray.find((s: any) => s.ml === 30);
+      const s50 = sizesArray.find((s: any) => s.ml === 50);
+      const s100 = sizesArray.find((s: any) => s.ml === 100);
+
+      setProdSize30Checked(!!s30);
+      setProdSize30Price(s30 ? String(s30.price) : '');
+      setProdSize50Checked(!!s50);
+      setProdSize50Price(s50 ? String(s50.price) : '');
+      setProdSize100Checked(!!s100);
+      setProdSize100Price(s100 ? String(s100.price) : '');
+      setProdImageFile(null);
     }
     
     setIsModalOpen(true);
@@ -364,6 +425,69 @@ export default function AdminContent() {
           const { error } = await supabase.from('special_offers').insert([payload]);
           if (error) throw error;
         }
+      } else if (modalType === 'product') {
+        // Build sizes array
+        const sizesArray = [];
+        if (prodSize30Checked) {
+          if (!prodSize30Price) throw new Error('يرجى كتابة سعر عبوة 30 مل');
+          sizesArray.push({ ml: 30, price: Number(prodSize30Price) });
+        }
+        if (prodSize50Checked) {
+          if (!prodSize50Price) throw new Error('يرجى كتابة سعر عبوة 50 مل');
+          sizesArray.push({ ml: 50, price: Number(prodSize50Price) });
+        }
+        if (prodSize100Checked) {
+          if (!prodSize100Price) throw new Error('يرجى كتابة سعر عبوة 100 مل');
+          sizesArray.push({ ml: 100, price: Number(prodSize100Price) });
+        }
+        if (sizesArray.length === 0) throw new Error('يرجى اختيار حجم واحد على الأقل للمنتج');
+
+        let categoryNameAr = 'العطور الرجالية';
+        if (prodCategory === 'women') categoryNameAr = 'العطور النسائية';
+        if (prodCategory === 'unisex') categoryNameAr = 'عطور للجنسين';
+        if (prodCategory === 'gifts') categoryNameAr = 'بوكسات الهدايا';
+
+        let imageUrl = editingItem ? editingItem.image : '';
+
+        // Upload Product Image
+        if (prodImageFile) {
+          const fileExt = prodImageFile.name.split('.').pop();
+          const fileName = `prod_${Date.now()}.${fileExt}`;
+          const filePath = `products/${fileName}`;
+          const { error: uploadError } = await supabase.storage.from('product-images').upload(filePath, prodImageFile);
+          if (uploadError) throw uploadError;
+          const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
+          imageUrl = publicUrlData.publicUrl;
+        }
+        if (!imageUrl) throw new Error('يرجى اختيار صورة للمنتج');
+
+        const payload = {
+          name: prodName,
+          category: prodCategory,
+          categoryNameAr,
+          price: sizesArray[0].price, // Base price is the first size price
+          stock: parseInt(prodStock) || 15,
+          description: prodDescription,
+          notes: {
+            top: prodTopNotes,
+            heart: prodHeartNotes,
+            base: prodBaseNotes
+          },
+          contents: prodContents,
+          isBestSeller: prodIsBestSeller,
+          isNew: prodIsNew,
+          sizes: sizesArray,
+          image: imageUrl,
+          images: editingItem ? (editingItem.images || [imageUrl]) : [imageUrl]
+        };
+
+        if (editingItem) {
+          const { error } = await supabase.from('products').update(payload).eq('id', editingItem.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('products').insert([payload]);
+          if (error) throw error;
+        }
       }
 
       showToast('تمت العملية بنجاح وتحديث الموقع', 'success');
@@ -441,11 +565,25 @@ export default function AdminContent() {
     }
   };
 
+  // Filter products by category tab
+  const getFilteredProducts = () => {
+    if (activeTab === 'men_products') {
+      return productsList.filter(p => p.category === 'men' || p.category === 'unisex');
+    }
+    if (activeTab === 'women_products') {
+      return productsList.filter(p => p.category === 'women' || p.category === 'unisex');
+    }
+    if (activeTab === 'gift_products') {
+      return productsList.filter(p => p.category === 'gifts');
+    }
+    return [];
+  };
+
   if (loading) {
     return (
       <div className="text-center py-20 text-[#D4AF37]">
         <i className="fa-solid fa-circle-notch animate-spin text-3xl"></i>
-        <p className="text-xs text-gray-400 mt-3 font-cairo">جاري تحميل إعدادات المحتوى...</p>
+        <p className="text-xs text-gray-400 mt-3 font-cairo">جاري تحميل إعدادات المحتوى والمنتجات...</p>
       </div>
     );
   }
@@ -467,7 +605,7 @@ export default function AdminContent() {
             <i className="fa-solid fa-pen-to-square text-[#D4AF37] text-lg"></i>
             إدارة محتوى المتجر (CMS)
           </h1>
-          <p className="text-xs text-gray-400 mt-1">تعديل النصوص، العروض الترويجية، صفحة من نحن، الآراء، والكوبونات</p>
+          <p className="text-xs text-gray-400 mt-1">تعديل نصوص وتصنيفات المتجر، المنتجات، العروض، والصفحات الثابتة</p>
         </div>
       </div>
 
@@ -485,6 +623,61 @@ export default function AdminContent() {
           المعلومات الأساسية
         </button>
         <button
+          onClick={() => setActiveTab('men_products')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'men_products'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10 border-b border-[#D4AF37]'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-mars ml-2"></i>
+          العطور الرجالية
+        </button>
+        <button
+          onClick={() => setActiveTab('women_products')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'women_products'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10 border-b border-[#D4AF37]'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-venus ml-2"></i>
+          العطور النسائية
+        </button>
+        <button
+          onClick={() => setActiveTab('gift_products')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'gift_products'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10 border-b border-[#D4AF37]'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-gift ml-2"></i>
+          صناديق الهدايا
+        </button>
+        <button
+          onClick={() => setActiveTab('offers')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'offers'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-tags ml-2"></i>
+          عروض المتجر
+        </button>
+        <button
+          onClick={() => setActiveTab('about')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'about'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-info-circle ml-2"></i>
+          صفحة من نحن
+        </button>
+        <button
           onClick={() => setActiveTab('features')}
           className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
             activeTab === 'features'
@@ -493,7 +686,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-gem ml-2"></i>
-          مميزات المتجر
+          المميزات
         </button>
         <button
           onClick={() => setActiveTab('testimonials')}
@@ -504,7 +697,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-comments ml-2"></i>
-          آراء العملاء
+          الآراء
         </button>
         <button
           onClick={() => setActiveTab('coupons')}
@@ -515,7 +708,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-ticket ml-2"></i>
-          كوبونات الخصم
+          الكوبونات
         </button>
         <button
           onClick={() => setActiveTab('boxTypes')}
@@ -527,28 +720,6 @@ export default function AdminContent() {
         >
           <i className="fa-solid fa-gift ml-2"></i>
           علب الهدايا
-        </button>
-        <button
-          onClick={() => setActiveTab('offers')}
-          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
-            activeTab === 'offers'
-              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
-              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
-          }`}
-        >
-          <i className="fa-solid fa-tags ml-2"></i>
-          عروض المتجر الرئيسية
-        </button>
-        <button
-          onClick={() => setActiveTab('about')}
-          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
-            activeTab === 'about'
-              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
-              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
-          }`}
-        >
-          <i className="fa-solid fa-info-circle ml-2"></i>
-          صفحة من نحن (About)
         </button>
       </div>
 
@@ -841,7 +1012,7 @@ export default function AdminContent() {
                     />
                   </div>
                   <div className="form-group flex flex-col gap-1.5">
-                    <label className="text-[10px] text-gray-400">الوصف أو العنوان الفرعي</label>
+                    <label className="text-[10px] text-gray-500">الوصف أو العنوان الفرعي</label>
                     <input
                       type="text"
                       value={giftCategorySubtitle}
@@ -857,7 +1028,102 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 2: HOMEPAGE FEATURES
+          TABS: PRODUCTS LISTING (NEW! - FOR MEN, WOMEN, AND GIFTS)
+          ──────────────────────────────────────────────────────────────── */}
+      {(activeTab === 'men_products' || activeTab === 'women_products' || activeTab === 'gift_products') && (
+        <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-900 pb-3">
+            <div>
+              <h3 className="text-sm md:text-base font-bold text-gray-200">
+                {activeTab === 'men_products' && 'إدارة العطور الرجالية والمشتركة'}
+                {activeTab === 'women_products' && 'إدارة العطور النسائية والمشتركة'}
+                {activeTab === 'gift_products' && 'إدارة صناديق وبوكسات الهدايا'}
+              </h3>
+              <p className="text-[10px] text-gray-500 mt-0.5">إضافة، تعديل، حذف، وتغيير صور المنتجات المعروضة في هذا القسم</p>
+            </div>
+            <button
+              onClick={() => openModal('product')}
+              className="bg-gradient-to-r from-[#AA7C11] to-[#D4AF37] hover:brightness-110 text-black text-xs font-bold py-2 px-4 rounded-xl transition-all duration-300 cursor-pointer"
+            >
+              <i className="fa-solid fa-plus ml-1.5"></i> إضافة منتج جديد
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-right border-collapse">
+              <thead>
+                <tr className="border-b border-gray-800 text-xs text-gray-400">
+                  <th className="py-3 px-4">المنتج</th>
+                  <th className="py-3 px-4 text-center">التصنيف</th>
+                  <th className="py-3 px-4 text-center">السعر الأساسي</th>
+                  <th className="py-3 px-4 text-center">الأحجام المتاحة</th>
+                  <th className="py-3 px-4 text-center">الكمية/الستوك</th>
+                  <th className="py-3 px-4 text-center">شارات مميزة</th>
+                  <th className="py-3 px-4 text-center">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800 text-xs md:text-sm">
+                {getFilteredProducts().map((prod) => (
+                  <tr className="hover:bg-[#1A1A1A]/40 transition-colors" key={prod.id}>
+                    <td className="py-3 px-4 flex items-center gap-3">
+                      <div className="relative w-10 h-12 rounded bg-[#1A1A1A] overflow-hidden border border-gray-800">
+                        <Image src={prod.image} alt={prod.name} fill className="object-contain" sizes="40px" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-200">{prod.name}</h4>
+                        {prod.stock <= 5 && (
+                          <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-0.5">
+                            <i className="fa-solid fa-triangle-exclamation"></i> كمية منخفضة!
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center text-gray-400">
+                      {prod.category === 'unisex' ? 'مشترك للجنسين' : prod.categoryNameAr}
+                    </td>
+                    <td className="py-3 px-4 text-center font-bold text-[#D4AF37] font-english">{prod.price} ج.م</td>
+                    <td className="py-3 px-4 text-center font-english space-x-1 space-x-reverse">
+                      {Array.isArray(prod.sizes) && prod.sizes.map((s: any) => (
+                        <span key={s.ml} className="bg-gray-800 text-gray-300 text-[10px] px-1.5 py-0.5 rounded">
+                          {s.ml}ML
+                        </span>
+                      ))}
+                    </td>
+                    <td className="py-3 px-4 text-center font-english text-gray-300">{prod.stock || 0}</td>
+                    <td className="py-3 px-4 text-center space-x-1 space-x-reverse">
+                      {prod.isBestSeller && (
+                        <span className="bg-amber-500/10 text-amber-500 text-[10px] px-2 py-0.5 rounded-full font-bold">الأكثر مبيعاً</span>
+                      )}
+                      {prod.isNew && (
+                        <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-full font-bold">جديد</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => openModal('product', prod)}
+                          className="text-[10px] font-bold text-amber-500 bg-[#1A1A1A] border border-gray-800 py-1 px-2.5 rounded-lg cursor-pointer"
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem('products', prod.id, prod.name)}
+                          className="text-[10px] font-bold text-red-500 bg-red-950/10 border border-red-900/20 py-1 px-2.5 rounded-lg cursor-pointer"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────────
+          TAB 5: HOMEPAGE FEATURES
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'features' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -907,7 +1173,7 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 3: TESTIMONIALS
+          TAB 6: TESTIMONIALS
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'testimonials' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -954,7 +1220,7 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 4: COUPONS LIST
+          TAB 7: COUPONS LIST
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'coupons' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -1023,7 +1289,7 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 5: BOX TYPES
+          TAB 8: BOX TYPES
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'boxTypes' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -1081,7 +1347,7 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 6: SPECIAL OFFERS
+          TAB 9: SPECIAL OFFERS
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'offers' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -1160,7 +1426,7 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
-          TAB 7: ABOUT PAGE EDITOR
+          TAB 10: ABOUT PAGE EDITOR
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'about' && (
         <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -1195,8 +1461,6 @@ export default function AdminContent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Left Column: Headers & Story text */}
             <div className="md:col-span-2 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-group flex flex-col gap-1.5">
@@ -1294,7 +1558,6 @@ export default function AdminContent() {
               </div>
             </div>
 
-            {/* Right Column: Cover image */}
             <div className="space-y-4">
               <div className="form-group flex flex-col gap-1.5">
                 <label className="text-xs text-gray-400 font-bold">صورة الغلاف الجانبية للدار</label>
@@ -1308,13 +1571,10 @@ export default function AdminContent() {
                   className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left text-gray-200"
                   dir="ltr"
                 />
-                <p className="text-[9px] text-gray-500">رفع صورة جديدة لتغيير الغلاف الحالي مباشرة</p>
               </div>
             </div>
-
           </div>
 
-          {/* SECTION: 3 Core Values Cards */}
           <div className="border-t border-gray-900 pt-6 space-y-4">
             <h3 className="text-sm md:text-base font-bold text-[#D4AF37]">القيم الجوهرية الثلاثة (Core Values)</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1437,10 +1697,10 @@ export default function AdminContent() {
           ──────────────────────────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm select-none">
-          <div className="bg-[#121212] border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden text-right font-cairo shadow-2xl">
+          <div className="bg-[#121212] border border-gray-800 rounded-2xl w-full max-w-lg overflow-hidden text-right font-cairo shadow-2xl">
             
             <div className="bg-[#1A1A1A] px-6 py-4 border-b border-gray-800 flex justify-between items-center">
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-300 text-lg cursor-pointer">
+              <button type="button" onClick={closeModal} className="text-gray-500 hover:text-gray-300 text-lg cursor-pointer">
                 <i className="fa-solid fa-xmark"></i>
               </button>
               <h3 className="text-sm md:text-base font-bold text-[#D4AF37]">
@@ -1448,8 +1708,213 @@ export default function AdminContent() {
               </h3>
             </div>
 
-            <form onSubmit={handleSubmitModal} className="p-6 space-y-4">
+            <form onSubmit={handleSubmitModal} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               
+              {/* PRODUCT FIELDS (NEW!) */}
+              {modalType === 'product' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">اسم المنتج (العطر)</label>
+                      <input
+                        type="text"
+                        required
+                        value={prodName}
+                        onChange={(e) => setProdName(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                        placeholder="مثال: عطر شيوخ الذهب"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">التصنيف</label>
+                      <select
+                        value={prodCategory}
+                        onChange={(e) => setProdCategory(e.target.value as any)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-gray-200"
+                      >
+                        <option value="men">العطور الرجالية</option>
+                        <option value="women">العطور النسائية</option>
+                        <option value="unisex">عطور للجنسين (مشتركة)</option>
+                        <option value="gifts">بوكسات الهدايا</option>
+                      </select>
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">الكمية المتوفرة بالستوك</label>
+                      <input
+                        type="number"
+                        required
+                        value={prodStock}
+                        onChange={(e) => setProdStock(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 font-english"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">صورة المنتج</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setProdImageFile(e.target.files ? e.target.files[0] : null)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-2 outline-none text-xs text-left text-gray-200"
+                        dir="ltr"
+                      />
+                      {editingItem && <p className="text-[9px] text-gray-500">اتركها فارغة للإبقاء على الصورة الحالية</p>}
+                    </div>
+                  </div>
+
+                  {/* SIZES CHECKBOXES & PRICES */}
+                  <div className="space-y-3 p-4 bg-[#1A1A1A] rounded-xl border border-gray-800">
+                    <h4 className="text-xs text-gray-300 font-bold">الحجم والأسعار (اختر حجمًا واحدًا على الأقل):</h4>
+                    
+                    {/* Size 30ML */}
+                    <div className="flex items-center gap-3 justify-between">
+                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={prodSize30Checked}
+                          onChange={(e) => setProdSize30Checked(e.target.checked)}
+                          className="w-4 h-4 rounded accent-[#D4AF37]"
+                        />
+                        عبوة 30 ML
+                      </label>
+                      {prodSize30Checked && (
+                        <input
+                          type="number"
+                          placeholder="السعر بالجنيه"
+                          value={prodSize30Price}
+                          onChange={(e) => setProdSize30Price(e.target.value)}
+                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
+                        />
+                      )}
+                    </div>
+
+                    {/* Size 50ML */}
+                    <div className="flex items-center gap-3 justify-between">
+                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={prodSize50Checked}
+                          onChange={(e) => setProdSize50Checked(e.target.checked)}
+                          className="w-4 h-4 rounded accent-[#D4AF37]"
+                        />
+                        عبوة 50 ML
+                      </label>
+                      {prodSize50Checked && (
+                        <input
+                          type="number"
+                          placeholder="السعر بالجنيه"
+                          value={prodSize50Price}
+                          onChange={(e) => setProdSize50Price(e.target.value)}
+                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
+                        />
+                      )}
+                    </div>
+
+                    {/* Size 100ML */}
+                    <div className="flex items-center gap-3 justify-between">
+                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={prodSize100Checked}
+                          onChange={(e) => setProdSize100Checked(e.target.checked)}
+                          className="w-4 h-4 rounded accent-[#D4AF37]"
+                        />
+                        عبوة 100 ML
+                      </label>
+                      {prodSize100Checked && (
+                        <input
+                          type="number"
+                          placeholder="السعر بالجنيه"
+                          value={prodSize100Price}
+                          onChange={(e) => setProdSize100Price(e.target.value)}
+                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-xs text-gray-400">وصف العطر أو النبذة التعريفية</label>
+                    <textarea
+                      rows={2}
+                      value={prodDescription}
+                      onChange={(e) => setProdDescription(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">المكونات العليا (Top Notes)</label>
+                      <input
+                        type="text"
+                        value={prodTopNotes}
+                        onChange={(e) => setProdTopNotes(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                        placeholder="مثال: الخزامى، الزعفران"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">المكونات الوسطى (Heart Notes)</label>
+                      <input
+                        type="text"
+                        value={prodHeartNotes}
+                        onChange={(e) => setProdHeartNotes(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                        placeholder="مثال: الباتشولي، العود"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">المكونات الأساسية (Base Notes)</label>
+                      <input
+                        type="text"
+                        value={prodBaseNotes}
+                        onChange={(e) => setProdBaseNotes(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                        placeholder="مثال: خشب الصندل، العنبر"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-xs text-gray-400">محتويات العلبة (Contents)</label>
+                    <input
+                      type="text"
+                      value={prodContents}
+                      onChange={(e) => setProdContents(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                      placeholder="مثال: زجاجة العطر 50 مل + علبة كرتونية فاخرة"
+                    />
+                  </div>
+
+                  <div className="flex gap-4 pt-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="prod_bestseller"
+                        checked={prodIsBestSeller}
+                        onChange={(e) => setProdIsBestSeller(e.target.checked)}
+                        className="w-4 h-4 rounded accent-[#D4AF37]"
+                      />
+                      <label htmlFor="prod_bestseller" className="text-xs text-gray-300 font-bold cursor-pointer">
+                        المنتج الأكثر مبيعاً
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="prod_new"
+                        checked={prodIsNew}
+                        onChange={(e) => setProdIsNew(e.target.checked)}
+                        className="w-4 h-4 rounded accent-[#D4AF37]"
+                      />
+                      <label htmlFor="prod_new" className="text-xs text-gray-300 font-bold cursor-pointer">
+                        منتج جديد بالمتجر
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* FEATURE FIELDS */}
               {modalType === 'feature' && (
                 <>
