@@ -2,37 +2,56 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useApp } from '@/context/AppContext';
 
 export default function About() {
+  const { aboutContent } = useApp();
+
+  const title = aboutContent?.title || "من نحن | Scent House";
+  const subtitle = aboutContent?.subtitle || "تعرف على تاريخ وقيم ورؤية دار العطور الفاخرة";
+  const historyBadge = aboutContent?.history_badge || "نبذة تاريخية";
+  const historyTitle = aboutContent?.history_title || "قصر يعبر عن جوهر الهوية العطرية الأصيلة";
+  const historyDescription = aboutContent?.history_description || "تأسس دار العطور **Scent House** كعلامة تجارية رائدة وُلدت من شغف حقيقي بإنتاج عطور فريدة لا يطويها النسيان. نحن نسعى لنقل العميل في رحلة حسية راقية تربط الشرق بتقاليده الغنية وعبق دهن العود، بالغرب بابتكاراته الكلاسيكية والمنعشة.";
+  const visionTitle = aboutContent?.vision_title || "رؤيتنا";
+  const visionDescription = aboutContent?.vision_description || "أن نكون الوجهة الأولى لمتذوقي العطور النادرة والنخبة في الشرق الأوسط، بتقديم جودة ومعايير فخامة لا تُنافس، مع ضمان تجربة اقتناء تسوق ممتعة ومبهرة.";
+  const missionTitle = aboutContent?.mission_title || "رسالتنا";
+  const missionDescription = aboutContent?.mission_description || "ابتكار خلطات عطرية متميزة تثري حضور العميل وتضفي عليه طابعاً ساحراً يمتد تأثيره طويلاً، باستخدام أفضل المستخلصات النقية والتغليف المذهب الفريد.";
+  const coverImage = aboutContent?.cover_image || "/images/S1.jpg";
+  const values = Array.isArray(aboutContent?.values_list) ? aboutContent?.values_list : [
+    { title: "النزاهة والضمان", desc: "نلتزم بنسبة نقاوة 100% لكافة الخلاصات والزيوت العطرية وضمان الثبات الممتد لأيام.", icon: "fa-award" },
+    { title: "الابتكار والحرفية", desc: "أخصائيو العطور لدينا يمزجون العناصر يدوياً لضمان توليفة حصرية لا تتوفر لدى أي دار آخر.", icon: "fa-wand-magic-sparkles" },
+    { title: "الخدمة الملكية", desc: "تغليف البوكسات وتصميم الرسائل والردود تتم بمستوى خدمة يليق بنخبة عملائنا الكرام.", icon: "fa-ribbon" }
+  ];
+
   return (
     <div id="view-about" className="active">
       <div className="info-page-header">
-        <h1 className="gold-text">من نحن | Scent House</h1>
-        <p>تعرف على تاريخ وقيم ورؤية دار العطور الفاخرة</p>
+        <h1 className="gold-text">{title}</h1>
+        <p>{subtitle}</p>
       </div>
       
       <div className="section-wrapper">
         <div className="about-panel-container">
           <div className="about-panel-text text-right">
-            <span className="gold-text">نبذة تاريخية</span>
-            <h3 className="gold-text">قصر يعبر عن جوهر الهوية العطرية الأصيلة</h3>
+            <span className="gold-text">{historyBadge}</span>
+            <h3 className="gold-text">{historyTitle}</h3>
             <p style={{ fontSize: '0.95rem' }}>
-              تأسس دار العطور **Scent House** كعلامة تجارية رائدة وُلدت من شغف حقيقي بإنتاج عطور فريدة لا يطويها النسيان. نحن نسعى لنقل العميل في رحلة حسية راقية تربط الشرق بتقاليده الغنية وعبق دهن العود، بالغرب بابتكاراته الكلاسيكية والمنعشة.
+              {historyDescription}
             </p>
             
-            <h4 className="gold-text" style={{ marginTop: '20px', fontWeight: 700 }}>رؤيتنا</h4>
+            <h4 className="gold-text" style={{ marginTop: '20px', fontWeight: 700 }}>{visionTitle}</h4>
             <p style={{ fontSize: '0.95rem' }}>
-              أن نكون الوجهة الأولى لمتذوقي العطور النادرة والنخبة في الشرق الأوسط، بتقديم جودة ومعايير فخامة لا تُنافس، مع ضمان تجربة اقتناء تسوق ممتعة ومبهرة.
+              {visionDescription}
             </p>
             
-            <h4 className="gold-text" style={{ marginTop: '20px', fontWeight: 700 }}>رسالتنا</h4>
+            <h4 className="gold-text" style={{ marginTop: '20px', fontWeight: 700 }}>{missionTitle}</h4>
             <p style={{ fontSize: '0.95rem' }}>
-              ابتكار خلطات عطرية متميزة تثري حضور العميل وتضفي عليه طابعاً ساحراً يمتد تأثيره طويلاً، باستخدام أفضل المستخلصات النقية والتغليف المذهب الفريد.
+              {missionDescription}
             </p>
           </div>
           <div className="about-panel-img-box">
             <Image
-              src="/images/S1.jpg"
+              src={coverImage}
               alt="دار عطور Scent House"
               width={500}
               height={400}
@@ -43,23 +62,13 @@ export default function About() {
         
         {/* Core Values Cards */}
         <div className="about-values-grid text-right">
-          <div className="value-card">
-            <div className="value-icon"><i className="fa-solid fa-award"></i></div>
-            <h4 className="value-title gold-text">النزاهة والضمان</h4>
-            <p className="value-desc">نلتزم بنسبة نقاوة 100% لكافة الخلاصات والزيوت العطرية وضمان الثبات الممتد لأيام.</p>
-          </div>
-          
-          <div className="value-card">
-            <div className="value-icon"><i className="fa-solid fa-wand-magic-sparkles"></i></div>
-            <h4 className="value-title gold-text">الابتكار والحرفية</h4>
-            <p className="value-desc">أخصائيو العطور لدينا يمزجون العناصر يدوياً لضمان توليفة حصرية لا تتوفر لدى أي دار آخر.</p>
-          </div>
-          
-          <div className="value-card">
-            <div className="value-icon"><i className="fa-solid fa-ribbon"></i></div>
-            <h4 className="value-title gold-text">الخدمة الملكية</h4>
-            <p className="value-desc">تغليف البوكسات وتصميم الرسائل والردود تتم بمستوى خدمة يليق بنخبة عملائنا الكرام.</p>
-          </div>
+          {values.map((v: any, idx: number) => (
+            <div className="value-card" key={idx}>
+              <div className="value-icon"><i className={`fa-solid ${v.icon}`}></i></div>
+              <h4 className="value-title gold-text">{v.title}</h4>
+              <p className="value-desc">{v.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

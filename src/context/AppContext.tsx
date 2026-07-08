@@ -57,6 +57,9 @@ interface AppContextType {
   testimonials: any[];
   giftBoxTypes: any[];
   refreshStage2Data: () => Promise<void>;
+  specialOffers: any[];
+  aboutContent: any | null;
+  refreshStage3Data: () => Promise<void>;
 }
 
 export interface SiteSettings {
@@ -100,6 +103,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [giftBoxTypes, setGiftBoxTypes] = useState<any[]>([]);
 
+  const [specialOffers, setSpecialOffers] = useState<any[]>([]);
+  const [aboutContent, setAboutContent] = useState<any | null>(null);
+
   const refreshSettings = async () => {
     const { data, error } = await supabase
       .from('site_settings')
@@ -129,9 +135,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Load Stage 2 data on mount
+  const refreshStage3Data = async () => {
+    try {
+      const { data: oData } = await supabase.from('special_offers').select('*').order('display_order');
+      if (oData) setSpecialOffers(oData);
+
+      const { data: aData } = await supabase.from('about_content').select('*').eq('id', 1).single();
+      if (aData) setAboutContent(aData);
+    } catch (err) {
+      console.error('Error fetching Stage 3 settings:', err);
+    }
+  };
+
+  // Load Stage 2 & 3 data on mount
   useEffect(() => {
     refreshStage2Data();
+    refreshStage3Data();
 
     // Subscribe to Stage 2 tables realtime changes
     const fChannel = supabase.channel('features-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'homepage_features' }, () => { refreshStage2Data(); }).subscribe();
@@ -139,11 +158,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const cChannel = supabase.channel('coupons-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'coupons' }, () => { refreshStage2Data(); }).subscribe();
     const gChannel = supabase.channel('giftbox-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'gift_box_types' }, () => { refreshStage2Data(); }).subscribe();
 
+    // Subscribe to Stage 3 tables realtime changes
+    const oChannel = supabase.channel('offers-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'special_offers' }, () => { refreshStage3Data(); }).subscribe();
+    const aChannel = supabase.channel('about-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'about_content' }, () => { refreshStage3Data(); }).subscribe();
+
     return () => {
       fChannel.unsubscribe();
       tChannel.unsubscribe();
       cChannel.unsubscribe();
       gChannel.unsubscribe();
+      oChannel.unsubscribe();
+      aChannel.unsubscribe();
     };
   }, []);
 
@@ -471,7 +496,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       homepageFeatures,
       testimonials,
       giftBoxTypes,
-      refreshStage2Data
+      refreshStage2Data,
+      specialOffers,
+      aboutContent,
+      refreshStage3Data
     }}>
       {children}
     </AppContext.Provider>

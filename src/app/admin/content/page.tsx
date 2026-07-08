@@ -6,7 +6,7 @@ import Toast from '@/components/Toast';
 import Image from 'next/image';
 
 export default function AdminContent() {
-  const [activeTab, setActiveTab] = useState<'settings' | 'features' | 'testimonials' | 'coupons' | 'boxTypes'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'features' | 'testimonials' | 'coupons' | 'boxTypes' | 'offers' | 'about'>('settings');
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [savingSection, setSavingSection] = useState<string | null>(null);
@@ -41,9 +41,39 @@ export default function AdminContent() {
   const [couponsList, setCouponsList] = useState<any[]>([]);
   const [boxTypesList, setBoxTypesList] = useState<any[]>([]);
 
-  // Modals / Forms for Stage 2
+  // ────────────────────────────────────────────────────────────────
+  // STAGE 3 STATES
+  // ────────────────────────────────────────────────────────────────
+  const [offersList, setOffersList] = useState<any[]>([]);
+  
+  // About Page State
+  const [aboutTitle, setAboutTitle] = useState('');
+  const [aboutSubtitle, setAboutSubtitle] = useState('');
+  const [aboutHistoryBadge, setAboutHistoryBadge] = useState('');
+  const [aboutHistoryTitle, setAboutHistoryTitle] = useState('');
+  const [aboutHistoryDesc, setAboutHistoryDesc] = useState('');
+  const [aboutVisionTitle, setAboutVisionTitle] = useState('');
+  const [aboutVisionDesc, setAboutVisionDesc] = useState('');
+  const [aboutMissionTitle, setAboutMissionTitle] = useState('');
+  const [aboutMissionDesc, setAboutMissionDesc] = useState('');
+  const [aboutCoverImageUrl, setAboutCoverImageUrl] = useState('');
+  
+  // Values State
+  const [value1Title, setValue1Title] = useState('');
+  const [value1Desc, setValue1Desc] = useState('');
+  const [value1Icon, setValue1Icon] = useState('');
+  
+  const [value2Title, setValue2Title] = useState('');
+  const [value2Desc, setValue2Desc] = useState('');
+  const [value2Icon, setValue2Icon] = useState('');
+  
+  const [value3Title, setValue3Title] = useState('');
+  const [value3Desc, setValue3Desc] = useState('');
+  const [value3Icon, setValue3Icon] = useState('');
+
+  // Modals / Forms
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'feature' | 'coupon' | 'boxType' | 'testimonial' | null>(null);
+  const [modalType, setModalType] = useState<'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer' | null>(null);
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
   // Form inputs
@@ -61,6 +91,17 @@ export default function AdminContent() {
 
   const [testimonialFile, setTestimonialFile] = useState<File | null>(null);
   const [testimonialOrder, setTestimonialOrder] = useState('1');
+
+  // Offer inputs
+  const [offerTitle, setOfferTitle] = useState('');
+  const [offerBadgeText, setOfferBadgeText] = useState('');
+  const [offerOldPrice, setOfferOldPrice] = useState('');
+  const [offerNewPrice, setOfferNewPrice] = useState('');
+  const [offerDetailsText, setOfferDetailsText] = useState('');
+  const [offerFile, setOfferFile] = useState<File | null>(null);
+  const [offerWhatsappText, setOfferWhatsappText] = useState('');
+  const [offerOrder, setOfferOrder] = useState('1');
+  const [offerActive, setOfferActive] = useState(true);
 
   useEffect(() => {
     fetchInitialData();
@@ -112,6 +153,42 @@ export default function AdminContent() {
       const { data: bData } = await supabase.from('gift_box_types').select('*').order('display_order');
       if (bData) setBoxTypesList(bData);
 
+      // Load Stage 3 special offers
+      const { data: oData } = await supabase.from('special_offers').select('*').order('display_order');
+      if (oData) setOffersList(oData);
+
+      // Load Stage 3 About Content
+      const { data: aboutData } = await supabase.from('about_content').select('*').eq('id', 1).single();
+      if (aboutData) {
+        setAboutTitle(aboutData.title || '');
+        setAboutSubtitle(aboutData.subtitle || '');
+        setAboutHistoryBadge(aboutData.history_badge || '');
+        setAboutHistoryTitle(aboutData.history_title || '');
+        setAboutHistoryDesc(aboutData.history_description || '');
+        setAboutVisionTitle(aboutData.vision_title || '');
+        setAboutVisionDesc(aboutData.vision_description || '');
+        setAboutMissionTitle(aboutData.vision_title || '');
+        setAboutMissionDesc(aboutData.mission_description || '');
+        setAboutCoverImageUrl(aboutData.cover_image || '');
+
+        const vals = Array.isArray(aboutData.values_list) ? aboutData.values_list : [];
+        if (vals[0]) {
+          setValue1Title(vals[0].title || '');
+          setValue1Desc(vals[0].desc || '');
+          setValue1Icon(vals[0].icon || '');
+        }
+        if (vals[1]) {
+          setValue2Title(vals[1].title || '');
+          setValue2Desc(vals[1].desc || '');
+          setValue2Icon(vals[1].icon || '');
+        }
+        if (vals[2]) {
+          setValue3Title(vals[2].title || '');
+          setValue3Desc(vals[2].desc || '');
+          setValue3Icon(vals[2].icon || '');
+        }
+      }
+
     } catch (err) {
       console.error('Error fetching settings:', err);
       showToast('خطأ في تحميل بيانات الإعدادات والمحتوى', 'error');
@@ -125,18 +202,19 @@ export default function AdminContent() {
   }
 
   // ────────────────────────────────────────────────────────────────
-  // STAGE 1 SAVE METHOD
+  // SAVE SITE SETTINGS (STAGE 1) OR ABOUT PAGE (STAGE 3)
   // ────────────────────────────────────────────────────────────────
-  async function handleSaveSection(sectionName: string, payload: any) {
+  async function handleSaveSection(sectionName: string, payload: any, table: string = 'site_settings') {
     try {
       setSavingSection(sectionName);
       const { error } = await supabase
-        .from('site_settings')
+        .from(table)
         .update(payload)
         .eq('id', 1);
 
       if (error) throw error;
       showToast('تم حفظ التعديلات بنجاح وتحديث الموقع فوراً', 'success');
+      fetchInitialData();
     } catch (err: any) {
       console.error(`Error saving section ${sectionName}:`, err);
       showToast(`خطأ في الحفظ: ${err.message || err}`, 'error');
@@ -146,11 +224,9 @@ export default function AdminContent() {
   }
 
   // ────────────────────────────────────────────────────────────────
-  // STAGE 2 CRUD METHODS
+  // MODAL CRUD OPEN
   // ────────────────────────────────────────────────────────────────
-
-  // Open modals
-  const openModal = (type: 'feature' | 'coupon' | 'boxType' | 'testimonial', item: any = null) => {
+  const openModal = (type: 'feature' | 'coupon' | 'boxType' | 'testimonial' | 'offer', item: any = null) => {
     setModalType(type);
     setEditingItem(item);
     
@@ -169,6 +245,16 @@ export default function AdminContent() {
     } else if (type === 'testimonial') {
       setTestimonialFile(null);
       setTestimonialOrder(item ? String(item.display_order) : '1');
+    } else if (type === 'offer') {
+      setOfferTitle(item ? item.title : '');
+      setOfferBadgeText(item ? item.badge_text : '');
+      setOfferOldPrice(item ? String(item.old_price || '') : '');
+      setOfferNewPrice(item ? String(item.new_price) : '');
+      setOfferDetailsText(item ? (Array.isArray(item.details_list) ? item.details_list.join('\n') : '') : '');
+      setOfferFile(null);
+      setOfferWhatsappText(item ? item.whatsapp_text : '');
+      setOfferOrder(item ? String(item.display_order) : '1');
+      setOfferActive(item ? item.is_active : true);
     }
     
     setIsModalOpen(true);
@@ -191,13 +277,10 @@ export default function AdminContent() {
           title: featureTitle,
           display_order: parseInt(featureOrder) || 1
         };
-
         if (editingItem) {
-          // Update
           const { error } = await supabase.from('homepage_features').update(payload).eq('id', editingItem.id);
           if (error) throw error;
         } else {
-          // Insert
           const { error } = await supabase.from('homepage_features').insert([payload]);
           if (error) throw error;
         }
@@ -207,7 +290,6 @@ export default function AdminContent() {
           discount_percent: parseInt(couponDiscount) || 10,
           is_active: couponActive
         };
-
         if (editingItem) {
           const { error } = await supabase.from('coupons').update(payload).eq('id', editingItem.id);
           if (error) throw error;
@@ -221,7 +303,6 @@ export default function AdminContent() {
           code: boxCode.trim().toLowerCase(),
           display_order: parseInt(boxOrder) || 1
         };
-
         if (editingItem) {
           const { error } = await supabase.from('gift_box_types').update(payload).eq('id', editingItem.id);
           if (error) throw error;
@@ -231,35 +312,20 @@ export default function AdminContent() {
         }
       } else if (modalType === 'testimonial') {
         let imageUrl = editingItem ? editingItem.image_url : '';
-
         if (testimonialFile) {
-          // Upload file to product-images storage
           const fileExt = testimonialFile.name.split('.').pop();
           const fileName = `testimonial_${Date.now()}.${fileExt}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('product-images')
-            .upload(fileName, testimonialFile);
-
+          const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, testimonialFile);
           if (uploadError) throw uploadError;
-
-          // Get Public URL
-          const { data: publicUrlData } = supabase.storage
-            .from('product-images')
-            .getPublicUrl(fileName);
-
+          const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
           imageUrl = publicUrlData.publicUrl;
         }
-
-        if (!imageUrl && !editingItem) {
-          throw new Error('يرجى تحديد ملف صورة للرأي أو المحادثة');
-        }
+        if (!imageUrl && !editingItem) throw new Error('يرجى تحديد ملف صورة للرأي');
 
         const payload = {
           image_url: imageUrl,
           display_order: parseInt(testimonialOrder) || 1
         };
-
         if (editingItem) {
           const { error } = await supabase.from('testimonials').update(payload).eq('id', editingItem.id);
           if (error) throw error;
@@ -267,14 +333,68 @@ export default function AdminContent() {
           const { error } = await supabase.from('testimonials').insert([payload]);
           if (error) throw error;
         }
+      } else if (modalType === 'offer') {
+        let imageUrl = editingItem ? editingItem.image_url : '';
+        if (offerFile) {
+          const fileExt = offerFile.name.split('.').pop();
+          const fileName = `offer_${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, offerFile);
+          if (uploadError) throw uploadError;
+          const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+          imageUrl = publicUrlData.publicUrl;
+        }
+        if (!imageUrl && !editingItem) throw new Error('يرجى تحديد صورة العرض الترويجي');
+
+        const payload = {
+          title: offerTitle,
+          badge_text: offerBadgeText,
+          old_price: offerOldPrice ? parseInt(offerOldPrice) : null,
+          new_price: parseInt(offerNewPrice) || 0,
+          details_list: offerDetailsText.split('\n').map(d => d.trim()).filter(Boolean),
+          image_url: imageUrl,
+          whatsapp_text: offerWhatsappText,
+          display_order: parseInt(offerOrder) || 1,
+          is_active: offerActive
+        };
+
+        if (editingItem) {
+          const { error } = await supabase.from('special_offers').update(payload).eq('id', editingItem.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('special_offers').insert([payload]);
+          if (error) throw error;
+        }
       }
 
       showToast('تمت العملية بنجاح وتحديث الموقع', 'success');
       closeModal();
-      fetchInitialData(); // Re-fetch to update table view
+      fetchInitialData();
     } catch (err: any) {
       console.error(err);
       showToast(`فشلت العملية: ${err.message || err}`, 'error');
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  // Upload About Page Image
+  const handleUploadAboutImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setSavingSection('about_image');
+      const fileExt = file.name.split('.').pop();
+      const fileName = `about_cover_${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setAboutCoverImageUrl(publicUrlData.publicUrl);
+      showToast('تم رفع صورة الغلاف لصفحة من نحن بنجاح', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(`فشل رفع الصورة: ${err.message || err}`, 'error');
     } finally {
       setSavingSection(null);
     }
@@ -296,12 +416,24 @@ export default function AdminContent() {
     }
   };
 
-  // Toggle Coupon Active Status
+  // Toggle statuses
   const handleToggleCoupon = async (id: number, currentStatus: boolean) => {
     try {
       const { error } = await supabase.from('coupons').update({ is_active: !currentStatus }).eq('id', id);
       if (error) throw error;
       showToast('تم تغيير حالة الكوبون بنجاح', 'success');
+      fetchInitialData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(`فشلت العملية: ${err.message || err}`, 'error');
+    }
+  };
+
+  const handleToggleOffer = async (id: number, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase.from('special_offers').update({ is_active: !currentStatus }).eq('id', id);
+      if (error) throw error;
+      showToast('تم تغيير حالة نشاط العرض بنجاح', 'success');
       fetchInitialData();
     } catch (err: any) {
       console.error(err);
@@ -335,7 +467,7 @@ export default function AdminContent() {
             <i className="fa-solid fa-pen-to-square text-[#D4AF37] text-lg"></i>
             إدارة محتوى المتجر (CMS)
           </h1>
-          <p className="text-xs text-gray-400 mt-1">تعديل النصوص، آراء العملاء، الكوبونات الفعالة، والعلب التخصيصية</p>
+          <p className="text-xs text-gray-400 mt-1">تعديل النصوص، العروض الترويجية، صفحة من نحن، الآراء، والكوبونات</p>
         </div>
       </div>
 
@@ -350,7 +482,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-align-justify ml-2"></i>
-          النصوص والمعلومات الأساسية
+          المعلومات الأساسية
         </button>
         <button
           onClick={() => setActiveTab('features')}
@@ -361,7 +493,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-gem ml-2"></i>
-          مميزات المتجر (Feature Bar)
+          مميزات المتجر
         </button>
         <button
           onClick={() => setActiveTab('testimonials')}
@@ -372,7 +504,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-comments ml-2"></i>
-          آراء ومحادثات العملاء
+          آراء العملاء
         </button>
         <button
           onClick={() => setActiveTab('coupons')}
@@ -383,7 +515,7 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-ticket ml-2"></i>
-          كوبونات الخصم (Coupons)
+          كوبونات الخصم
         </button>
         <button
           onClick={() => setActiveTab('boxTypes')}
@@ -394,7 +526,29 @@ export default function AdminContent() {
           }`}
         >
           <i className="fa-solid fa-gift ml-2"></i>
-          أنواع وتخصيص علب الهدايا
+          علب الهدايا
+        </button>
+        <button
+          onClick={() => setActiveTab('offers')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'offers'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-tags ml-2"></i>
+          عروض المتجر الرئيسية
+        </button>
+        <button
+          onClick={() => setActiveTab('about')}
+          className={`py-2.5 px-4 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 cursor-pointer ${
+            activeTab === 'about'
+              ? 'bg-[#D4AF37] text-black shadow-lg shadow-yellow-600/10'
+              : 'text-gray-400 hover:text-white hover:bg-[#121212]'
+          }`}
+        >
+          <i className="fa-solid fa-info-circle ml-2"></i>
+          صفحة من نحن (About)
         </button>
       </div>
 
@@ -403,8 +557,6 @@ export default function AdminContent() {
           ──────────────────────────────────────────────────────────────── */}
       {activeTab === 'settings' && (
         <div className="grid grid-cols-1 gap-8">
-          
-          {/* SECTION 1: Announcement Bar */}
           <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-900 pb-3">
               <h3 className="text-sm md:text-base font-bold text-gray-200 flex items-center gap-2">
@@ -430,7 +582,6 @@ export default function AdminContent() {
             </div>
           </div>
 
-          {/* SECTION 2: Hero Section */}
           <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-900 pb-3">
               <h3 className="text-sm md:text-base font-bold text-gray-200 flex items-center gap-2">
@@ -492,7 +643,6 @@ export default function AdminContent() {
             </div>
           </div>
 
-          {/* SECTION 3: Social Media Links */}
           <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-900 pb-3">
               <h3 className="text-sm md:text-base font-bold text-gray-200 flex items-center gap-2">
@@ -551,7 +701,6 @@ export default function AdminContent() {
             </div>
           </div>
 
-          {/* SECTION 4: Contact details */}
           <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-900 pb-3">
               <h3 className="text-sm md:text-base font-bold text-gray-200 flex items-center gap-2">
@@ -613,7 +762,6 @@ export default function AdminContent() {
             </div>
           </div>
 
-          {/* SECTION 5: Category Shop Headers */}
           <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-900 pb-3">
               <h3 className="text-sm md:text-base font-bold text-gray-200 flex items-center gap-2">
@@ -636,8 +784,6 @@ export default function AdminContent() {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Men's category */}
               <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
                 <h4 className="text-xs text-[#D4AF37] font-black">العطور الرجالية</h4>
                 <div className="form-group flex flex-col gap-1.5">
@@ -660,7 +806,6 @@ export default function AdminContent() {
                 </div>
               </div>
 
-              {/* Women's category */}
               <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
                 <h4 className="text-xs text-[#D4AF37] font-black">العطور النسائية</h4>
                 <div className="form-group flex flex-col gap-1.5">
@@ -683,7 +828,6 @@ export default function AdminContent() {
                 </div>
               </div>
 
-              {/* Gifts category */}
               <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800 md:col-span-2">
                 <h4 className="text-xs text-[#D4AF37] font-black">بوكسات الهدايا</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -707,10 +851,8 @@ export default function AdminContent() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
-
         </div>
       )}
 
@@ -888,7 +1030,7 @@ export default function AdminContent() {
           <div className="flex items-center justify-between border-b border-gray-900 pb-3">
             <div>
               <h3 className="text-sm md:text-base font-bold text-gray-200">أنواع وتخصيص علب الهدايا</h3>
-              <p className="text-[10px] text-gray-500 mt-0.5">إدارة الخيارات الظاهرة للزبون في قائمة تخصيص بوكس الهدايا بصفحة تفاصيل المنتج</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">إدارة الخيارات الظاهرة للزبون في قائمة تخصيص بوكس الهدايا بصفحة تفاصيل العطر</p>
             </div>
             <button
               onClick={() => openModal('boxType')}
@@ -939,13 +1081,364 @@ export default function AdminContent() {
       )}
 
       {/* ────────────────────────────────────────────────────────────────
+          TAB 6: SPECIAL OFFERS
+          ──────────────────────────────────────────────────────────────── */}
+      {activeTab === 'offers' && (
+        <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-900 pb-3">
+            <div>
+              <h3 className="text-sm md:text-base font-bold text-gray-200">عروض المتجر الرئيسية (Special Offers)</h3>
+              <p className="text-[10px] text-gray-500 mt-0.5">البطاقات الترويجية الثلاثة بوسط الواجهة الرئيسية للمتجر</p>
+            </div>
+            <button
+              onClick={() => openModal('offer')}
+              className="bg-gradient-to-r from-[#AA7C11] to-[#D4AF37] hover:brightness-110 text-black text-xs font-bold py-2 px-4 rounded-xl transition-all duration-300 cursor-pointer"
+            >
+              <i className="fa-solid fa-plus ml-1.5"></i> إضافة عرض ترويجي جديد
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {offersList.map((o) => (
+              <div className="bg-[#1A1A1A] border border-gray-800 rounded-xl p-4 flex flex-col justify-between hover:border-[#D4AF37]/30 transition-all duration-300 relative" key={o.id}>
+                {o.badge_text && (
+                  <span className="absolute top-3 right-3 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
+                    {o.badge_text}
+                  </span>
+                )}
+                
+                <div className="space-y-3">
+                  <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden bg-[#121212] border border-gray-800">
+                    <Image src={o.image_url} alt={o.title} fill className="object-cover" sizes="300px" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#D4AF37]">{o.title}</h4>
+                    <div className="flex gap-2 items-center text-xs mt-1">
+                      <span className="text-gray-400 font-english font-bold text-sm">{o.new_price} ج.م</span>
+                      {o.old_price && <span className="text-gray-600 line-through font-english text-xs">{o.old_price} ج.م</span>}
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-gray-400 space-y-1 bg-[#121212] p-2.5 rounded-lg border border-gray-900">
+                    <span className="text-[10px] text-gray-500 font-bold">تفاصيل العرض:</span>
+                    {Array.isArray(o.details_list) && o.details_list.map((d: string, idx: number) => (
+                      <p className="flex items-center gap-1.5" key={idx}>
+                        <i className="fa-solid fa-circle-check text-green-500 text-[9px]"></i>
+                        {d}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-gray-900">
+                  <button
+                    onClick={() => handleToggleOffer(o.id, o.is_active)}
+                    className={`text-[10px] font-bold py-1 px-2.5 rounded-lg border cursor-pointer ${
+                      o.is_active
+                        ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                        : 'bg-red-500/10 border-red-500/20 text-red-400'
+                    }`}
+                  >
+                    {o.is_active ? 'نشط' : 'معطل'}
+                  </button>
+                  <button
+                    onClick={() => openModal('offer', o)}
+                    className="text-[10px] font-bold text-amber-500 hover:text-amber-400 bg-[#121212] border border-gray-800 py-1 px-2.5 rounded-lg cursor-pointer"
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    onClick={() => handleDeleteItem('special_offers', o.id, o.title)}
+                    className="text-[10px] font-bold text-red-500 hover:text-red-400 bg-red-950/10 border border-red-900/20 py-1 px-2.5 rounded-lg cursor-pointer"
+                  >
+                    حذف
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────────
+          TAB 7: ABOUT PAGE EDITOR
+          ──────────────────────────────────────────────────────────────── */}
+      {activeTab === 'about' && (
+        <div className="bg-[#121212] border border-gray-800 rounded-2xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-900 pb-3">
+            <div>
+              <h3 className="text-sm md:text-base font-bold text-gray-200">صفحة من نحن (About)</h3>
+              <p className="text-[10px] text-gray-500 mt-0.5">تعديل قصة دار العطور، قيمنا الجوهرية الثلاثة، وصورة الغلاف الجانبية</p>
+            </div>
+            <button
+              onClick={() => handleSaveSection('about_all', {
+                title: aboutTitle,
+                subtitle: aboutSubtitle,
+                history_badge: aboutHistoryBadge,
+                history_title: aboutHistoryTitle,
+                history_description: aboutHistoryDesc,
+                vision_title: aboutVisionTitle,
+                vision_description: aboutVisionDesc,
+                mission_title: aboutMissionTitle,
+                mission_description: aboutMissionDesc,
+                cover_image: aboutCoverImageUrl,
+                values_list: [
+                  { title: value1Title, desc: value1Desc, icon: value1Icon },
+                  { title: value2Title, desc: value2Desc, icon: value2Icon },
+                  { title: value3Title, desc: value3Desc, icon: value3Icon }
+                ]
+              }, 'about_content')}
+              disabled={savingSection === 'about_all'}
+              className="bg-gradient-to-r from-[#AA7C11] to-[#D4AF37] hover:brightness-110 text-black text-xs font-bold py-2 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 cursor-pointer shadow-lg shadow-yellow-600/10"
+            >
+              {savingSection === 'about_all' ? 'جاري حفظ الصفحة...' : 'حفظ كامل الصفحة'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Left Column: Headers & Story text */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-xs text-gray-400 font-bold">عنوان الصفحة الرئيسي</label>
+                  <input
+                    type="text"
+                    value={aboutTitle}
+                    onChange={(e) => setAboutTitle(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-xs text-gray-400 font-bold">العنوان الفرعي</label>
+                  <input
+                    type="text"
+                    value={aboutSubtitle}
+                    onChange={(e) => setAboutSubtitle(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-xs text-gray-400 font-bold">شارة القصة (Badge)</label>
+                  <input
+                    type="text"
+                    value={aboutHistoryBadge}
+                    onChange={(e) => setAboutHistoryBadge(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-xs text-gray-400 font-bold">عنوان القصة الرئيسي</label>
+                  <input
+                    type="text"
+                    value={aboutHistoryTitle}
+                    onChange={(e) => setAboutHistoryTitle(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group flex flex-col gap-1.5">
+                <label className="text-xs text-gray-400 font-bold">نص تاريخ وتأسيس دار عطور Scent House</label>
+                <textarea
+                  rows={4}
+                  value={aboutHistoryDesc}
+                  onChange={(e) => setAboutHistoryDesc(e.target.value)}
+                  className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200 resize-y"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
+                  <h4 className="text-xs text-[#D4AF37] font-black">رؤية المتجر</h4>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-[10px] text-gray-500">عنوان الرؤية</label>
+                    <input
+                      type="text"
+                      value={aboutVisionTitle}
+                      onChange={(e) => setAboutVisionTitle(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                    />
+                  </div>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-[10px] text-gray-500">نص الرؤية</label>
+                    <textarea
+                      rows={3}
+                      value={aboutVisionDesc}
+                      onChange={(e) => setAboutVisionDesc(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
+                  <h4 className="text-xs text-[#D4AF37] font-black">رسالة المتجر</h4>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-[10px] text-gray-500">عنوان الرسالة</label>
+                    <input
+                      type="text"
+                      value={aboutMissionTitle}
+                      onChange={(e) => setAboutMissionTitle(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                    />
+                  </div>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-[10px] text-gray-500">نص الرسالة</label>
+                    <textarea
+                      rows={3}
+                      value={aboutMissionDesc}
+                      onChange={(e) => setAboutMissionDesc(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Cover image */}
+            <div className="space-y-4">
+              <div className="form-group flex flex-col gap-1.5">
+                <label className="text-xs text-gray-400 font-bold">صورة الغلاف الجانبية للدار</label>
+                <div className="relative w-full aspect-[4/3] bg-[#1A1A1A] rounded-xl border border-gray-800 overflow-hidden">
+                  <Image src={aboutCoverImageUrl || '/images/S1.jpg'} alt="غلاف صفحة من نحن" fill className="object-cover" sizes="300px" />
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadAboutImage}
+                  className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left text-gray-200"
+                  dir="ltr"
+                />
+                <p className="text-[9px] text-gray-500">رفع صورة جديدة لتغيير الغلاف الحالي مباشرة</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* SECTION: 3 Core Values Cards */}
+          <div className="border-t border-gray-900 pt-6 space-y-4">
+            <h3 className="text-sm md:text-base font-bold text-[#D4AF37]">القيم الجوهرية الثلاثة (Core Values)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Card 1 */}
+              <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
+                <h4 className="text-xs text-gray-300 font-black flex items-center justify-between">
+                  <span>القيمة الأولى</span>
+                  <i className={`fa-solid ${value1Icon || 'fa-award'} text-[#D4AF37]`}></i>
+                </h4>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">العنوان</label>
+                  <input
+                    type="text"
+                    value={value1Title}
+                    onChange={(e) => setValue1Title(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">أيقونة FontAwesome</label>
+                  <input
+                    type="text"
+                    value={value1Icon}
+                    onChange={(e) => setValue1Icon(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left font-english text-gray-200"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">شرح القيمة</label>
+                  <textarea
+                    rows={3}
+                    value={value1Desc}
+                    onChange={(e) => setValue1Desc(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                  />
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
+                <h4 className="text-xs text-gray-300 font-black flex items-center justify-between">
+                  <span>القيمة الثانية</span>
+                  <i className={`fa-solid ${value2Icon || 'fa-award'} text-[#D4AF37]`}></i>
+                </h4>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">العنوان</label>
+                  <input
+                    type="text"
+                    value={value2Title}
+                    onChange={(e) => setValue2Title(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">أيقونة FontAwesome</label>
+                  <input
+                    type="text"
+                    value={value2Icon}
+                    onChange={(e) => setValue2Icon(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left font-english text-gray-200"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">شرح القيمة</label>
+                  <textarea
+                    rows={3}
+                    value={value2Desc}
+                    onChange={(e) => setValue2Desc(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                  />
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="space-y-3 p-4 bg-[#1A1A1A]/40 rounded-xl border border-gray-800">
+                <h4 className="text-xs text-gray-300 font-black flex items-center justify-between">
+                  <span>القيمة الثالثة</span>
+                  <i className={`fa-solid ${value3Icon || 'fa-award'} text-[#D4AF37]`}></i>
+                </h4>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">العنوان</label>
+                  <input
+                    type="text"
+                    value={value3Title}
+                    onChange={(e) => setValue3Title(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">أيقونة FontAwesome</label>
+                  <input
+                    type="text"
+                    value={value3Icon}
+                    onChange={(e) => setValue3Icon(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left font-english text-gray-200"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-[10px] text-gray-500">شرح القيمة</label>
+                  <textarea
+                    rows={3}
+                    value={value3Desc}
+                    onChange={(e) => setValue3Desc(e.target.value)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                  />
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────────
           ADD/EDIT COMMON MODAL POPUP
           ──────────────────────────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm select-none">
           <div className="bg-[#121212] border border-gray-800 rounded-2xl w-full max-w-md overflow-hidden text-right font-cairo shadow-2xl">
             
-            {/* Modal Header */}
             <div className="bg-[#1A1A1A] px-6 py-4 border-b border-gray-800 flex justify-between items-center">
               <button onClick={closeModal} className="text-gray-500 hover:text-gray-300 text-lg cursor-pointer">
                 <i className="fa-solid fa-xmark"></i>
@@ -955,7 +1448,6 @@ export default function AdminContent() {
               </h3>
             </div>
 
-            {/* Modal Form */}
             <form onSubmit={handleSubmitModal} className="p-6 space-y-4">
               
               {/* FEATURE FIELDS */}
@@ -1105,6 +1597,111 @@ export default function AdminContent() {
                       />
                     </div>
                   )}
+                </>
+              )}
+
+              {/* SPECIAL OFFER FIELDS */}
+              {modalType === 'offer' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">اسم العرض الترويجي</label>
+                      <input
+                        type="text"
+                        required
+                        value={offerTitle}
+                        onChange={(e) => setOfferTitle(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">شارة الخصم (Badge)</label>
+                      <input
+                        type="text"
+                        value={offerBadgeText}
+                        onChange={(e) => setOfferBadgeText(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                        placeholder="مثال: وفر 200 جنيه!"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">السعر القديم (اختياري)</label>
+                      <input
+                        type="number"
+                        value={offerOldPrice}
+                        onChange={(e) => setOfferOldPrice(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200 font-english"
+                      />
+                    </div>
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">السعر الجديد (الحالي)</label>
+                      <input
+                        type="number"
+                        required
+                        value={offerNewPrice}
+                        onChange={(e) => setOfferNewPrice(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200 font-english"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-xs text-gray-400">تفاصيل ومميزات العرض (كل ميزة في سطر منفصل)</label>
+                    <textarea
+                      rows={3}
+                      required
+                      value={offerDetailsText}
+                      onChange={(e) => setOfferDetailsText(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-right text-gray-200 resize-y"
+                      placeholder="مثال:&#10;2 × 50 مل&#10;بوكس التسترات هدية"
+                    />
+                  </div>
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-xs text-gray-400">رسالة الطلب عبر واتساب</label>
+                    <input
+                      type="text"
+                      required
+                      value={offerWhatsappText}
+                      onChange={(e) => setOfferWhatsappText(e.target.value)}
+                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-xs text-gray-400">ترتيب العرض</label>
+                      <input
+                        type="number"
+                        required
+                        value={offerOrder}
+                        onChange={(e) => setOfferOrder(e.target.value)}
+                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200 font-english"
+                      />
+                    </div>
+                    {!editingItem && (
+                      <div className="form-group flex flex-col gap-1.5">
+                        <label className="text-xs text-gray-400">صورة العرض</label>
+                        <input
+                          type="file"
+                          required
+                          accept="image/*"
+                          onChange={(e) => setOfferFile(e.target.files ? e.target.files[0] : null)}
+                          className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left text-gray-200"
+                          dir="ltr"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      id="offer_active"
+                      checked={offerActive}
+                      onChange={(e) => setOfferActive(e.target.checked)}
+                      className="w-4 h-4 rounded accent-[#D4AF37]"
+                    />
+                    <label htmlFor="offer_active" className="text-xs text-gray-300 font-bold select-none cursor-pointer">
+                      تفعيل وعرض العرض الترويجي بالصفحة الرئيسية
+                    </label>
+                  </div>
                 </>
               )}
 

@@ -8,7 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 export default function Home() {
-  const { products, settings, homepageFeatures, testimonials: dbTestimonials } = useApp();
+  const { products, settings, homepageFeatures, testimonials: dbTestimonials, specialOffers } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Video volume state
@@ -181,104 +181,150 @@ export default function Home() {
           </div>
 
           <div className="offers-grid">
-            {/* Offer 1 */}
-            <div className="offer-card">
-              <span className="offer-badge">وفر 200 جنيه!</span>
-              <div className="offer-img-wrapper">
-                <Image
-                  src="/images/1.jpg"
-                  alt="العرض الأول"
-                  fill
-                  className="offer-img"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="offer-card-body">
-                <h3 className="offer-title gold-text">🔥 العرض الأول</h3>
-                <div className="offer-details">
-                  <p className="detail-item"><i className="fa-solid fa-circle-check"></i> 2 × 50 مل</p>
-                  <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+            {specialOffers && specialOffers.length > 0 ? (
+              specialOffers.filter((o: any) => o.is_active).map((offer: any, idx: number) => {
+                const details = Array.isArray(offer.details_list) ? offer.details_list : [];
+                return (
+                  <div className={`offer-card ${idx === 1 ? 'featured' : ''}`} key={offer.id || idx}>
+                    {offer.badge_text && (
+                      <span className={`offer-badge ${idx === 1 ? 'hot' : offer.badge_text.includes('300') ? 'save' : ''}`}>{offer.badge_text}</span>
+                    )}
+                    <div className="offer-img-wrapper">
+                      <Image
+                        src={offer.image_url || "/images/1.jpg"}
+                        alt={offer.title}
+                        fill
+                        className="offer-img"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                    <div className="offer-card-body">
+                      <h3 className="offer-title gold-text">{offer.title}</h3>
+                      <div className="offer-details">
+                        {details.map((detail: string, dIdx: number) => (
+                          <p className="detail-item" key={dIdx}>
+                            <i className="fa-solid fa-circle-check"></i> {detail}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="offer-pricing">
+                        {offer.old_price && <span className="old-price">{offer.old_price} جنيه</span>}
+                        <span className="new-price gold-text">{offer.new_price} جنيه</span>
+                      </div>
+                      <a
+                        href={buildWhatsAppLink(offer.whatsapp_text || `أرغب في طلب ${offer.title}`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-premium btn-offer"
+                      >
+                        اطلب الآن
+                      </a>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                {/* Offer 1 */}
+                <div className="offer-card">
+                  <span className="offer-badge">وفر 200 جنيه!</span>
+                  <div className="offer-img-wrapper">
+                    <Image
+                      src="/images/1.jpg"
+                      alt="العرض الأول"
+                      fill
+                      className="offer-img"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="offer-card-body">
+                    <h3 className="offer-title gold-text">🔥 العرض الأول</h3>
+                    <div className="offer-details">
+                      <p className="detail-item"><i className="fa-solid fa-circle-check"></i> 2 × 50 مل</p>
+                      <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+                    </div>
+                    <div className="offer-pricing">
+                      <span className="old-price">1100 جنيه</span>
+                      <span className="new-price gold-text">900 جنيه</span>
+                    </div>
+                    <a
+                      href={buildWhatsAppLink('أرغب في طلب العرض الأول')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-premium btn-offer"
+                    >
+                      اطلب الآن
+                    </a>
+                  </div>
                 </div>
-                <div className="offer-pricing">
-                  <span className="old-price">1100 جنيه</span>
-                  <span className="new-price gold-text">900 جنيه</span>
-                </div>
-                <a
-                  href={buildWhatsAppLink('أرغب في طلب العرض الأول')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-premium btn-offer"
-                >
-                  اطلب الآن
-                </a>
-              </div>
-            </div>
 
-            {/* Offer 2 */}
-            <div className="offer-card featured">
-              <span className="offer-badge hot">☀️ الأكثر طلباً</span>
-              <div className="offer-img-wrapper">
-                <Image
-                  src="/images/2.jpeg"
-                  alt="عرض الصيف"
-                  fill
-                  className="offer-img"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="offer-card-body">
-                <h3 className="offer-title gold-text">☀️ عرض الصيف</h3>
-                <div className="offer-details">
-                  <p className="detail-item"><i className="fa-solid fa-circle-check"></i> بوكس 30 مل</p>
-                  <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+                {/* Offer 2 */}
+                <div className="offer-card featured">
+                  <span className="offer-badge hot">☀️ الأكثر طلباً</span>
+                  <div className="offer-img-wrapper">
+                    <Image
+                      src="/images/2.jpeg"
+                      alt="عرض الصيف"
+                      fill
+                      className="offer-img"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="offer-card-body">
+                    <h3 className="offer-title gold-text">☀️ عرض الصيف</h3>
+                    <div className="offer-details">
+                      <p className="detail-item"><i className="fa-solid fa-circle-check"></i> بوكس 30 مل</p>
+                      <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+                    </div>
+                    <div className="offer-pricing">
+                      <span className="old-price">950 جنيه</span>
+                      <span className="new-price gold-text">800 جنيه</span>
+                    </div>
+                    <a
+                      href={buildWhatsAppLink('أرغب في طلب عرض الصيف')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-premium btn-offer"
+                    >
+                      اطلب الآن
+                    </a>
+                  </div>
                 </div>
-                <div className="offer-pricing">
-                  <span className="old-price">950 جنيه</span>
-                  <span className="new-price gold-text">800 جنيه</span>
-                </div>
-                <a
-                  href={buildWhatsAppLink('أرغب في طلب عرض الصيف')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-premium btn-offer"
-                >
-                  اطلب الآن
-                </a>
-              </div>
-            </div>
 
-            {/* Offer 3 */}
-            <div className="offer-card">
-              <span className="offer-badge save">وفر 300 جنيه!</span>
-              <div className="offer-img-wrapper">
-                <Image
-                  src="/images/3.jpeg"
-                  alt="عرض سنت هاوس الجبار"
-                  fill
-                  className="offer-img"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="offer-card-body">
-                <h3 className="offer-title gold-text">👑 عرض سنت هاوس الجبار</h3>
-                <div className="offer-details">
-                  <p className="detail-item"><i className="fa-solid fa-circle-check"></i> 4 × 50 مل</p>
-                  <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+                {/* Offer 3 */}
+                <div className="offer-card">
+                  <span className="offer-badge save">وفر 300 جنيه!</span>
+                  <div className="offer-img-wrapper">
+                    <Image
+                      src="/images/3.jpeg"
+                      alt="عرض سنت هاوس الجبار"
+                      fill
+                      className="offer-img"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="offer-card-body">
+                    <h3 className="offer-title gold-text">👑 عرض سنت هاوس الجبار</h3>
+                    <div className="offer-details">
+                      <p className="detail-item"><i className="fa-solid fa-circle-check"></i> 4 × 50 مل</p>
+                      <p className="detail-item"><i className="fa-solid fa-gift"></i> بوكس التسترات هدية</p>
+                    </div>
+                    <div className="offer-pricing">
+                      <span className="old-price">1600 جنيه</span>
+                      <span className="new-price gold-text">1300 جنيه</span>
+                    </div>
+                    <a
+                      href={buildWhatsAppLink('أرغب في طلب عرض سنت هاوس الجبار')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-premium btn-offer"
+                    >
+                      اطلب الآن
+                    </a>
+                  </div>
                 </div>
-                <div className="offer-pricing">
-                  <span className="old-price">1600 جنيه</span>
-                  <span className="new-price gold-text">1300 جنيه</span>
-                </div>
-                <a
-                  href={buildWhatsAppLink('أرغب في طلب عرض سنت هاوس الجبار')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-premium btn-offer"
-                >
-                  اطلب الآن
-                </a>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Bottom of the Section */}
