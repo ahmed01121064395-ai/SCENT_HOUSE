@@ -167,7 +167,7 @@ export default function Checkout() {
 
                 <div className="form-row-2col">
                   <div className="form-group-checkout">
-                    <label className="block text-sm mb-1 text-gray-300">رقم الجوال الأول (للتنسيق مع مندوب التوصيل)</label>
+                    <label className="block text-sm mb-1 text-gray-300">رقم الهاتف الأول (للتنسيق مع مندوب التوصيل)</label>
                     <input
                       type="tel"
                       placeholder="01xxxxxxxxx"
@@ -178,7 +178,7 @@ export default function Checkout() {
                     />
                   </div>
                   <div className="form-group-checkout">
-                    <label className="block text-sm mb-1 text-gray-300">رقم الجوال الثاني (احتياطي)</label>
+                    <label className="block text-sm mb-1 text-gray-300">رقم الهاتف الثاني (احتياطي)</label>
                     <input
                       type="tel"
                       placeholder="01xxxxxxxxx"
