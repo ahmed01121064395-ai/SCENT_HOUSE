@@ -478,9 +478,14 @@ export default function AdminContent() {
         }
         if (!imageUrl && !editingItem) throw new Error('يرجى تحديد ملف صورة للرأي');
 
+        // Automatically set any new image at the end of the display order
+        const nextOrder = testimonialsList.length > 0 
+          ? Math.max(...testimonialsList.map(t => t.display_order || 0)) + 1 
+          : 1;
+
         const payload = {
           image_url: imageUrl,
-          display_order: parseInt(testimonialOrder) || 1
+          display_order: editingItem ? (editingItem.display_order || 1) : nextOrder
         };
         if (editingItem) {
           const { error } = await supabase.from('testimonials').update(payload).eq('id', editingItem.id);
@@ -1310,14 +1315,8 @@ export default function AdminContent() {
                 </div>
                 <div className="flex gap-2 justify-center mt-2 pt-2 border-t border-gray-900/60">
                   <button
-                    onClick={() => openModal('testimonial', t)}
-                    className="text-[9px] font-bold text-amber-500 hover:text-amber-400 bg-[#121212] border border-gray-800 py-0.5 px-2 rounded cursor-pointer"
-                  >
-                    تعديل الترتيب
-                  </button>
-                  <button
                     onClick={() => handleDeleteItem('testimonials', t.id, `رأي رقم ${t.display_order}`)}
-                    className="text-[9px] font-bold text-red-500 hover:text-red-400 bg-red-950/10 border border-red-900/20 py-0.5 px-2 rounded cursor-pointer"
+                    className="text-[9px] font-bold text-red-500 hover:text-red-400 bg-red-950/10 border border-red-900/20 py-0.5 px-3 rounded cursor-pointer"
                   >
                     إزالة
                   </button>
@@ -2146,32 +2145,18 @@ export default function AdminContent() {
               )}
 
               {/* TESTIMONIAL FIELDS */}
-              {modalType === 'testimonial' && (
-                <>
-                  <div className="form-group flex flex-col gap-1.5">
-                    <label className="text-xs text-gray-400">ترتيب العرض (الرقم)</label>
-                    <input
-                      type="number"
-                      required
-                      value={testimonialOrder}
-                      onChange={(e) => setTestimonialOrder(e.target.value)}
-                      className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200 font-english"
-                    />
-                  </div>
-                  {!editingItem && (
-                    <div className="form-group flex flex-col gap-1.5">
-                      <label className="text-xs text-gray-400">صورة الرأي / لقطة الشاشة</label>
-                      <input
-                        type="file"
-                        required
-                        accept="image/*"
-                        onChange={(e) => setTestimonialFile(e.target.files ? e.target.files[0] : null)}
-                        className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left text-gray-200"
-                        dir="ltr"
-                      />
-                    </div>
-                  )}
-                </>
+              {modalType === 'testimonial' && !editingItem && (
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-xs text-gray-400">صورة الرأي / لقطة الشاشة</label>
+                  <input
+                    type="file"
+                    required
+                    accept="image/*"
+                    onChange={(e) => setTestimonialFile(e.target.files ? e.target.files[0] : null)}
+                    className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-left text-gray-200"
+                    dir="ltr"
+                  />
+                </div>
               )}
 
               {/* SPECIAL OFFER FIELDS */}
