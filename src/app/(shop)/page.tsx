@@ -3,12 +3,14 @@
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
 export default function Home() {
-  const { products, settings, homepageFeatures, testimonials: dbTestimonials, specialOffers } = useApp();
+  const router = useRouter();
+  const { products, settings, homepageFeatures, testimonials: dbTestimonials, specialOffers, setBuyNowItem } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Best Sellers list
@@ -31,6 +33,44 @@ export default function Home() {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleBuyOffer = (offer: any) => {
+    setBuyNowItem({
+      product: {
+        id: null as any,
+        name: offer.title,
+        image: offer.image_url,
+        category: 'offer'
+      },
+      size: {
+        ml: 0,
+        price: offer.new_price,
+        offerName: offer.title,
+        offerImage: offer.image_url
+      },
+      quantity: 1
+    });
+    router.push('/checkout');
+  };
+
+  const handleBuyOfferStatic = (title: string, price: number, image: string) => {
+    setBuyNowItem({
+      product: {
+        id: null as any,
+        name: title,
+        image: image,
+        category: 'offer'
+      },
+      size: {
+        ml: 0,
+        price: price,
+        offerName: title,
+        offerImage: image
+      },
+      quantity: 1
+    });
+    router.push('/checkout');
   };
 
 
@@ -194,14 +234,13 @@ export default function Home() {
                         {offer.old_price && <span className="old-price">{offer.old_price} جنيه</span>}
                         <span className="new-price gold-text">{offer.new_price} جنيه</span>
                       </div>
-                      <a
-                        href={buildWhatsAppLink(offer.whatsapp_text || `أرغب في طلب ${offer.title}`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-premium btn-offer"
+                      <button
+                        onClick={() => handleBuyOffer(offer)}
+                        className="btn-premium btn-offer w-full text-center"
+                        style={{ border: 'none', cursor: 'pointer' }}
                       >
                         اطلب الآن
-                      </a>
+                      </button>
                     </div>
                   </div>
                 );
@@ -230,14 +269,13 @@ export default function Home() {
                       <span className="old-price">1100 جنيه</span>
                       <span className="new-price gold-text">900 جنيه</span>
                     </div>
-                    <a
-                      href={buildWhatsAppLink('أرغب في طلب العرض الأول')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-premium btn-offer"
+                    <button
+                      onClick={() => handleBuyOfferStatic('العرض الأول', 900, '/images/1.jpg')}
+                      className="btn-premium btn-offer w-full text-center"
+                      style={{ border: 'none', cursor: 'pointer' }}
                     >
                       اطلب الآن
-                    </a>
+                    </button>
                   </div>
                 </div>
 
@@ -263,14 +301,13 @@ export default function Home() {
                       <span className="old-price">950 جنيه</span>
                       <span className="new-price gold-text">800 جنيه</span>
                     </div>
-                    <a
-                      href={buildWhatsAppLink('أرغب في طلب عرض الصيف')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-premium btn-offer"
+                    <button
+                      onClick={() => handleBuyOfferStatic('العرض الثاني', 800, '/images/2.jpeg')}
+                      className="btn-premium btn-offer w-full text-center"
+                      style={{ border: 'none', cursor: 'pointer' }}
                     >
                       اطلب الآن
-                    </a>
+                    </button>
                   </div>
                 </div>
 
@@ -296,14 +333,13 @@ export default function Home() {
                       <span className="old-price">1600 جنيه</span>
                       <span className="new-price gold-text">1300 جنيه</span>
                     </div>
-                    <a
-                      href={buildWhatsAppLink('أرغب في طلب عرض سنت هاوس الجبار')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-premium btn-offer"
+                    <button
+                      onClick={() => handleBuyOfferStatic('عرض سنت هاوس الجبار', 1300, '/images/3.jpeg')}
+                      className="btn-premium btn-offer w-full text-center"
+                      style={{ border: 'none', cursor: 'pointer' }}
                     >
                       اطلب الآن
-                    </a>
+                    </button>
                   </div>
                 </div>
               </>
