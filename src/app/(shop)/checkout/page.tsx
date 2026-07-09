@@ -318,7 +318,11 @@ export default function Checkout() {
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-[var(--text-primary)]">{item.product.name.split(' - ')[0]}</h4>
                     <span className="text-xs text-gray-400">
-                      الحجم: <span className="english-num">{item.size.ml}</span> مل × <span className="english-num">{item.quantity}</span>
+                      {item.product.category === 'offer' ? (
+                        <span className="text-[#D4AF37] font-bold">عرض خاص</span>
+                      ) : (
+                        <>الحجم: <span className="english-num">{item.size.ml}</span> مل</>
+                      )} × <span className="english-num">{item.quantity}</span>
                     </span>
                   </div>
                   <div className="text-left font-mono text-sm">
