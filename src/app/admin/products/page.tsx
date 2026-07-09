@@ -264,8 +264,8 @@ export default function AdminProducts() {
       setIsModalOpen(false);
       setToast({ message: editingProduct ? 'تم تحديث المنتج بنجاح' : 'تم إضافة المنتج بنجاح', type: 'success' });
       fetchProducts();
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ المنتج.';
+    } catch (err: any) {
+      const errMsg = err?.message || err?.details || (typeof err === 'string' ? err : 'حدث خطأ أثناء حفظ المنتج.');
       console.error(err);
       setFormError(errMsg);
     } finally {
