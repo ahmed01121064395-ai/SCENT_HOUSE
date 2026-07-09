@@ -11,13 +11,6 @@ export default function Home() {
   const { products, settings, homepageFeatures, testimonials: dbTestimonials, specialOffers } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Video volume state
-  const [video1Muted, setVideo1Muted] = useState(true);
-  const [video2Muted, setVideo2Muted] = useState(true);
-
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
-
   // Best Sellers list
   const bestSellers = products.filter(p => p.isBestSeller);
 
@@ -40,17 +33,7 @@ export default function Home() {
     }
   };
 
-  const handleToggleSound = (videoNum: number) => {
-    if (videoNum === 1 && video1Ref.current) {
-      const current = video1Ref.current.muted;
-      video1Ref.current.muted = !current;
-      setVideo1Muted(!current);
-    } else if (videoNum === 2 && video2Ref.current) {
-      const current = video2Ref.current.muted;
-      video2Ref.current.muted = !current;
-      setVideo2Muted(!current);
-    }
-  };
+
 
   // Testimonials Images
   const testimonials = dbTestimonials && dbTestimonials.length > 0
@@ -472,44 +455,25 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Inspiration Videos Row (Grande Fragrances style) */}
-        <div className="hero-videos-row" style={{ marginTop: '25px' }}>
-          <div className="hero-video-card">
-            <video
-              ref={video1Ref}
-              src={settings?.hero_video_1_url || "/videos/v1.mp4"}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/images/background.jpg"
-              onClick={() => handleToggleSound(1)}
-              style={{ cursor: 'pointer' }}
-            ></video>
-            <button className="sound-toggle-btn" onClick={() => handleToggleSound(1)}>
-              <i className={`fa-solid ${video1Muted ? 'fa-volume-xmark' : 'fa-volume-high'}`}></i>
-            </button>
-          </div>
-          <div className="hero-video-card">
-            <video
-              ref={video2Ref}
-              src={settings?.hero_video_2_url || "/videos/v2.mp4"}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="/images/background.jpg"
-              onClick={() => handleToggleSound(2)}
-              style={{ cursor: 'pointer' }}
-            ></video>
-            <button className="sound-toggle-btn" onClick={() => handleToggleSound(2)}>
-              <i className={`fa-solid ${video2Muted ? 'fa-volume-xmark' : 'fa-volume-high'}`}></i>
-            </button>
-          </div>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '800px', margin: '25px auto 0 auto', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
+          <a
+            href={settings?.instagram_url || "https://www.instagram.com/scent.house9?igsh=MThtbXFzODVuYzNhZg%3D%3D&utm_source=qr"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'block', cursor: 'pointer' }}
+          >
+            <Image
+              src="/images/p1.jpeg"
+              alt="Scent House Inspiration"
+              width={1515}
+              height={1038}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+              sizes="(max-width: 800px) 100vw, 800px"
+            />
+          </a>
         </div>
       </div>
+
     </div>
   );
 }
