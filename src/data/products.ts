@@ -247,8 +247,8 @@ export const productsDatabase: Product[] = [
   {
     id: 14,
     name: "نقاء - Naqa' Fresh",
-    category: "unisex",
-    categoryNameAr: "عطور مشتركة",
+    category: "men",
+    categoryNameAr: "العطور الرجالية",
     price: 600,
     image: "/images/naqaa1.jpg",
     images: ["/images/naqaa1.jpg", "/images/naqaa2.jpg", "/images/naqaa3.jpg"],
