@@ -87,7 +87,7 @@ export default function Confirmation() {
                       )}
                     </td>
                     <td className="py-3 english-num">
-                      {item.product.category === 'gifts' ? 'صندوق فاخر' : `${item.size.ml}ml`}
+                      {item.product.category === 'gifts' ? 'صندوق فاخر' : item.product.category === 'offer' ? 'عرض خاص' : `${item.size.ml}ml`}
                     </td>
                     <td className="py-3 english-num">{item.quantity}</td>
                     <td className="py-3 text-left font-mono english-num">{item.size.price * item.quantity} ج.م</td>
