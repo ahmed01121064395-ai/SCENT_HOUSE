@@ -469,11 +469,26 @@ export default function AdminContent() {
       } else if (modalType === 'testimonial') {
         let imageUrl = editingItem ? editingItem.image_url : '';
         if (testimonialFile) {
+          // File size limit: 5MB
+          if (testimonialFile.size > 5 * 1024 * 1024) {
+            throw new Error('حجم الصورة كبير جداً، الحد الأقصى هو 5 ميجابايت.');
+          }
+          // File type validation
+          if (!testimonialFile.type.startsWith('image/')) {
+            throw new Error('الملف المختار ليس صورة صالحة.');
+          }
+
           const fileExt = testimonialFile.name.split('.').pop();
           const fileName = `testimonial_${Date.now()}.${fileExt}`;
           const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, testimonialFile);
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Testimonial upload error:', uploadError);
+            throw new Error('فشل رفع الصورة، يرجى المحاولة مرة أخرى.');
+          }
           const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+          if (!publicUrlData || !publicUrlData.publicUrl) {
+            throw new Error('فشل الحصول على رابط الصورة المرفوعة.');
+          }
           imageUrl = publicUrlData.publicUrl;
         }
         if (!imageUrl && !editingItem) throw new Error('يرجى تحديد ملف صورة للرأي');
@@ -497,11 +512,26 @@ export default function AdminContent() {
       } else if (modalType === 'offer') {
         let imageUrl = editingItem ? editingItem.image_url : '';
         if (offerFile) {
+          // File size limit: 5MB
+          if (offerFile.size > 5 * 1024 * 1024) {
+            throw new Error('حجم الصورة كبير جداً، الحد الأقصى هو 5 ميجابايت.');
+          }
+          // File type validation
+          if (!offerFile.type.startsWith('image/')) {
+            throw new Error('الملف المختار ليس صورة صالحة.');
+          }
+
           const fileExt = offerFile.name.split('.').pop();
           const fileName = `offer_${Date.now()}.${fileExt}`;
           const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, offerFile);
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Offer upload error:', uploadError);
+            throw new Error('فشل رفع الصورة، يرجى المحاولة مرة أخرى.');
+          }
           const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+          if (!publicUrlData || !publicUrlData.publicUrl) {
+            throw new Error('فشل الحصول على رابط الصورة المرفوعة.');
+          }
           imageUrl = publicUrlData.publicUrl;
         }
         if (!imageUrl && !editingItem) throw new Error('يرجى تحديد صورة العرض الترويجي');
@@ -551,12 +581,27 @@ export default function AdminContent() {
 
         // Upload Product Image
         if (prodImageFile) {
+          // File size limit: 5MB
+          if (prodImageFile.size > 5 * 1024 * 1024) {
+            throw new Error('حجم الصورة كبير جداً، الحد الأقصى هو 5 ميجابايت.');
+          }
+          // File type validation
+          if (!prodImageFile.type.startsWith('image/')) {
+            throw new Error('الملف المختار ليس صورة صالحة.');
+          }
+
           const fileExt = prodImageFile.name.split('.').pop();
           const fileName = `prod_${Date.now()}.${fileExt}`;
           const filePath = `products/${fileName}`;
           const { error: uploadError } = await supabase.storage.from('product-images').upload(filePath, prodImageFile);
-          if (uploadError) throw uploadError;
+          if (uploadError) {
+            console.error('Product image upload error:', uploadError);
+            throw new Error('فشل رفع الصورة، يرجى المحاولة مرة أخرى.');
+          }
           const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
+          if (!publicUrlData || !publicUrlData.publicUrl) {
+            throw new Error('فشل الحصول على رابط الصورة المرفوعة.');
+          }
           imageUrl = publicUrlData.publicUrl;
         }
         if (!imageUrl) throw new Error('يرجى اختيار صورة للمنتج');
@@ -606,14 +651,31 @@ export default function AdminContent() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // File size limit: 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('حجم الصورة كبير جداً، الحد الأقصى هو 5 ميجابايت.', 'error');
+      return;
+    }
+    // File type validation
+    if (!file.type.startsWith('image/')) {
+      showToast('الملف المختار ليس صورة صالحة.', 'error');
+      return;
+    }
+
     try {
       setSavingSection('about_image');
       const fileExt = file.name.split('.').pop();
       const fileName = `about_cover_${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('About image upload error:', uploadError);
+        throw new Error('فشل رفع الصورة، يرجى المحاولة مرة أخرى.');
+      }
 
       const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      if (!publicUrlData || !publicUrlData.publicUrl) {
+        throw new Error('فشل الحصول على رابط الصورة المرفوعة.');
+      }
       setAboutCoverImageUrl(publicUrlData.publicUrl);
       showToast('تم رفع صورة الغلاف لصفحة من نحن بنجاح', 'success');
     } catch (err: any) {
