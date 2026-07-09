@@ -131,8 +131,8 @@ export default function AdminOrders() {
                      productsDatabase.find(p => Number(p.id) === Number(item.productId));
         return {
           ...item,
-          productName: prod ? prod.name.split(' - ')[0] : `عطر (كود: ${item.productId})`,
-          productImage: prod ? prod.image : 'https://placehold.co/100x100/121212/D4AF37?text=Perfume'
+          productName: prod ? prod.name.split(' - ')[0] : (item.size?.offerName || `عرض خاص (كود: ${item.productId})`),
+          productImage: prod ? prod.image : (item.size?.offerImage || 'https://placehold.co/100x100/121212/D4AF37?text=Offer')
         };
       });
 
@@ -173,7 +173,7 @@ export default function AdminOrders() {
                      productsDatabase.find(p => Number(p.id) === Number(item.productId));
         return {
           ...item,
-          productName: prod ? prod.name.split(' - ')[0] : `عطر (كود: ${item.productId})`
+          productName: prod ? prod.name.split(' - ')[0] : (item.size?.offerName || `عرض خاص (كود: ${item.productId})`)
         };
       });
 
