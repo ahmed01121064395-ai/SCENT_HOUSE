@@ -16,16 +16,19 @@ export default function Header() {
     return '';
   };
 
+  const showAnnouncement = settings ? (settings.announcement_bar_text && settings.announcement_bar_text.trim() !== '') : true;
+  const announcementText = settings?.announcement_bar_text || "✨ شحن سريع ومجاني لجميع طلبات العروض! 🎁 استخدم كوبون SCENT10 لخصم 10% عند الدفع!";
+
   return (
     <header>
       {/* Top Premium Announcement Bar */}
-      <div className="announcement-bar">
-        <div className="announcement-content">
-          <span>
-            {settings?.announcement_bar_text || "✨ شحن سريع ومجاني لجميع طلبات العروض! 🎁 استخدم كوبون SCENT10 لخصم 10% عند الدفع!"}
-          </span>
+      {showAnnouncement && (
+        <div className="announcement-bar">
+          <div className="announcement-content">
+            <span>{announcementText}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="header-container">
         {/* Brand Logo and Name */}
