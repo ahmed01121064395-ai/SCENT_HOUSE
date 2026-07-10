@@ -64,19 +64,19 @@ export default function ProductDetails() {
     if (product.id === 9) {
       const p1Price = getPriceForSize(perfume1Size);
       const p2Price = getPriceForSize(perfume2Size);
-      return p1Price + p2Price + 502 - 50; // -50 EGP discount
+      return p1Price + p2Price - 50;
     }
     
     if (product.id === 11 || product.id === 12) {
       const p1Price = getPriceForSize(perfume1Size);
       const p2Price = getPriceForSize(perfume2Size);
       const p3Price = getPriceForSize(perfume3Size);
-      return p1Price + p2Price + p3Price + 2 - 50; // -50 EGP discount
+      return p1Price + p2Price + p3Price - 50;
     }
     
     const p1Price = getPriceForSize(perfume1Size);
     const p2Price = getPriceForSize(perfume2Size);
-    return p1Price + p2Price + 2 - 50; // -50 EGP discount
+    return p1Price + p2Price - 50;
   })();
 
   useEffect(() => {
@@ -408,6 +408,82 @@ export default function ProductDetails() {
               </div>
             </div>
 
+            {/* Size Selector */}
+            {product.sizes.length > 1 && (
+              <div className="filter-group">
+                <h4 className="filter-title">الحجم المتوفر:</h4>
+                <div className="size-selector">
+                  {product.sizes.map(sz => (
+                    <button
+                      key={sz.ml}
+                      className={`size-option-btn ${selectedSizeMl === sz.ml ? 'active' : ''}`}
+                      onClick={() => setSelectedSizeMl(sz.ml)}
+                      type="button"
+                    >
+                      {sz.ml} ML
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity control & Add to Cart button */}
+            <div className="purchase-actions">
+              {/* Row 1: qty + add-to-cart side by side */}
+              <div className="purchase-actions-row">
+                <div className="qty-control">
+                  <button
+                    className="qty-btn"
+                    onClick={() => setQty(Math.max(1, qty - 1))}
+                    type="button"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={qty}
+                    readOnly
+                    className="qty-input"
+                  />
+                  <button
+                    className="qty-btn"
+                    onClick={() => setQty(qty + 1)}
+                    type="button"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Add to Cart */}
+                <button
+                  className="btn-premium btn-add-cart-large"
+                  onClick={handleAddToCart}
+                  type="button"
+                >
+                  <i className="fa-solid fa-bag-shopping"></i> إضافة إلى السلة
+                </button>
+              </div>
+
+              {/* Row 2: Buy Now — goes directly to checkout */}
+              <button
+                className="buy-now-btn-large"
+                onClick={handleBuyNow}
+                type="button"
+              >
+                <i className="fa-solid fa-bolt"></i> اشتري الان
+              </button>
+
+              {/* Wishlist */}
+              <button
+                className={`btn-wishlist-large ${isWishlisted}`}
+                onClick={() => toggleWishlist(product.id)}
+                type="button"
+                title="تفضيل"
+              >
+                <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
+              </button>
+            </div>
+
             <p className="details-desc">{product.description}</p>
 
             {/* Custom Packaging options for Gift Boxes */}
@@ -514,82 +590,6 @@ export default function ProductDetails() {
                 </div>
               </div>
             )}
-
-            {/* Size Selector */}
-            {product.sizes.length > 1 && (
-              <div className="filter-group">
-                <h4 className="filter-title">الحجم المتوفر:</h4>
-                <div className="size-selector">
-                  {product.sizes.map(sz => (
-                    <button
-                      key={sz.ml}
-                      className={`size-option-btn ${selectedSizeMl === sz.ml ? 'active' : ''}`}
-                      onClick={() => setSelectedSizeMl(sz.ml)}
-                      type="button"
-                    >
-                      {sz.ml} ML
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity control & Add to Cart button */}
-            <div className="purchase-actions">
-              {/* Row 1: qty + add-to-cart side by side */}
-              <div className="purchase-actions-row">
-                <div className="qty-control">
-                  <button
-                    className="qty-btn"
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                    type="button"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    value={qty}
-                    readOnly
-                    className="qty-input"
-                  />
-                  <button
-                    className="qty-btn"
-                    onClick={() => setQty(qty + 1)}
-                    type="button"
-                  >
-                    +
-                  </button>
-                </div>
-
-                {/* Add to Cart */}
-                <button
-                  className="btn-premium btn-add-cart-large"
-                  onClick={handleAddToCart}
-                  type="button"
-                >
-                  <i className="fa-solid fa-bag-shopping"></i> إضافة إلى السلة
-                </button>
-              </div>
-
-              {/* Row 2: Buy Now — goes directly to checkout */}
-              <button
-                className="buy-now-btn-large"
-                onClick={handleBuyNow}
-                type="button"
-              >
-                <i className="fa-solid fa-bolt"></i> اشتري الان
-              </button>
-
-              {/* Wishlist */}
-              <button
-                className={`btn-wishlist-large ${isWishlisted}`}
-                onClick={() => toggleWishlist(product.id)}
-                type="button"
-                title="تفضيل"
-              >
-                <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
-              </button>
-            </div>
 
             {/* Fragrance Notes Display */}
             {product.notes && (
