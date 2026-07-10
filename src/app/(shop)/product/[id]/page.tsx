@@ -515,38 +515,6 @@ export default function ProductDetails() {
               </div>
             )}
 
-            {/* Fragrance Notes Display */}
-            {product.notes && (
-              <div className="fragrance-notes-display">
-                {/* Top Note */}
-                <div className="note-display-card">
-                  <div className="note-card-header">
-                    <i className="fa-solid fa-wind note-icon"></i>
-                    <span>مقدمة العطر (Top Notes)</span>
-                  </div>
-                  <div className="note-card-content">{product.notes.top}</div>
-                </div>
-
-                {/* Heart Note */}
-                <div className="note-display-card">
-                  <div className="note-card-header">
-                    <i className="fa-solid fa-heart note-icon"></i>
-                    <span>قلب العطر (Heart Notes)</span>
-                  </div>
-                  <div className="note-card-content">{product.notes.heart}</div>
-                </div>
-
-                {/* Base Note */}
-                <div className="note-display-card">
-                  <div className="note-card-header">
-                    <i className="fa-solid fa-gem note-icon"></i>
-                    <span>قاعدة العطر (Base Notes)</span>
-                  </div>
-                  <div className="note-card-content">{product.notes.base}</div>
-                </div>
-              </div>
-            )}
-
             {/* Size Selector */}
             {product.sizes.length > 1 && (
               <div className="filter-group">
@@ -622,6 +590,38 @@ export default function ProductDetails() {
                 <i className={isWishlisted ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
               </button>
             </div>
+
+            {/* Fragrance Notes Display */}
+            {product.notes && (
+              <div className="fragrance-notes-display">
+                {/* Top Note */}
+                <div className="note-display-card">
+                  <div className="note-card-header">
+                    <i className="fa-solid fa-wind note-icon"></i>
+                    <span>مقدمة العطر (Top Notes)</span>
+                  </div>
+                  <div className="note-card-content">{product.notes.top}</div>
+                </div>
+
+                {/* Heart Note */}
+                <div className="note-display-card">
+                  <div className="note-card-header">
+                    <i className="fa-solid fa-heart note-icon"></i>
+                    <span>قلب العطر (Heart Notes)</span>
+                  </div>
+                  <div className="note-card-content">{product.notes.heart}</div>
+                </div>
+
+                {/* Base Note */}
+                <div className="note-display-card">
+                  <div className="note-card-header">
+                    <i className="fa-solid fa-gem note-icon"></i>
+                    <span>قاعدة العطر (Base Notes)</span>
+                  </div>
+                  <div className="note-card-content">{product.notes.base}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
