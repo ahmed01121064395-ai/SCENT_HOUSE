@@ -173,17 +173,6 @@ header {
     cursor: pointer;
 }
 
-@media (min-width: 769px) {
-    .header-container {
-        position: relative;
-    }
-    .logo-container {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-}
-
 .logo-img {
     height: 48px;
     width: auto;
