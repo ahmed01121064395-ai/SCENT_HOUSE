@@ -112,7 +112,7 @@ export default function Home() {
           playsInline 
           className="hero-video-bg"
         >
-          <source src="/videos/v1.mp4" type="video/mp4" />
+          <source src="/videos/vidback.mp4" type="video/mp4" />
         </video>
         <div className="hero-overlay"></div>
         <div className="hero-content">
