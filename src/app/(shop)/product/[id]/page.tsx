@@ -64,19 +64,19 @@ export default function ProductDetails() {
     if (product.id === 9) {
       const p1Price = getPriceForSize(perfume1Size);
       const p2Price = getPriceForSize(perfume2Size);
-      return p1Price + p2Price + 502;
+      return p1Price + p2Price + 502 - 50; // -50 EGP discount
     }
     
     if (product.id === 11 || product.id === 12) {
       const p1Price = getPriceForSize(perfume1Size);
       const p2Price = getPriceForSize(perfume2Size);
       const p3Price = getPriceForSize(perfume3Size);
-      return p1Price + p2Price + p3Price + 2;
+      return p1Price + p2Price + p3Price + 2 - 50; // -50 EGP discount
     }
     
     const p1Price = getPriceForSize(perfume1Size);
     const p2Price = getPriceForSize(perfume2Size);
-    return p1Price + p2Price + 2;
+    return p1Price + p2Price + 2 - 50; // -50 EGP discount
   })();
 
   useEffect(() => {
