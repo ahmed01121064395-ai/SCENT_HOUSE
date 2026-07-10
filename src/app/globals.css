@@ -460,7 +460,7 @@ header {
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    padding: 40px 0;
+    padding: 24px 0;
     margin-top: 0;
     margin-bottom: 40px;
     z-index: 10;
@@ -473,63 +473,85 @@ header {
     padding: 0 24px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    gap: 20px;
     box-sizing: border-box;
 }
 
 .feature-card {
     background: transparent;
-    padding: 20px;
-    text-align: center;
+    padding: 10px 15px;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: right;
     transition: transform 0.3s ease;
     box-sizing: border-box;
 }
 
 .feature-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
 .feature-card-icon {
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     color: var(--primary-gold);
-    margin-bottom: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.feature-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .feature-card-title {
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 8px;
-    letter-spacing: 0.3px;
+    margin: 0;
+    letter-spacing: 0.2px;
 }
 
 .feature-card-desc {
-    font-size: 0.82rem;
+    font-size: 16px;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.4;
     margin: 0;
 }
 
 @media (max-width: 1024px) {
     .hero-features-container {
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: 16px;
     }
 }
 
 @media (max-width: 550px) {
     .hero-features-container {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 16px;
     }
     .hero-features-bar {
-        padding: 30px 0;
+        padding: 16px 0;
+        margin-bottom: 25px;
+    }
+    .feature-card {
+        padding: 8px 12px;
+    }
+    .feature-card-icon {
+        font-size: 1.25rem;
+        margin-top: 3px;
+    }
+    .feature-card-title {
+        font-size: 0.95rem;
+    }
+    .feature-card-desc {
+        font-size: 16px;
     }
 }
 
