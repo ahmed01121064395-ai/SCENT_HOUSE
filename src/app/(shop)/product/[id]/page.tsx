@@ -214,7 +214,7 @@ export default function ProductDetails() {
         product.id,
         100,
         qty,
-        boxType,
+        undefined,
         giftMessage,
         customSizeObj
       );
@@ -253,7 +253,7 @@ export default function ProductDetails() {
         product.id,
         100,
         qty,
-        boxType,
+        undefined,
         giftMessage,
         customSizeObj
       );
@@ -501,18 +501,7 @@ export default function ProductDetails() {
                   </div>
                 )}
 
-                <div className="form-group-checkout" style={{ marginBottom: '15px' }}>
-                  <label className="block text-sm mb-1 text-gray-300">نوع البوكس والمناسبة</label>
-                  <select
-                    className="select-premium w-full"
-                    value={boxType}
-                    onChange={(e) => setBoxType(e.target.value)}
-                  >
-                    <option value="عطور رجالية">عطور رجالية فاخرة</option>
-                    <option value="عطور نسائية">عطور نسائية راقية</option>
-                    <option value="عطور مكس (رجالي ونسائي)">تشكيلة رجالي ونسائي (مكس)</option>
-                  </select>
-                </div>
+
 
                 <div className="form-group-checkout">
                   <label className="block text-sm mb-1 text-gray-300">اكتب رسالة الإهداء (تُطبع بخط مذهب يدوي)</label>
