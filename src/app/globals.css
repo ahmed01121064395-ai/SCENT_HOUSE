@@ -2911,6 +2911,80 @@ footer {
         font-size: 0.72rem;
         justify-content: center;
     }
+
+    /* Mobile optimization for Product Detail template */
+    .section-wrapper {
+        padding: 0 16px !important;
+    }
+    .details-info .product-card-category {
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+        display: block;
+    }
+    .details-info .details-title {
+        font-size: 28px !important;
+        margin-top: 0 !important;
+        margin-bottom: 12px !important;
+    }
+    .details-info .details-price-bar {
+        margin-top: 0 !important;
+        margin-bottom: 16px !important;
+        gap: 12px !important;
+    }
+    .details-info .details-price {
+        font-size: 24px !important;
+    }
+    .details-info .product-card-rating span {
+        font-size: 13px !important;
+    }
+    .details-info .filter-group {
+        margin-top: 0 !important;
+        margin-bottom: 16px !important;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+    .details-info .filter-title {
+        font-size: 15px !important;
+        margin-bottom: 8px !important;
+    }
+    .details-info .size-selector {
+        gap: 10px !important;
+        margin-bottom: 0 !important;
+    }
+    .details-info .size-option-btn {
+        width: auto !important;
+        padding: 10px 20px !important;
+        font-size: 15px !important;
+    }
+    .details-info .qty-control {
+        height: 44px !important;
+    }
+    .details-info .qty-btn,
+    .details-info .qty-input {
+        font-size: 16px !important;
+        width: 32px !important;
+        padding: 0 !important;
+    }
+    .details-info .qty-btn {
+        width: 36px !important;
+    }
+    .details-info .btn-add-cart-large {
+        height: 48px !important;
+        font-size: 16px !important;
+        padding: 0 20px !important;
+    }
+    .details-info .buy-now-btn-large {
+        height: 48px !important;
+        font-size: 16px !important;
+    }
+    .details-info .purchase-actions {
+        margin-top: 0 !important;
+        margin-bottom: 16px !important;
+        gap: 12px !important;
+    }
+    .details-info .purchase-actions-row {
+        gap: 10px !important;
+    }
 }
 
 @media (max-width: 550px) {
