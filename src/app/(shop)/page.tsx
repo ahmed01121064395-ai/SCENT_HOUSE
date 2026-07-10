@@ -103,7 +103,10 @@ export default function Home() {
           <p className="hero-slogan">{settings?.hero_subtitle || "اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع"}</p>
           <div className="hero-buttons">
             <Link href="/shop" className="btn-premium inline-block text-center">
-              الفئات الفاخرة
+              تسوق الآن
+            </Link>
+            <Link href="/shop" className="btn-outline-gold inline-block text-center">
+              اكتشف المجموعة
             </Link>
           </div>
         </div>
