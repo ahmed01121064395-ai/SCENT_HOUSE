@@ -306,7 +306,7 @@ header {
 /* Hero Section Style */
 .hero-section {
     position: relative;
-    min-height: 100vh;
+    min-height: 75vh;
     padding: 100px 0 70px 0; /* Reduced top padding to move content closer to header */
     background-size: cover;
     background-position: center;
@@ -318,6 +318,17 @@ header {
     box-sizing: border-box;
 }
 
+.hero-video-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    opacity: 0.35;
+}
+
 .hero-overlay {
     position: absolute;
     top: 0;
@@ -325,6 +336,7 @@ header {
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(10,10,10,0.85) 90%);
+    z-index: 2;
 }
 
 .hero-content {
@@ -407,6 +419,49 @@ header {
     border-color: var(--primary-gold);
     color: var(--text-primary);
     transform: translateY(-3px);
+}
+
+.btn-luxury-outline {
+    border: 1px solid var(--primary-gold);
+    background: transparent;
+    color: var(--primary-gold);
+    padding: 10px 28px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    text-shadow: none;
+    letter-spacing: 0.5px;
+    box-shadow: none;
+    display: inline-block;
+}
+.btn-luxury-outline:hover {
+    background: var(--primary-gold);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+}
+
+.btn-luxury-solid {
+    background: var(--primary-gold);
+    color: #000;
+    border: 1px solid var(--primary-gold);
+    padding: 9px 24px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+}
+.btn-luxury-solid:hover {
+    background: transparent;
+    color: var(--primary-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
 }
 
 /* Hero Badge Features */
@@ -2735,7 +2790,7 @@ footer {
         align-items: center;
         gap: 10px;
     }
-    .btn-premium, .btn-outline-gold {
+    .btn-premium, .btn-outline-gold, .btn-luxury-outline, .btn-luxury-solid {
         width: 100%;
         max-width: 280px;
     }
