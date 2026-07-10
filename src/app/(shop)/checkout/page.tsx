@@ -63,7 +63,8 @@ export default function Checkout() {
   const discount = buyNowItem
     ? Math.round(subtotal * (discountPercent / 100))
     : cartDiscount;
-  const grandTotal = subtotal - discount;
+  const shippingCost = checkoutItems.length > 0 ? 80 : 0;
+  const grandTotal = subtotal - discount + shippingCost;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -451,7 +452,9 @@ export default function Checkout() {
 
               <div className="summary-item-line flex justify-between py-1 text-sm text-gray-300">
                 <span>تكلفة الشحن والتغليف الفاخر:</span>
-                <span className="text-green-500">مجاني</span>
+                <span>
+                  <span className="english-num">{shippingCost}</span> جنيه
+                </span>
               </div>
 
               <div className="summary-item-line total flex justify-between py-2 border-t border-yellow-600/10 mt-2 font-bold text-[var(--text-primary)] text-lg">
