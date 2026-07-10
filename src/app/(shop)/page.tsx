@@ -142,8 +142,10 @@ export default function Home() {
                   <div className="feature-card-icon">
                     <i className={`fa-solid ${f.icon}`}></i>
                   </div>
-                  <h4 className="feature-card-title">{title}</h4>
-                  {description && <p className="feature-card-desc">{description}</p>}
+                  <div className="feature-card-content text-right">
+                    <h4 className="feature-card-title">{title}</h4>
+                    {description && <p className="feature-card-desc">{description}</p>}
+                  </div>
                 </div>
               );
             })
@@ -151,23 +153,31 @@ export default function Home() {
             <>
               <div className="feature-card">
                 <div className="feature-card-icon"><i className="fa-solid fa-gem"></i></div>
-                <h4 className="feature-card-title">مكونات طبيعية نادرة</h4>
-                <p className="feature-card-desc">زيوت عطرية مختارة بعناية فائقة ونقاوة 100%</p>
+                <div className="feature-card-content text-right">
+                  <h4 className="feature-card-title">مكونات طبيعية نادرة</h4>
+                  <p className="feature-card-desc">زيوت عطرية مختارة بعناية فائقة ونقاوة 100%</p>
+                </div>
               </div>
               <div className="feature-card">
                 <div className="feature-card-icon"><i className="fa-solid fa-crown"></i></div>
-                <h4 className="feature-card-title">فخامة ملكية</h4>
-                <p className="feature-card-desc">روائح وتصاميم مميزة تعكس الهوية العطرية الأصيلة</p>
+                <div className="feature-card-content text-right">
+                  <h4 className="feature-card-title">فخامة ملكية</h4>
+                  <p className="feature-card-desc">روائح وتصاميم مميزة تعكس الهوية العطرية الأصيلة</p>
+                </div>
               </div>
               <div className="feature-card">
                 <div className="feature-card-icon"><i className="fa-solid fa-hourglass-half"></i></div>
-                <h4 className="feature-card-title">ثبات ممتد</h4>
-                <p className="feature-card-desc">أداء وتأثير يدوم لساعات طويلة لتجربة حضور لافت</p>
+                <div className="feature-card-content text-right">
+                  <h4 className="feature-card-title">ثبات ممتد</h4>
+                  <p className="feature-card-desc">أداء وتأثير يدوم لساعات طويلة لتجربة حضور لافت</p>
+                </div>
               </div>
               <div className="feature-card">
                 <div className="feature-card-icon"><i className="fa-solid fa-truck-fast"></i></div>
-                <h4 className="feature-card-title">شحن سريع وآمن</h4>
-                <p className="feature-card-desc">تغليف فاخر وشحن سريع لجميع محافظات مصر</p>
+                <div className="feature-card-content text-right">
+                  <h4 className="feature-card-title">شحن سريع وآمن</h4>
+                  <p className="feature-card-desc">تغليف فاخر وشحن سريع لجميع محافظات مصر</p>
+                </div>
               </div>
             </>
           )}
