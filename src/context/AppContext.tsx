@@ -32,8 +32,8 @@ interface AppContextType {
   wishlist: number[];
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
-  addToCart: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => void;
-  buyNow: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => void;
+  addToCart: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string, customSizeObj?: any) => void;
+  buyNow: (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string, customSizeObj?: any) => void;
   buyNowItem: CartItem | null;
   setBuyNowItem: (item: CartItem | null) => void;
   removeFromCart: (productId: number, sizeMl: number) => void;
@@ -354,11 +354,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('scent_wishlist', JSON.stringify(newWishlist));
   };
 
-  const addToCart = (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => {
+  const addToCart = (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string, customSizeObj?: any) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    const sizeObj = product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
     const existingIndex = cart.findIndex(item => item.product.id === productId && item.size.ml === sizeMl);
 
     const newCart = [...cart];
@@ -381,11 +381,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // buyNow: sets the temporary checkout item and does NOT open the drawer or change persistent cart
-  const buyNow = (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string) => {
+  const buyNow = (productId: number, sizeMl: number, quantity: number, boxType?: string, giftMessage?: string, customSizeObj?: any) => {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    const sizeObj = product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
     setBuyNowItem({
       product,
       size: sizeObj,
