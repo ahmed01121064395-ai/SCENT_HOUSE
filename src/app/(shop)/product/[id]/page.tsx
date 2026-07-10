@@ -71,16 +71,14 @@ export default function ProductDetails() {
 
   useEffect(() => {
     if (product) {
-      // Set default size (100ml for gift boxes, null for perfumes)
-      if (product.category === 'gifts') {
-        setSelectedSizeMl(100);
-        setActiveImage(product.image);
+      if (product.sizes.length === 1) {
+        setSelectedSizeMl(product.sizes[0].ml);
       } else {
         setSelectedSizeMl(null);
-        setActiveImage(product.image);
       }
+      setActiveImage(product.image);
       setQty(1);
-      setBoxType('luxury');
+      setBoxType('عطور رجالية');
       setGiftMessage('');
     }
   }, [product]);
@@ -154,7 +152,7 @@ export default function ProductDetails() {
   })();
 
   const handleAddToCart = () => {
-    if (product.category !== 'gifts' && selectedSizeMl === null) {
+    if (selectedSizeMl === null) {
       setSizeError(true);
       setTimeout(() => setSizeError(false), 3000);
       return;
@@ -173,7 +171,7 @@ export default function ProductDetails() {
   };
 
   const handleBuyNow = () => {
-    if (product.category !== 'gifts' && selectedSizeMl === null) {
+    if (selectedSizeMl === null) {
       setSizeError(true);
       setTimeout(() => setSizeError(false), 3000);
       return;
@@ -335,25 +333,15 @@ export default function ProductDetails() {
                 </h4>
 
                 <div className="form-group-checkout" style={{ marginBottom: '15px' }}>
-                  <label className="block text-sm mb-1 text-gray-300">نوع البوكس والمناسبة</label>
+                  <label className="block text-sm mb-1 text-gray-300">نوع العطور المفضلة بالبوكس</label>
                   <select
                     className="select-premium w-full"
                     value={boxType}
                     onChange={(e) => setBoxType(e.target.value)}
                   >
-                    {giftBoxTypes && giftBoxTypes.length > 0 ? (
-                      giftBoxTypes.map((b: any) => (
-                        <option key={b.code} value={b.code}>{b.name}</option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="luxury">بوكس فاخر بقفل مغناطيسي</option>
-                        <option value="birthday">بوكس مناسبات يوم ميلاد</option>
-                        <option value="anniversary">بوكس مناسبات ذكرى زواج</option>
-                        <option value="men">بوكس إهداء رجالي أسود وذهبي</option>
-                        <option value="women">بوكس إهداء نسائي مخملي</option>
-                      </>
-                    )}
+                    <option value="عطور رجالية">عطور رجالية فاخرة</option>
+                    <option value="عطور نسائية">عطور نسائية راقية</option>
+                    <option value="عطور مكس (رجالي ونسائي)">تشكيلة رجالي ونسائي (مكس)</option>
                   </select>
                 </div>
 
@@ -401,8 +389,8 @@ export default function ProductDetails() {
               </div>
             )}
 
-            {/* Size Selector for Perfumes */}
-            {product.category !== 'gifts' && product.sizes.length > 1 && (
+            {/* Size Selector */}
+            {product.sizes.length > 1 && (
               <div className="filter-group">
                 <h4 className="filter-title">الحجم المتوفر:</h4>
                 <div className="size-selector">
