@@ -6,6 +6,12 @@ import { useApp } from '@/context/AppContext';
 export default function Contact() {
   const { settings } = useApp();
 
+  const hasSettings = !!settings;
+  const rawPhone1 = hasSettings ? settings.contact_phone_1 : "01095363169";
+  const rawPhone2 = hasSettings ? settings.contact_phone_2 : "01005006426";
+  const phone1 = rawPhone1?.trim();
+  const phone2 = rawPhone2?.trim();
+
   return (
     <div id="view-contact" className="active">
       <div className="info-page-header">
@@ -16,18 +22,24 @@ export default function Contact() {
       <div className="section-wrapper">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: '1100px', margin: '0 auto' }}>
           {/* Card 1: Phone & Customer Service */}
-          <div className="value-card" style={{ padding: '30px', minHeight: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '50%', border: '1px solid var(--border-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', color: 'var(--primary-gold)', marginBottom: '20px' }}>
-              <i className="fa-solid fa-phone"></i>
+          {(phone1 || phone2) && (
+            <div className="value-card" style={{ padding: '30px', minHeight: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', border: '1px solid var(--border-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', color: 'var(--primary-gold)', marginBottom: '20px' }}>
+                <i className="fa-solid fa-phone"></i>
+              </div>
+              <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الهاتف وخدمة العملاء</h3>
+              {phone1 && (
+                <a href={`tel:${phone1}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>
+                  {phone1}
+                </a>
+              )}
+              {phone2 && (
+                <a href={`tel:${phone2}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
+                  {phone2}
+                </a>
+              )}
             </div>
-            <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الهاتف وخدمة العملاء</h3>
-            <a href={`tel:${settings?.contact_phone_1 || "01095363169"}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block', marginBottom: '5px' }}>
-              {settings?.contact_phone_1 || "01095363169"}
-            </a>
-            <a href={`tel:${settings?.contact_phone_2 || "01005006426"}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
-              {settings?.contact_phone_2 || "01005006426"}
-            </a>
-          </div>
+          )}
 
           {/* Card 2: Social Media */}
           <div className="value-card" style={{ padding: '30px', minHeight: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
