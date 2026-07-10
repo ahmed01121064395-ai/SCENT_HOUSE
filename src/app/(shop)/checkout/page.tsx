@@ -418,12 +418,20 @@ export default function Checkout() {
                   />
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-[var(--text-primary)]">{item.product.name.split(' - ')[0]}</h4>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400 block mt-0.5">
                       {item.product.category === 'offer' ? (
                         <span className="text-[#D4AF37] font-bold">عرض خاص</span>
+                      ) : item.product.category === 'gifts' && item.size.perfume1 ? (
+                        <span className="text-gray-300 block text-[11px] leading-relaxed">
+                          المكونات: {item.size.perfume1} ({item.size.perfume1Size}مل) × {item.size.perfume2} ({item.size.perfume2Size}مل)
+                          {item.size.perfume3 && ` × ${item.size.perfume3} (${item.size.perfume3Size}مل)`}
+                        </span>
                       ) : (
                         <>الحجم: <span className="english-num">{item.size.ml}</span> مل</>
-                      )} × <span className="english-num">{item.quantity}</span>
+                      )}
+                    </span>
+                    <span className="text-[11px] text-gray-500 block mt-0.5">
+                      الكمية: <span className="english-num">{item.quantity}</span>
                     </span>
                   </div>
                   <div className="text-left font-mono text-sm">
