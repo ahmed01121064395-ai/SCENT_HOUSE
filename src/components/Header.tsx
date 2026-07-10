@@ -33,14 +33,6 @@ export default function Header() {
       <div className="header-container">
         {/* Brand Logo and Name */}
         <Link href="/" className="logo-container">
-          <Image
-            src="/images/LOGO.jpg"
-            alt="شعار Scent House"
-            width={48}
-            height={48}
-            className="logo-img"
-            priority
-          />
           <span className="brand-title gold-text">SCENT HOUSE</span>
         </Link>
 
