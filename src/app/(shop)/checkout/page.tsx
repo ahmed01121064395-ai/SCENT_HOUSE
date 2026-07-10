@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
@@ -25,7 +25,29 @@ export default function Checkout() {
   const [phone2, setPhone2] = useState('');
   const [city, setCity] = useState('الفيوم');
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'applepay' | 'cod'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'wallet' | 'applepay'>('cod');
+  const [walletType, setWalletType] = useState<'mobile' | 'instapay' | null>(null);
+  const [isAppleDevice, setIsAppleDevice] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if device is Apple (Mac, iPhone, iPad) and is running Safari or supports Apple Pay
+    const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && !(window as any).MSStream;
+    const hasApplePay = !!(window as any).ApplePaySession;
+    setIsAppleDevice(isApple || hasApplePay);
+  }, []);
+
+  const handleDisabledPaymentSelect = (method: 'card' | 'wallet' | 'applepay', subType?: 'mobile' | 'instapay') => {
+    setPaymentMethod(method);
+    if (method === 'wallet' && subType) {
+      setWalletType(subType);
+    } else if (method === 'wallet' && !subType) {
+      setWalletType('mobile');
+    } else {
+      setWalletType(null);
+    }
+    setActiveTooltip('هذه الطريقة ستكون متاحة قريباً. تم توفيرها للتجربة البصرية فقط.');
+  };
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,12 +71,30 @@ export default function Checkout() {
     setIsSubmitting(true);
     setDbError('');
 
+    if (paymentMethod !== 'cod') {
+      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار الدفع عند الاستلام لإتمام الطلب.');
+      setIsSubmitting(false);
+      return;
+    }
+
     const orderDate = new Date().toLocaleDateString('ar-EG', {
       year: 'numeric', month: 'numeric', day: 'numeric'
     });
 
     let paymentMethodLabel = 'الدفع عند الاستلام';
-    if (paymentMethod === 'applepay') paymentMethodLabel = 'Apple Pay';
+    if (paymentMethod === 'applepay') {
+      paymentMethodLabel = 'Apple Pay';
+    } else if (paymentMethod === 'card') {
+      paymentMethodLabel = 'الدفع بالبطاقة (فيزا/ماستركارد)';
+    } else if (paymentMethod === 'wallet') {
+      if (walletType === 'mobile') {
+        paymentMethodLabel = 'المحفظة الإلكترونية - محفظة الهاتف المحمول';
+      } else if (walletType === 'instapay') {
+        paymentMethodLabel = 'المحفظة الإلكترونية - إنستاباي (InstaPay)';
+      } else {
+        paymentMethodLabel = 'المحفظة الإلكترونية';
+      }
+    }
 
     // ── Step 1: Insert into orders (column names match your real schema) ──
     const { data: orderRow, error: orderError } = await supabase
@@ -244,22 +284,82 @@ export default function Checkout() {
                   <i className="fa-regular fa-credit-card"></i> طريقة الدفع المفضلة
                 </h3>
                 
-                <div className="payment-method-selector grid grid-cols-2 gap-3">
-                  <div
-                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'applepay' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('applepay')}
-                  >
-                    <i className="fa-brands fa-apple-pay text-2xl"></i>
-                    <span className="payment-option-title text-xs mt-1 block">Apple Pay</span>
-                  </div>
+                <div className={`payment-method-selector grid ${isAppleDevice ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3`}>
+                  {/* Option 1: Cash on Delivery (COD) */}
                   <div
                     className={`payment-option-btn cursor-pointer ${paymentMethod === 'cod' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('cod')}
+                    onClick={() => {
+                      setPaymentMethod('cod');
+                      setWalletType(null);
+                      setActiveTooltip(null);
+                    }}
                   >
-                    <i className="fa-solid fa-hand-holding-dollar"></i>
-                    <span className="payment-option-title text-xs mt-1 block">عند الاستلام</span>
+                    <i className="fa-solid fa-hand-holding-dollar text-xl"></i>
+                    <span className="payment-option-title text-xs mt-1 block">الدفع عند الاستلام</span>
                   </div>
+
+                  {/* Option 2: Credit/Debit Card */}
+                  <div
+                    className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'card' ? 'active' : ''}`}
+                    onClick={() => handleDisabledPaymentSelect('card')}
+                  >
+                    <span className="payment-option-badge-soon">قريباً</span>
+                    <i className="fa-solid fa-credit-card text-xl"></i>
+                    <span className="payment-option-title text-xs mt-1 block">بطاقة بنكية</span>
+                  </div>
+
+                  {/* Option 3: Digital Wallet */}
+                  <div
+                    className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'wallet' ? 'active' : ''}`}
+                    onClick={() => handleDisabledPaymentSelect('wallet')}
+                  >
+                    <span className="payment-option-badge-soon">قريباً</span>
+                    <i className="fa-solid fa-wallet text-xl"></i>
+                    <span className="payment-option-title text-xs mt-1 block">المحفظة الإلكترونية</span>
+                  </div>
+
+                  {/* Option 4: Apple Pay (Only for Safari/Apple users) */}
+                  {isAppleDevice && (
+                    <div
+                      className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'applepay' ? 'active' : ''}`}
+                      onClick={() => handleDisabledPaymentSelect('applepay')}
+                    >
+                      <span className="payment-option-badge-soon">قريباً</span>
+                      <i className="fa-brands fa-apple-pay text-2xl"></i>
+                      <span className="payment-option-title text-xs mt-1 block">Apple Pay</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Sub-choices for Digital Wallet */}
+                {paymentMethod === 'wallet' && (
+                  <div className="wallet-sub-choices grid grid-cols-2 gap-3 mt-3 p-3 bg-black/25 border border-yellow-600/10 rounded-lg animate-fadeIn text-right">
+                    <div
+                      className={`payment-option-btn disabled cursor-pointer ${walletType === 'mobile' ? 'active' : ''}`}
+                      onClick={() => handleDisabledPaymentSelect('wallet', 'mobile')}
+                    >
+                      <span className="payment-option-badge-soon">قريباً</span>
+                      <i className="fa-solid fa-mobile-screen-button text-xl"></i>
+                      <span className="payment-option-title text-xs mt-1 block">محفظة هاتف محمول</span>
+                    </div>
+                    <div
+                      className={`payment-option-btn disabled cursor-pointer ${walletType === 'instapay' ? 'active' : ''}`}
+                      onClick={() => handleDisabledPaymentSelect('wallet', 'instapay')}
+                    >
+                      <span className="payment-option-badge-soon">قريباً</span>
+                      <i className="fa-solid fa-money-bill-transfer text-xl"></i>
+                      <span className="payment-option-title text-xs mt-1 block">إنستاباي (InstaPay)</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Warning Tooltip */}
+                {activeTooltip && (
+                  <div className="bg-yellow-950/20 border border-yellow-600/30 text-yellow-500 text-xs p-3 rounded-lg text-center mt-3 flex items-center justify-center gap-1.5 animate-fadeIn">
+                    <i className="fa-solid fa-circle-info"></i>
+                    {activeTooltip}
+                  </div>
+                )}
 
                 {/* DB Error display */}
                 {dbError && (
