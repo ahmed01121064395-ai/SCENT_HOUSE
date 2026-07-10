@@ -73,6 +73,14 @@ export default function Home() {
     router.push('/checkout');
   };
 
+  const handleScrollToNewArrivals = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.getElementById('new-arrivals');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
 
 
   // Testimonials Images
@@ -97,16 +105,25 @@ export default function Home() {
     <div id="view-home" className="active">
       {/* Premium Fullscreen Hero Banner */}
       <div className="hero-section" style={{ backgroundImage: "url('/images/background.jpg')" }}>
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="hero-video-bg"
+        >
+          <source src="/videos/v1.mp4" type="video/mp4" />
+        </video>
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title gold-text">{settings?.hero_title || "عطرٌ يليقُ بفخامتِك"}</h1>
           <p className="hero-slogan">{settings?.hero_subtitle || "اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع"}</p>
           <div className="hero-buttons">
-            <Link href="/shop" className="btn-premium inline-block text-center">
+            <button onClick={handleScrollToNewArrivals} className="btn-luxury-outline">
+              اكتشف الجديد
+            </button>
+            <Link href="/shop" className="btn-luxury-solid">
               تسوق الآن
-            </Link>
-            <Link href="/shop" className="btn-outline-gold inline-block text-center">
-              اكتشف المجموعة
             </Link>
           </div>
         </div>
@@ -400,7 +417,7 @@ export default function Home() {
       </div>
 
       {/* New Arrivals Grid */}
-      <div className="section-wrapper">
+      <div className="section-wrapper" id="new-arrivals" style={{ scrollMarginTop: '100px' }}>
         <div className="section-header">
           <h2>أحدث الإصدارات</h2>
           <p>روائح جديدة تنضم لأسطول عطورنا الفاخرة، استكشف التميز الآن</p>
