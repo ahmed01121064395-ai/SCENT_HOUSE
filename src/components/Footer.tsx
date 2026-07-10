@@ -46,17 +46,35 @@ export default function Footer() {
             <i className="fa-brands fa-tiktok"></i>
           </a>
 
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '10px', marginLeft: '10px' }}>|</span>
+          {/* Conditional Phones & Separator */}
+          {(() => {
+            const hasSettings = !!settings;
+            const rawPhone1 = hasSettings ? settings.contact_phone_1 : "01095363169";
+            const rawPhone2 = hasSettings ? settings.contact_phone_2 : "01005006426";
+            const phone1 = rawPhone1?.trim();
+            const phone2 = rawPhone2?.trim();
 
-          <span style={{ fontSize: '0.85rem', color: 'var(--primary-gold)', display: 'flex', gap: '10px', direction: 'ltr' }}>
-            <a href={`tel:${settings?.contact_phone_1 || "01095363169"}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
-              {settings?.contact_phone_1 || "01095363169"}
-            </a>
-            <span>-</span>
-            <a href={`tel:${settings?.contact_phone_2 || "01005006426"}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
-              {settings?.contact_phone_2 || "01005006426"}
-            </a>
-          </span>
+            if (!phone1 && !phone2) return null;
+
+            return (
+              <>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '10px', marginLeft: '10px' }}>|</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--primary-gold)', display: 'flex', gap: '10px', direction: 'ltr' }}>
+                  {phone1 && (
+                    <a href={`tel:${phone1}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
+                      {phone1}
+                    </a>
+                  )}
+                  {phone1 && phone2 && <span>-</span>}
+                  {phone2 && (
+                    <a href={`tel:${phone2}`} className="english-num" style={{ color: 'var(--primary-gold)' }}>
+                      {phone2}
+                    </a>
+                  )}
+                </span>
+              </>
+            );
+          })()}
         </div>
 
         {/* Trust badges / payment mock icons */}
