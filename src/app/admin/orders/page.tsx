@@ -639,7 +639,7 @@ ${itemListText}
                 </div>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>رسوم التغليف الفاخر والشحن:</span>
-                  <span className="text-green-500 font-bold">مجاني</span>
+                  <span className="text-green-500 font-bold">80 جنيه</span>
                 </div>
                 <div className="flex justify-between text-sm font-black text-white pt-2.5 border-t border-gray-800">
                   <span className="font-cairo">الإجمالي الكلي للفاتورة:</span>
