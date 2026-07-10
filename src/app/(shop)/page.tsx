@@ -133,29 +133,41 @@ export default function Home() {
       <div className="hero-features-bar">
         <div className="hero-features-container">
           {homepageFeatures && homepageFeatures.length > 0 ? (
-            homepageFeatures.map((f: any, idx: number) => (
-              <div className="feature-item" key={f.id || idx}>
-                <i className={`fa-solid ${f.icon} font-gold`}></i>
-                <span>{f.title}</span>
-              </div>
-            ))
+            homepageFeatures.map((f: any, idx: number) => {
+              const parts = f.title.split('*');
+              const title = parts[0]?.trim() || '';
+              const description = parts[1]?.trim() || '';
+              return (
+                <div className="feature-card" key={f.id || idx}>
+                  <div className="feature-card-icon">
+                    <i className={`fa-solid ${f.icon}`}></i>
+                  </div>
+                  <h4 className="feature-card-title">{title}</h4>
+                  {description && <p className="feature-card-desc">{description}</p>}
+                </div>
+              );
+            })
           ) : (
             <>
-              <div className="feature-item">
-                <i className="fa-solid fa-gem font-gold"></i>
-                <span>مكونات طبيعية نادرة ومختارة</span>
+              <div className="feature-card">
+                <div className="feature-card-icon"><i className="fa-solid fa-gem"></i></div>
+                <h4 className="feature-card-title">مكونات طبيعية نادرة</h4>
+                <p className="feature-card-desc">زيوت عطرية مختارة بعناية فائقة ونقاوة 100%</p>
               </div>
-              <div className="feature-item">
-                <i className="fa-solid fa-crown font-gold"></i>
-                <span>فخامة وروائح لا تضاهى</span>
+              <div className="feature-card">
+                <div className="feature-card-icon"><i className="fa-solid fa-crown"></i></div>
+                <h4 className="feature-card-title">فخامة ملكية</h4>
+                <p className="feature-card-desc">روائح وتصاميم مميزة تعكس الهوية العطرية الأصيلة</p>
               </div>
-              <div className="feature-item">
-                <i className="fa-solid fa-hourglass-half font-gold"></i>
-                <span>ثبات وتأثير عالي يدوم طويلاً</span>
+              <div className="feature-card">
+                <div className="feature-card-icon"><i className="fa-solid fa-hourglass-half"></i></div>
+                <h4 className="feature-card-title">ثبات ممتد</h4>
+                <p className="feature-card-desc">أداء وتأثير يدوم لساعات طويلة لتجربة حضور لافت</p>
               </div>
-              <div className="feature-item">
-                <i className="fa-solid fa-truck-fast font-gold"></i>
-                <span>شحن وتوصيل فاخر وسريع</span>
+              <div className="feature-card">
+                <div className="feature-card-icon"><i className="fa-solid fa-truck-fast"></i></div>
+                <h4 className="feature-card-title">شحن سريع وآمن</h4>
+                <p className="feature-card-desc">تغليف فاخر وشحن سريع لجميع محافظات مصر</p>
               </div>
             </>
           )}
