@@ -1948,6 +1948,30 @@ header {
     gap: 10px;
     cursor: pointer;
     transition: var(--transition-quick);
+    position: relative;
+    overflow: hidden;
+}
+
+.payment-option-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.payment-option-btn.disabled:hover {
+    border-color: var(--border-color);
+    background: var(--bg-primary);
+}
+
+.payment-option-badge-soon {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: #AA7C11;
+    color: #fff;
+    font-size: 8px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
 }
 
 .payment-option-btn i {
