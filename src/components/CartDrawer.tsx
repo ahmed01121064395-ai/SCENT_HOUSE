@@ -75,12 +75,27 @@ export default function CartDrawer() {
           ) : (
             <div className="cart-items-wrapper">
               {cart.map((item, index) => {
-                const sizeLabel = item.product.category === 'gifts' ? 'صندوق فاخر' : `${item.size.ml} ML`;
-                const boxTypeName = giftBoxTypes.find(g => g.code === item.boxType)?.name || (item.boxType === 'luxury' || item.boxType === 'royal' ? 'ملكي فاخر' : 'بسيط');
-                const customBadge = item.boxType ? (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--primary-gold)', marginTop: '3px' }}>
-                    <i className="fa-solid fa-gift"></i> التغليف: {boxTypeName}
-                    {item.giftMessage && ` - رسالة: ${item.giftMessage}`}
+                let customChoiceText = '';
+                if (item.product.category === 'gifts' && item.size.perfume1) {
+                  customChoiceText = `${item.size.perfume1} (${item.size.perfume1Size}مل) × ${item.size.perfume2} (${item.size.perfume2Size}مل)${item.size.perfume3 ? ` × ${item.size.perfume3} (${item.size.perfume3Size}مل)` : ''}`;
+                }
+                const sizeLabel = item.product.category === 'gifts' 
+                  ? (customChoiceText || 'صندوق فاخر') 
+                  : `${item.size.ml} ML`;
+
+                const boxTypeName = giftBoxTypes.find(g => g.code === item.boxType)?.name || item.boxType || 'بسيط';
+                const customBadge = item.boxType || item.giftMessage ? (
+                  <div style={{ fontSize: '0.73rem', color: 'var(--primary-gold)', marginTop: '3px', lineHeight: '1.4' }}>
+                    {item.boxType && (
+                      <div>
+                        <i className="fa-solid fa-gift"></i> التغليف: {boxTypeName}
+                      </div>
+                    )}
+                    {item.giftMessage && (
+                      <div className="text-gray-400">
+                        <i className="fa-regular fa-comment-dots"></i> الرسالة: "{item.giftMessage}"
+                      </div>
+                    )}
                   </div>
                 ) : null;
 
