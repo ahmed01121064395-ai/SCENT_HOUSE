@@ -80,6 +80,12 @@ export default function Confirmation() {
                   >
                     <td className="py-3 font-medium">
                       {item.product.name.split(' - ')[0]}
+                      {item.size?.perfume1 && (
+                        <span className="block text-[10px] text-gray-400">
+                          المكونات: {item.size.perfume1} ({item.size.perfume1Size}مل) × {item.size.perfume2} ({item.size.perfume2Size}مل)
+                          {item.size.perfume3 && ` × ${item.size.perfume3} (${item.size.perfume3Size}مل)`}
+                        </span>
+                      )}
                       {item.boxType && (
                         <span className="block text-[10px] text-yellow-500/80">
                           تغليف: {item.boxType === 'royal' ? 'ملكي فاخر' : 'بسيط'}
