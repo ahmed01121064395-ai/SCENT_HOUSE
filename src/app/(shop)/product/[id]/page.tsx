@@ -459,11 +459,7 @@ export default function ProductDetails() {
 
             {/* Customizable Gift Box Wizard */}
             {product.category === 'gifts' && (
-              <div className="gift-box-builder bg-[#171717]/60 border border-yellow-600/10 rounded-2xl p-5 mb-6 text-right">
-                <h3 className="gold-text font-bold text-base mb-4 flex items-center gap-2 justify-end">
-                  <i className="fa-solid fa-wand-magic-sparkles"></i>
-                  مصمم البوكس المخصص
-                </h3>
+              <div className="gift-box-builder mb-6 text-right">
 
                 {/* Variant Selector (Only for Mixed Box 13) */}
                 {product.id === 13 && (
