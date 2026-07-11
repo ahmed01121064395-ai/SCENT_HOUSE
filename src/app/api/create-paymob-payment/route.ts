@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Trigger rebuild for environment variables setup
+
 export async function POST(req: NextRequest) {
   console.log('[Paymob Payment API] Starting payment initialization...');
   try {
