@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Trigger rebuild for environment variables setup
+// Paymob Integration Constants (hardcoded as fallback - these are non-secret integration IDs)
+const PAYMOB_CARD_INTEGRATION_ID = 5771591;
+const PAYMOB_IFRAME_ID = '38194';
 
 export async function POST(req: NextRequest) {
   console.log('[Paymob Payment API] Starting payment initialization...');
@@ -8,7 +10,12 @@ export async function POST(req: NextRequest) {
     const { orderId, fullname, phone, city, address, amount, items } = await req.json();
 
     const apiKey = process.env.PAYMOB_API_KEY;
-    const integrationId = Number(process.env.PAYMOB_CARD_INTEGRATION_ID || '5771591');
+    
+    // Use env variable if set, otherwise fall back to hardcoded value
+    const integrationId = Number(process.env.PAYMOB_CARD_INTEGRATION_ID) || PAYMOB_CARD_INTEGRATION_ID;
+    const iframeId = process.env.PAYMOB_IFRAME_ID || PAYMOB_IFRAME_ID;
+
+    console.log(`[Paymob Payment API] Using integrationId=${integrationId}, iframeId=${iframeId}`);
 
     if (!apiKey) {
       console.error('[Paymob Payment API] Missing PAYMOB_API_KEY env variable.');
@@ -40,7 +47,7 @@ export async function POST(req: NextRequest) {
         delivery_needed: 'false',
         amount_cents: amountCents.toString(),
         currency: 'EGP',
-        merchant_order_id: orderId, // Our SH-XXXXX id
+        merchant_order_id: orderId,
         items: items.map((item: any) => {
           let itemName = item.product?.name?.split(' - ')[0] || 'عطر';
           if (item.product?.category === 'gifts' && item.size?.perfumes) {
@@ -69,34 +76,38 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || 'Customer';
 
     // 3. Generate Payment Key
-    console.log('[Paymob Payment API] Generating payment key...');
+    console.log(`[Paymob Payment API] Generating payment key with integration_id=${integrationId}...`);
+    const paymentKeyBody = {
+      auth_token: authToken,
+      amount_cents: amountCents.toString(),
+      expiration: 3600,
+      order_id: paymobOrder.id,
+      billing_data: {
+        apartment: 'NA',
+        email: 'customer@scenthouse.com',
+        floor: 'NA',
+        first_name: firstName,
+        street: address || 'NA',
+        building: 'NA',
+        phone_number: phone,
+        shipping_method: 'NA',
+        postal_code: 'NA',
+        city: city || 'Cairo',
+        country: 'EG',
+        last_name: lastName,
+        state: 'NA'
+      },
+      currency: 'EGP',
+      integration_id: integrationId,
+      lock_order_to_token: true
+    };
+    
+    console.log('[Paymob Payment API] Payment key request body:', JSON.stringify(paymentKeyBody, null, 2));
+    
     const paymentKeyRes = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        auth_token: authToken,
-        amount_cents: amountCents.toString(),
-        expiration: 3600,
-        order_id: paymobOrder.id,
-        billing_data: {
-          apartment: 'NA',
-          email: 'customer@scenthouse.com',
-          floor: 'NA',
-          first_name: firstName,
-          street: address || 'NA',
-          building: 'NA',
-          phone_number: phone,
-          shipping_method: 'NA',
-          postal_code: 'NA',
-          city: city || 'Cairo',
-          country: 'EG',
-          last_name: lastName,
-          state: 'NA'
-        },
-        currency: 'EGP',
-        integration_id: integrationId,
-        lock_order_to_token: true
-      })
+      body: JSON.stringify(paymentKeyBody)
     });
     if (!paymentKeyRes.ok) {
       const errText = await paymentKeyRes.text();
@@ -106,7 +117,6 @@ export async function POST(req: NextRequest) {
     const { token: paymentToken } = await paymentKeyRes.json();
 
     // 4. Build Iframe redirect url
-    const iframeId = process.env.PAYMOB_IFRAME_ID || '38194';
     const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${iframeId}?payment_token=${paymentToken}`;
 
     console.log('[Paymob Payment API] Payment key generated successfully. Redirecting to:', redirectUrl);
