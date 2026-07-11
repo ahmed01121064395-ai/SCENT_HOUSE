@@ -1,101 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
+import { createOrderFromPaymob, logOrderCreationError } from '@/lib/orderCreation';
 
+// Standard HMAC validation for Paymob webhook callbacks
 function verifyPaymobHmac(body: any, receivedHmac: string): boolean {
   const secret = process.env.PAYMOB_HMAC_SECRET || process.env.NEXT_PUBLIC_PAYMOB_HMAC_SECRET;
   if (!secret) {
-    console.warn('[Paymob Webhook] Missing PAYMOB_HMAC_SECRET. Skipping HMAC validation.');
-    return true;
+    console.warn('[Paymob Webhook] Missing PAYMOB_HMAC_SECRET. HMAC validation skipped.');
+    return true; // During placeholder/testing phase or if not configured, you might allow it or fail
   }
+
   try {
     const obj = body.obj;
     if (!obj) return false;
+
+    // Concatenate the values in the exact lexicographical/ordered sequence defined by Paymob docs:
+    // amount_cents, created_at, currency, error_occured, has_parent_transaction, id, integration_id,
+    // is_3d_secure, is_auth, is_capture, is_refunded, is_standalone_payment, is_voided, order.id,
+    // owner, pending, source_data.pan, source_data.sub_type, source_data.type, success.
     const orderId = obj.order?.id !== undefined ? obj.order.id : (obj.order || '');
     const sourcePan = obj.source_data?.pan !== undefined ? obj.source_data.pan : '';
     const sourceSubType = obj.source_data?.sub_type !== undefined ? obj.source_data.sub_type : '';
     const sourceType = obj.source_data?.type !== undefined ? obj.source_data.type : '';
+
     const hmacSource = [
-      obj.amount_cents, obj.created_at, obj.currency, obj.error_occured,
-      obj.has_parent_transaction, obj.id, obj.integration_id, obj.is_3d_secure,
-      obj.is_auth, obj.is_capture, obj.is_refunded, obj.is_standalone_payment,
-      obj.is_voided, orderId, obj.owner, obj.pending, sourcePan,
-      sourceSubType, sourceType, obj.success
+      obj.amount_cents,
+      obj.created_at,
+      obj.currency,
+      obj.error_occured,
+      obj.has_parent_transaction,
+      obj.id,
+      obj.integration_id,
+      obj.is_3d_secure,
+      obj.is_auth,
+      obj.is_capture,
+      obj.is_refunded,
+      obj.is_standalone_payment,
+      obj.is_voided,
+      orderId,
+      obj.owner,
+      obj.pending,
+      sourcePan,
+      sourceSubType,
+      sourceType,
+      obj.success
     ].join('');
-    const computedHmac = crypto.createHmac('sha512', secret).update(hmacSource).digest('hex');
+
+    const computedHmac = crypto
+      .createHmac('sha512', secret)
+      .update(hmacSource)
+      .digest('hex');
+
     return computedHmac === receivedHmac;
   } catch (err: any) {
-    console.error('[Paymob Webhook] HMAC error:', err.message);
+    console.error('[Paymob Webhook] Error calculating HMAC:', err.message);
     return false;
   }
 }
 
 export async function POST(req: NextRequest) {
   console.log('[Paymob Webhook] Received webhook call');
+
   try {
+    // Read query parameter for HMAC signature (passed by Paymob in URL: ?hmac=...)
     const { searchParams } = new URL(req.url);
     const hmac = searchParams.get('hmac');
-    if (!hmac) return NextResponse.json({ error: 'Missing hmac signature' }, { status: 400 });
+
+    if (!hmac) {
+      return NextResponse.json({ error: 'Missing hmac signature' }, { status: 400 });
+    }
 
     const body = await req.json();
-    console.log('[Paymob Webhook] Body type:', body.type, '| Transaction ID:', body.obj?.id);
+    console.log('[Paymob Webhook] Body:', JSON.stringify(body, null, 2));
 
+    // Verify signature
     const isValid = verifyPaymobHmac(body, hmac);
     if (!isValid) {
-      console.error('[Paymob Webhook] Invalid HMAC signature');
+      console.error('[Paymob Webhook] Signature verification failed');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    const type = body.type;
+    const type = body.type; // e.g. TRANSACTION
     const transaction = body.obj;
 
     if (type === 'TRANSACTION' && transaction) {
       const isSuccess = transaction.success === true || transaction.success === 'true';
-      const merchantOrderId = transaction.merchant_order_id;
+      const amount = transaction.amount_cents / 100;
+      const currency = transaction.currency;
+      
+      const paymobOrderId = transaction.order?.id || transaction.order;
+      const merchantOrderId = transaction.merchant_order_id || transaction.order?.merchant_order_id;
       const integrationId = Number(transaction.integration_id);
 
-      let paymentLabel = 'بطاقة بنكية';
-      if (integrationId === 5774297) paymentLabel = 'محفظة هاتف محمول';
-      else if (integrationId === 5774294) paymentLabel = 'دفع كشك (أمان/مصاري)';
-
-      console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Integration=${integrationId}, MerchantOrder=${merchantOrderId}`);
+      console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Amount=${amount} ${currency}, Integration=${integrationId}, PaymobOrder=${paymobOrderId}, MerchantOrder=${merchantOrderId}`);
 
       if (isSuccess) {
-        // Update the pending order to confirmed/paid
-        const { error } = await supabase
-          .from('orders')
-          .update({
-            status: 'جديد',
-            paymentMethodLabel: `${paymentLabel} - تم الدفع`
-          })
-          .eq('orderId', merchantOrderId);
-
-        if (error) {
-          console.error(`[Paymob Webhook] Failed to update order ${merchantOrderId} to paid:`, error.message);
-        } else {
-          console.log(`[Paymob Webhook] ✅ Order ${merchantOrderId} marked as PAID successfully!`);
+        if (!transaction.order) {
+          throw new Error('Transaction order object is empty - cannot create order in DB');
         }
+
+        // Trigger dynamic order creation helper
+        await createOrderFromPaymob(transaction.order, integrationId);
+        console.log(`[Paymob Webhook] Order ${merchantOrderId} processed & inserted successfully via Webhook.`);
       } else {
-        // Keep as ملغي but update the payment label to show it failed
-        const { error } = await supabase
-          .from('orders')
-          .update({
-            status: 'ملغي',
-            paymentMethodLabel: `${paymentLabel} - فشل الدفع`
-          })
-          .eq('orderId', merchantOrderId);
-
-        if (error) {
-          console.error(`[Paymob Webhook] Failed to update order ${merchantOrderId} to failed:`, error.message);
-        } else {
-          console.warn(`[Paymob Webhook] ❌ Transaction ${transaction.id} failed. Order ${merchantOrderId} marked as cancelled.`);
-        }
+        console.warn(`[Paymob Webhook] Transaction ${transaction.id} failed. Skipping database insertion (no unpaid order created).`);
+        await logOrderCreationError(merchantOrderId || 'UNKNOWN', `Paymob transaction failed with code: ${transaction.txn_response_code}`, transaction);
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error('[Paymob Webhook] Crash:', err.message);
+    console.error('[Paymob Webhook] Webhook handler crashed:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
