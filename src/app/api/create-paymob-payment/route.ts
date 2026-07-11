@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Paymob Integration Constants (hardcoded as fallback - these are non-secret integration IDs)
 const PAYMOB_CARD_INTEGRATION_ID = 5771591;
-const PAYMOB_IFRAME_ID = '38194';
+const PAYMOB_IFRAME_ID = '1058892'; // "My new card Iframe" - confirmed from Paymob account
 
 export async function POST(req: NextRequest) {
   console.log('[Paymob Payment API] Starting payment initialization...');
