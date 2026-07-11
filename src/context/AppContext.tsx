@@ -359,7 +359,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!product) return;
 
     const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
-    const existingIndex = cart.findIndex(item => item.product.id === productId && item.size.ml === sizeMl);
+    const existingIndex = cart.findIndex(item => {
+      if (item.product.id !== productId) return false;
+      if (product.category === 'gifts') {
+        return JSON.stringify(item.size?.perfumes) === JSON.stringify(sizeObj?.perfumes);
+      }
+      return item.size.ml === sizeMl;
+    });
 
     const newCart = [...cart];
     if (existingIndex > -1) {
