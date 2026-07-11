@@ -1,26 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Paymob Integration Constants (hardcoded as fallback - these are non-secret integration IDs)
+// Paymob Integration Constants (hardcoded as fallback)
 const PAYMOB_CARD_INTEGRATION_ID = 5771591;
-const PAYMOB_IFRAME_ID = '1058892'; // "My new card Iframe" - confirmed from Paymob account
+const PAYMOB_WALLET_INTEGRATION_ID = 5774297;
+const PAYMOB_KIOSK_INTEGRATION_ID = 5774294;
+const PAYMOB_IFRAME_ID = '1058892'; // "My new card Iframe"
 
 export async function POST(req: NextRequest) {
   console.log('[Paymob Payment API] Starting payment initialization...');
   try {
-    const { orderId, fullname, phone, city, address, amount, items } = await req.json();
+    const { 
+      orderId, 
+      fullname, 
+      phone, 
+      city, 
+      address, 
+      amount, 
+      items, 
+      paymentMethod = 'card', 
+      walletNumber 
+    } = await req.json();
 
     const apiKey = process.env.PAYMOB_API_KEY;
-    
-    // Use env variable if set, otherwise fall back to hardcoded value
-    const integrationId = Number(process.env.PAYMOB_CARD_INTEGRATION_ID) || PAYMOB_CARD_INTEGRATION_ID;
-    const iframeId = process.env.PAYMOB_IFRAME_ID || PAYMOB_IFRAME_ID;
-
-    console.log(`[Paymob Payment API] Using integrationId=${integrationId}, iframeId=${iframeId}`);
 
     if (!apiKey) {
       console.error('[Paymob Payment API] Missing PAYMOB_API_KEY env variable.');
       return NextResponse.json({ error: 'Missing Paymob API Key configuration on the server.' }, { status: 500 });
     }
+
+    // Determine integration ID based on payment method
+    let integrationId = PAYMOB_CARD_INTEGRATION_ID;
+    if (paymentMethod === 'wallet') {
+      integrationId = Number(process.env.PAYMOB_WALLET_INTEGRATION_ID) || PAYMOB_WALLET_INTEGRATION_ID;
+    } else if (paymentMethod === 'kiosk') {
+      integrationId = Number(process.env.PAYMOB_KIOSK_INTEGRATION_ID) || PAYMOB_KIOSK_INTEGRATION_ID;
+    } else {
+      integrationId = Number(process.env.PAYMOB_CARD_INTEGRATION_ID) || PAYMOB_CARD_INTEGRATION_ID;
+    }
+
+    const iframeId = process.env.PAYMOB_IFRAME_ID || PAYMOB_IFRAME_ID;
+
+    console.log(`[Paymob Payment API] Method: ${paymentMethod}, Integration ID: ${integrationId}`);
 
     // 1. Authenticate with Paymob
     console.log('[Paymob Payment API] Authenticating...');
@@ -76,7 +96,7 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || 'Customer';
 
     // 3. Generate Payment Key
-    console.log(`[Paymob Payment API] Generating payment key with integration_id=${integrationId}...`);
+    console.log(`[Paymob Payment API] Generating payment key for integration ${integrationId}...`);
     const paymentKeyBody = {
       auth_token: authToken,
       amount_cents: amountCents.toString(),
@@ -102,8 +122,6 @@ export async function POST(req: NextRequest) {
       lock_order_to_token: true
     };
     
-    console.log('[Paymob Payment API] Payment key request body:', JSON.stringify(paymentKeyBody, null, 2));
-    
     const paymentKeyRes = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -116,11 +134,61 @@ export async function POST(req: NextRequest) {
     }
     const { token: paymentToken } = await paymentKeyRes.json();
 
-    // 4. Build Iframe redirect url
-    const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${iframeId}?payment_token=${paymentToken}`;
+    // 4. Handle Redirection URL or Kiosk Reference API payment
+    if (paymentMethod === 'wallet' || paymentMethod === 'kiosk') {
+      console.log(`[Paymob Payment API] Requesting Pay API for ${paymentMethod}...`);
+      const payBody: any = {
+        payment_token: paymentToken
+      };
 
-    console.log('[Paymob Payment API] Payment key generated successfully. Redirecting to:', redirectUrl);
-    return NextResponse.json({ redirectUrl });
+      if (paymentMethod === 'wallet') {
+        payBody.source = {
+          identifier: walletNumber || phone,
+          subtype: 'WALLET'
+        };
+      } else {
+        // kiosk
+        payBody.source = {
+          identifier: 'AGGREGATOR',
+          subtype: 'CASH'
+        };
+      }
+
+      const payRes = await fetch('https://accept.paymob.com/api/acceptance/payments/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payBody)
+      });
+
+      if (!payRes.ok) {
+        const errText = await payRes.text();
+        console.error(`[Paymob Payment API] Pay call failed for ${paymentMethod}:`, errText);
+        return NextResponse.json({ error: `Paymob Payment Request failed: ${errText}` }, { status: 400 });
+      }
+
+      const payResult = await payRes.json();
+      console.log(`[Paymob Payment API] Pay response:`, JSON.stringify(payResult, null, 2));
+
+      if (paymentMethod === 'wallet') {
+        const redirectUrl = payResult.redirect_url || payResult.iframe_redirection_url;
+        if (!redirectUrl) {
+          return NextResponse.json({ error: 'No redirect URL returned for mobile wallet payment' }, { status: 400 });
+        }
+        return NextResponse.json({ redirectUrl });
+      } else {
+        // kiosk
+        const billReference = payResult.data?.bill_reference;
+        if (!billReference) {
+          return NextResponse.json({ error: 'No bill reference returned for kiosk cash payment' }, { status: 400 });
+        }
+        return NextResponse.json({ billReference });
+      }
+    } else {
+      // credit card - returns direct hosted checkout page iframe URL
+      const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${iframeId}?payment_token=${paymentToken}`;
+      console.log('[Paymob Payment API] Hosted credit card redirect URL generated:', redirectUrl);
+      return NextResponse.json({ redirectUrl });
+    }
   } catch (err: any) {
     console.error('[Paymob Payment API] Crash:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
