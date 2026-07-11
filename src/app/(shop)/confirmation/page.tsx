@@ -65,6 +65,9 @@ function ConfirmationContent() {
   }, [orderIdParam, lastPlacedOrder]);
 
   const order = lastPlacedOrder || dbOrder;
+  
+  const isKiosk = order?.paymentMethodLabel && order.paymentMethodLabel.includes('كود الدفع:');
+  const kioskCode = isKiosk ? order.paymentMethodLabel.split('كود الدفع:')[1]?.trim() : '';
 
   if (loading) {
     return (
@@ -99,6 +102,25 @@ function ConfirmationContent() {
           <p className="text-gray-300 max-w-lg mx-auto text-sm leading-relaxed mb-6">
             شكراً لاختيارك Scent House. تم إرسال فاتورة تفصيلية ورسالة شحن مؤقتة لهاتفك المحمول وجاري تحضير الباقة العطرية.
           </p>
+
+          {/* Kiosk Cash Payment Instruction Card */}
+          {isKiosk && kioskCode && (
+            <div className="bg-yellow-950/30 border border-yellow-600/30 text-yellow-500 rounded-lg p-5 max-w-md mx-auto my-6 text-right animate-fadeIn">
+              <div className="flex items-center gap-2 mb-2 text-lg font-bold">
+                <i className="fa-solid fa-shop gold-text"></i>
+                <span>كود الدفع عبر أمان أو مصاري</span>
+              </div>
+              <p className="text-gray-300 text-xs leading-relaxed mb-4">
+                يرجى التوجه إلى أقرب منفذ أمان (Aman) أو مصاري (Masary) خلال 24 ساعة، وإبلاغ البائع برغبتك في دفع خدمة <strong>"مدفوعات Paymob"</strong> برقم الخدمة التالي:
+              </p>
+              <div className="bg-black/40 border border-yellow-600/20 rounded p-3 text-center text-2xl font-mono font-bold tracking-wider gold-text english-num">
+                {kioskCode}
+              </div>
+              <p className="text-gray-400 text-[10px] mt-2 text-center">
+                * سيتم شحن الطلب والبدء في تجهيزه فور تأكيد الدفع تلقائياً.
+              </p>
+            </div>
+          )}
           
           {/* Invoice Info Card */}
           <div className="bg-[var(--bg-secondary)] border border-yellow-600/10 rounded-lg p-6 text-right max-w-md mx-auto my-6">
