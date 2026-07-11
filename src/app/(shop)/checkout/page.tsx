@@ -110,62 +110,22 @@ function CheckoutContent() {
       paymentMethodLabel = 'دفع كشك (أمان/مصاري) - قيد الدفع';
     }
 
-    const initialStatus = paymentMethod === 'cod' ? 'جديد' : 'ملغي';
+    // Generate a secure temporary merchant order ID for tracking online payments
+    const merchantOrderId = `SH-${Math.floor(10000 + Math.random() * 90000)}-${Date.now()}`;
 
-    // ── Step 1: Insert into orders (column names match your real schema) ──
-    const { data: orderRow, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        orderDate,        // VARCHAR - matches "orderDate" column
-        fullname,
-        phone,
-        phone2,
-        city,
-        address,
-        paymentMethodLabel,   // matches "paymentMethodLabel" column
-        subtotal: subtotal,
-        discount: discount,
-        vat: 0,
-        grandTotal,            // matches "grandTotal" column
-        status: initialStatus,  // matches CHECK constraint values
-      })
-      .select('id, "orderId"') // get back UUID id + trigger-generated orderId
-      .single();
-
-    if (orderError) {
-      const msg = `${orderError.code}: ${orderError.message}${orderError.details ? ' | ' + orderError.details : ''}`;
-      setDbError(msg);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // ── Step 2: Insert each checkout item into order_items ──
-    const itemRows = checkoutItems.map(item => ({
-      order_id: orderRow.id,              // UUID FK to orders.id
-      productId: Number(item.product.id), // INTEGER FK to products.id
-      size: item.size,                    // JSONB (full object)
-      quantity: item.quantity,
-      boxType: item.boxType || null,
-      giftMessage: item.giftMessage || null,
-    }));
-
-    const { error: itemsError } = await supabase.from('order_items').insert(itemRows);
-    if (itemsError) {
-      console.warn('order_items insert failed (non-blocking):', itemsError.message);
-    }
-
-    // ── Step 3: Handle card/wallet/kiosk payment redirect or Cash on Delivery completion ──
+    // ── Step 1: Handle card/wallet/kiosk payment redirect or Cash on Delivery completion ──
     if (paymentMethod === 'card' || paymentMethod === 'wallet' || paymentMethod === 'kiosk') {
       try {
-        console.log(`[Checkout] Initiating Paymob ${paymentMethod} payment for order:`, orderRow.orderId);
+        console.log(`[Checkout] Initiating Paymob ${paymentMethod} payment for order:`, merchantOrderId);
         const res = await fetch('/api/create-paymob-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            orderId: orderRow.orderId,
-            dbOrderId: orderRow.id,
+            orderId: merchantOrderId,
             fullname,
             phone,
+            phone2,
+            discount,
             city,
             address,
             amount: grandTotal,
@@ -187,21 +147,52 @@ function CheckoutContent() {
           // Kiosk payment returns a reference code instead of redirecting
           const billRef = data.billReference;
           finalLabel = `دفع كشك (أمان/مصاري) - كود الدفع: ${billRef}`;
-          
-          // Update the order row in DB to save the kiosk payment code
-          const { error: updateError } = await supabase
+
+          // Insert order immediately for Kiosk since it does not redirect
+          console.log(`[Checkout] Kiosk code generated successfully. Inserting order row for: ${merchantOrderId}...`);
+          const { data: orderRow, error: orderError } = await supabase
             .from('orders')
-            .update({ paymentMethodLabel: finalLabel })
-            .eq('id', orderRow.id);
-            
-          if (updateError) {
-            console.error('[Checkout] Failed to save kiosk bill reference in DB:', updateError.message);
+            .insert({
+              orderId: merchantOrderId,
+              orderDate,
+              fullname,
+              phone,
+              phone2,
+              city,
+              address,
+              paymentMethodLabel: finalLabel,
+              subtotal,
+              discount,
+              vat: 0,
+              grandTotal,
+              status: 'جديد' // Kiosk orders are registered as pending payments
+            })
+            .select('id')
+            .single();
+
+          if (orderError) {
+            throw new Error(`Failed to save Kiosk order: ${orderError.message}`);
+          }
+
+          // Insert order items
+          const itemRows = checkoutItems.map(item => ({
+            order_id: orderRow.id,
+            productId: Number(item.product.id),
+            size: item.size,
+            quantity: item.quantity,
+            boxType: item.boxType || null,
+            giftMessage: item.giftMessage || null,
+          }));
+
+          const { error: itemsError } = await supabase.from('order_items').insert(itemRows);
+          if (itemsError) {
+            console.warn('[Checkout] order_items insert failed for Kiosk order:', itemsError.message);
           }
         }
 
         // Save to context for confirmation page
         setLastPlacedOrder({
-          orderId: orderRow.orderId,
+          orderId: merchantOrderId,
           orderDate,
           fullname,
           phone,
@@ -231,36 +222,77 @@ function CheckoutContent() {
       } catch (err: any) {
         console.error('[Checkout] Paymob Payment initiation failed:', err.message);
         setDbError(`خطأ في تهيئة بوابة الدفع: ${err.message}`);
-        
-        // Cleanup order to prevent orphan unpaid records in DB
-        await supabase.from('orders').delete().eq('id', orderRow.id);
         setIsSubmitting(false);
       }
     } else {
-      setIsSubmitting(false);
-      
-      // Save to context for confirmation page
-      setLastPlacedOrder({
-        orderId: orderRow.orderId,
-        orderDate,
-        fullname,
-        phone,
-        phone2,
-        paymentMethodLabel,
-        items: [...checkoutItems],
-        subtotal: subtotal,
-        discount: discount,
-        vat: 0,
-        grandTotal
-      });
+      // ── Step 2: Handle Cash on Delivery (COD) ──
+      try {
+        console.log('[Checkout] Placing Cash on Delivery order...');
+        const { data: orderRow, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            orderDate,
+            fullname,
+            phone,
+            phone2,
+            city,
+            address,
+            paymentMethodLabel,
+            subtotal,
+            discount,
+            vat: 0,
+            grandTotal,
+            status: 'جديد',
+          })
+          .select('id, "orderId"')
+          .single();
 
-      // Clear buyNowItem if it exists, otherwise clear cart
-      if (buyNowItem) {
-        setBuyNowItem(null);
-      } else {
-        clearCart();
+        if (orderError) {
+          throw new Error(orderError.message);
+        }
+
+        // Insert items
+        const itemRows = checkoutItems.map(item => ({
+          order_id: orderRow.id,
+          productId: Number(item.product.id),
+          size: item.size,
+          quantity: item.quantity,
+          boxType: item.boxType || null,
+          giftMessage: item.giftMessage || null,
+        }));
+
+        const { error: itemsError } = await supabase.from('order_items').insert(itemRows);
+        if (itemsError) {
+          console.warn('[Checkout] order_items insert failed for COD order:', itemsError.message);
+        }
+
+        setLastPlacedOrder({
+          orderId: orderRow.orderId,
+          orderDate,
+          fullname,
+          phone,
+          phone2,
+          paymentMethodLabel,
+          items: [...checkoutItems],
+          subtotal,
+          discount,
+          vat: 0,
+          grandTotal
+        });
+
+        setIsSubmitting(false);
+
+        // Clear buyNowItem if it exists, otherwise clear cart
+        if (buyNowItem) {
+          setBuyNowItem(null);
+        } else {
+          clearCart();
+        }
+        router.push('/confirmation');
+      } catch (err: any) {
+        setDbError(`خطأ في إنشاء الطلب: ${err.message}`);
+        setIsSubmitting(false);
       }
-      router.push('/confirmation');
     }
   };
 
