@@ -581,7 +581,23 @@ ${itemListText}
                           
                           {/* Size label */}
                           <span className="text-[10px] text-gray-500 font-bold block">
-                            {item.size?.perfume1 ? (
+                            {item.size?.perfumes ? (
+                              <span className="text-yellow-500/90 font-bold block text-[10px] leading-relaxed">
+                                المكونات: {(() => {
+                                  const grouped = item.size.perfumes.reduce((acc: any, p: any) => {
+                                    const exist = acc.find((x: any) => x.name === p.name);
+                                    if (exist) {
+                                      exist.qty += 1;
+                                      exist.sizes.push(p.size);
+                                    } else {
+                                      acc.push({ name: p.name, qty: 1, sizes: [p.size] });
+                                    }
+                                    return acc;
+                                  }, []);
+                                  return grouped.map((g: any) => `${g.name} × ${g.qty} (${g.sizes.map((s: any) => s + 'مل').join(' + ')})`).join('، ');
+                                })()}
+                              </span>
+                            ) : item.size?.perfume1 ? (
                               <span className="text-yellow-500/90 font-bold block text-[10px] leading-relaxed">
                                 المكونات: {item.size.perfume1} ({item.size.perfume1Size}مل) × {item.size.perfume2} ({item.size.perfume2Size}مل)
                                 {item.size.perfume3 && ` × ${item.size.perfume3} (${item.size.perfume3Size}مل)`}
