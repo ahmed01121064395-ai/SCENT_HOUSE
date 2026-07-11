@@ -556,16 +556,16 @@ export default function ProductDetails() {
                                 type="button"
                                 onClick={handleDecrement}
                                 disabled={count === 0}
-                                className="w-6 h-6 rounded bg-neutral-800 border border-neutral-700 font-bold text-xs flex items-center justify-center text-gray-200 disabled:opacity-30 cursor-pointer"
+                              className="w-6 h-6 rounded bg-white border border-gray-300 font-bold text-xs flex items-center justify-center text-gray-700 disabled:opacity-30 cursor-pointer hover:bg-gray-100"
                               >
                                 -
                               </button>
-                              <span className="text-xs font-bold text-gray-200 min-w-[12px] text-center font-english">{count}</span>
+                              <span className="text-xs font-bold text-gray-800 min-w-[12px] text-center font-english">{count}</span>
                               <button
                                 type="button"
                                 onClick={handleIncrement}
                                 disabled={selectedSlots.length >= limit}
-                                className="w-6 h-6 rounded bg-neutral-800 border border-neutral-700 font-bold text-xs flex items-center justify-center text-gray-200 disabled:opacity-30 cursor-pointer"
+                              className="w-6 h-6 rounded bg-white border border-gray-300 font-bold text-xs flex items-center justify-center text-gray-700 disabled:opacity-30 cursor-pointer hover:bg-gray-100"
                               >
                                 +
                               </button>
