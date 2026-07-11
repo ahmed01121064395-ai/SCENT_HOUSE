@@ -12,6 +12,8 @@ function ConfirmationContent() {
   const orderIdParam = searchParams.get('orderId');
   const successParam = searchParams.get('success');
 
+  const txnParam = searchParams.get('txn');
+
   const [dbOrder, setDbOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,11 +30,39 @@ function ConfirmationContent() {
         setLoading(true);
         console.log('[Confirmation] Fetching order from DB:', orderIdParam);
         
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('orders')
           .select('*, order_items(*, product:products(*))')
           .eq('orderId', orderIdParam)
-          .single();
+          .maybeSingle();
+          
+        // Backup check: If order is not in DB yet but we have txnParam, verify with Paymob and create order
+        if (!data && txnParam) {
+          console.log('[Confirmation] Order not found in DB. Triggering verify-and-create API backup...');
+          try {
+            const verifyRes = await fetch('/api/verify-and-create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: orderIdParam, txnId: txnParam })
+            });
+            
+            if (verifyRes.ok) {
+              console.log('[Confirmation] Verify-and-create API succeeded. Fetching order again...');
+              const refetch = await supabase
+                .from('orders')
+                .select('*, order_items(*, product:products(*))')
+                .eq('orderId', orderIdParam)
+                .maybeSingle();
+              data = refetch.data;
+              error = refetch.error;
+            } else {
+              const errData = await verifyRes.json();
+              console.error('[Confirmation] Verify-and-create API failed:', errData.error);
+            }
+          } catch (err: any) {
+            console.error('[Confirmation] Error during verify-and-create API backup call:', err.message);
+          }
+        }
           
         if (!error && data) {
           const mappedOrder = {
@@ -62,7 +92,7 @@ function ConfirmationContent() {
       }
     }
     fetchOrder();
-  }, [orderIdParam, lastPlacedOrder]);
+  }, [orderIdParam, lastPlacedOrder, txnParam]);
 
   const order = lastPlacedOrder || dbOrder;
   
