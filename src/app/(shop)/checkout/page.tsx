@@ -128,7 +128,7 @@ export default function Checkout() {
     const itemRows = checkoutItems.map(item => ({
       order_id: orderRow.id,              // UUID FK to orders.id
       productId: Number(item.product.id), // INTEGER FK to products.id
-      size: { ml: item.size.ml, price: item.size.price }, // JSONB
+      size: item.size,                    // JSONB (full object)
       quantity: item.quantity,
       boxType: item.boxType || null,
       giftMessage: item.giftMessage || null,
