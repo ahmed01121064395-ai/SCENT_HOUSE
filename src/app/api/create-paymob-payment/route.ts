@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
         // kiosk
         payBody.source = {
           identifier: 'AGGREGATOR',
-          subtype: 'CASH'
+          subtype: 'AGGREGATOR'
         };
       }
 
