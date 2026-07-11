@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { supabase } from '@/lib/supabase';
 
 // Standard HMAC validation for Paymob webhook callbacks
 function verifyPaymobHmac(body: any, receivedHmac: string): boolean {
@@ -94,14 +95,33 @@ export async function POST(req: NextRequest) {
       console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Amount=${amount} ${currency}, PaymobOrder=${paymobOrderId}, MerchantOrder=${merchantOrderId}`);
 
       if (isSuccess) {
-        // TODO: Update order status to paid / processing in Supabase database
-        // const { data, error } = await supabase
-        //   .from('orders')
-        //   .update({ status: 'قيد التجهيز', paid: true })
-        //   .eq('orderId', merchantOrderId);
-        console.log(`[Paymob Webhook] Order ${merchantOrderId} marked as paid successfully!`);
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'جديد',
+            paymentMethodLabel: 'بطاقة بنكية - تم الدفع'
+          })
+          .eq('orderId', merchantOrderId);
+        
+        if (error) {
+          console.error(`[Paymob Webhook] Error updating order ${merchantOrderId} to paid:`, error.message);
+        } else {
+          console.log(`[Paymob Webhook] Order ${merchantOrderId} marked as paid successfully!`);
+        }
       } else {
-        console.warn(`[Paymob Webhook] Transaction ${transaction.id} failed/declined.`);
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'ملغي',
+            paymentMethodLabel: 'بطاقة بنكية - فشل الدفع'
+          })
+          .eq('orderId', merchantOrderId);
+        
+        if (error) {
+          console.error(`[Paymob Webhook] Error updating order ${merchantOrderId} to failed:`, error.message);
+        } else {
+          console.warn(`[Paymob Webhook] Transaction ${transaction.id} failed. Order ${merchantOrderId} marked as cancelled/failed.`);
+        }
       }
     }
 
