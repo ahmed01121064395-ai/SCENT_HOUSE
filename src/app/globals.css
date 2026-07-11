@@ -3918,48 +3918,50 @@ html[data-theme="monochrome_gold"] .offers-bottom-bar .bottom-item {
 
 .perfume-selection-card {
     cursor: pointer;
-    border: 1.5px solid #262626 !important; /* Card border: reduce border width to 1.5px */
+    border: 1.5px solid #d1d5db !important; /* Light gray border for unselected */
     border-radius: 10px;
-    padding: 10px !important; /* Card padding: maximum 10px on all sides */
+    padding: 10px !important;
     text-align: center;
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: #ffffff; /* White/light background — consistent default */
     position: relative;
     user-select: none;
     box-sizing: border-box;
 }
 
 .perfume-selection-card:hover {
-    border-color: #404040 !important;
+    border-color: #9ca3af !important;
+    background-color: #f9fafb;
 }
 
 .perfume-selection-card.selected {
-    border-color: #d4af37 !important; /* gold selected-state border, slightly thinner and cleaner (1.5px) */
-    background-color: rgba(212, 175, 55, 0.06);
+    border-color: #d4af37 !important; /* Gold border — only visual difference for selected */
+    border-width: 2px !important;
+    background-color: rgba(212, 175, 55, 0.04); /* Very faint gold tint */
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
 }
 
 .perfume-selection-card-img-wrapper {
     position: relative;
     width: 100%;
-    max-width: 140px; /* Card image size: maximum of 140px width */
-    height: 100px; /* Scaled height to fit mobile viewport */
-    max-height: 180px; /* Card image size: maximum of 180px height */
+    max-width: 140px;
+    height: 100px;
+    max-height: 180px;
     aspect-ratio: 140/180;
     border-radius: 6px;
     overflow: hidden;
-    background-color: #0c0c0c;
-    border: 1px solid #1a1a1a;
+    background-color: #f3f4f6; /* Light gray image background */
+    border: 1px solid #e5e7eb;
 }
 
 .perfume-selection-card-name {
-    font-size: 15px !important; /* Perfume name text: font-size 15px */
-    font-weight: 600 !important; /* font-weight semibold */
-    color: #e5e7eb;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #111827; /* Dark text for readability on light background */
     line-clamp: 1;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -3969,8 +3971,8 @@ html[data-theme="monochrome_gold"] .offers-bottom-bar .bottom-item {
 }
 
 .perfume-selection-card-category {
-    font-size: 12px !important; /* Category label under the name: font-size 12px */
-    color: #737373;
+    font-size: 12px !important;
+    color: #6b7280; /* Medium gray — readable on white */
 }
 
 @media (min-width: 768px) {
