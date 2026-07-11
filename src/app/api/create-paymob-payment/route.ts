@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
       orderId, 
       fullname, 
       phone, 
+      phone2,
+      discount = 0,
       city, 
       address, 
       amount, 
@@ -74,10 +76,18 @@ export async function POST(req: NextRequest) {
             const perfumesList = item.size.perfumes.map((p: any) => p.name).join(', ');
             itemName = `${itemName} (${perfumesList})`;
           }
+          // Serialize item metadata inside description field
+          const itemMeta = {
+            productId: Number(item.product.id),
+            ml: Number(item.size.ml),
+            price: Number(item.size.price),
+            boxType: item.boxType || null,
+            giftMessage: item.giftMessage || null
+          };
           return {
             name: itemName.substring(0, 80),
             amount_cents: Math.round(item.size.price * 100).toString(),
-            description: item.product?.description?.substring(0, 150) || 'Scent House Item',
+            description: JSON.stringify(itemMeta),
             quantity: item.quantity.toString()
           };
         })
@@ -103,7 +113,7 @@ export async function POST(req: NextRequest) {
       expiration: 3600,
       order_id: paymobOrder.id,
       billing_data: {
-        apartment: 'NA',
+        apartment: phone2 || 'NA', // Store phone2 in apartment
         email: 'customer@scenthouse.com',
         floor: 'NA',
         first_name: firstName,
@@ -111,11 +121,11 @@ export async function POST(req: NextRequest) {
         building: 'NA',
         phone_number: phone,
         shipping_method: 'NA',
-        postal_code: 'NA',
+        postal_code: discount.toString(), // Store discount in postal_code
         city: city || 'Cairo',
         country: 'EG',
         last_name: lastName,
-        state: 'NA'
+        state: paymentMethod // Store paymentMethod in state
       },
       currency: 'EGP',
       integration_id: integrationId,
