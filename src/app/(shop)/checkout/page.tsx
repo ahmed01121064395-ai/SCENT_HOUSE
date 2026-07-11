@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
-export default function Checkout() {
+function CheckoutContent() {
   const router = useRouter();
   const {
     cart,
@@ -29,6 +29,16 @@ export default function Checkout() {
   const [walletType, setWalletType] = useState<'mobile' | 'instapay' | null>(null);
   const [isAppleDevice, setIsAppleDevice] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+  const errorParam = searchParams.get('error');
+  const [paymobError, setPaymobError] = useState('');
+
+  useEffect(() => {
+    if (errorParam === 'paymob_failed') {
+      setPaymobError('لم تتم عملية الدفع، برجاء المحاولة مرة أخرى.');
+    }
+  }, [errorParam]);
 
   useEffect(() => {
     // Check if device is Apple (Mac, iPhone, iPad) and is running Safari or supports Apple Pay
@@ -72,8 +82,8 @@ export default function Checkout() {
     setIsSubmitting(true);
     setDbError('');
 
-    if (paymentMethod !== 'cod') {
-      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار الدفع عند الاستلام لإتمام الطلب.');
+    if (paymentMethod !== 'cod' && paymentMethod !== 'card') {
+      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار الدفع عند الاستلام أو الدفع بالبطاقة البنكية لإتمام الطلب.');
       setIsSubmitting(false);
       return;
     }
@@ -86,7 +96,7 @@ export default function Checkout() {
     if (paymentMethod === 'applepay') {
       paymentMethodLabel = 'Apple Pay';
     } else if (paymentMethod === 'card') {
-      paymentMethodLabel = 'الدفع بالبطاقة (فيزا/ماستركارد)';
+      paymentMethodLabel = 'بطاقة بنكية - قيد الدفع';
     } else if (paymentMethod === 'wallet') {
       if (walletType === 'mobile') {
         paymentMethodLabel = 'المحفظة الإلكترونية - محفظة الهاتف المحمول';
@@ -139,30 +149,84 @@ export default function Checkout() {
       console.warn('order_items insert failed (non-blocking):', itemsError.message);
     }
 
-    setIsSubmitting(false);
+    // ── Step 3: Handle card payment redirect or Cash on Delivery completion ──
+    if (paymentMethod === 'card') {
+      try {
+        console.log('[Checkout] Initiating Paymob card payment for order:', orderRow.orderId);
+        const res = await fetch('/api/create-paymob-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderRow.orderId,
+            dbOrderId: orderRow.id,
+            fullname,
+            phone,
+            city,
+            address,
+            amount: grandTotal,
+            items: checkoutItems
+          })
+        });
 
-    // ── Step 3: Save to context for confirmation page ──
-    setLastPlacedOrder({
-      orderId: orderRow.orderId,   // use the DB-generated SH-XXXXX id
-      orderDate,
-      fullname,
-      phone,
-      phone2,
-      paymentMethodLabel,
-      items: [...checkoutItems],
-      subtotal: subtotal,
-      discount: discount,
-      vat: 0,
-      grandTotal
-    });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Failed to initialize payment at Paymob');
+        }
 
-    // Clear buyNowItem if it exists, otherwise clear cart
-    if (buyNowItem) {
-      setBuyNowItem(null);
+        const { redirectUrl } = await res.json();
+        
+        // Save to context for confirmation page
+        setLastPlacedOrder({
+          orderId: orderRow.orderId,
+          orderDate,
+          fullname,
+          phone,
+          phone2,
+          paymentMethodLabel,
+          items: [...checkoutItems],
+          subtotal: subtotal,
+          discount: discount,
+          vat: 0,
+          grandTotal
+        });
+
+        setIsSubmitting(false);
+        // Redirect client to Paymob checkout
+        window.location.href = redirectUrl;
+      } catch (err: any) {
+        console.error('[Checkout] Paymob Payment initiation failed:', err.message);
+        setDbError(`خطأ في تهيئة بوابة الدفع: ${err.message}`);
+        
+        // Cleanup order to prevent orphan unpaid records in DB
+        await supabase.from('orders').delete().eq('id', orderRow.id);
+        setIsSubmitting(false);
+      }
     } else {
-      clearCart();
+      setIsSubmitting(false);
+      
+      // Save to context for confirmation page
+      setLastPlacedOrder({
+        orderId: orderRow.orderId,
+        orderDate,
+        fullname,
+        phone,
+        phone2,
+        paymentMethodLabel,
+        items: [...checkoutItems],
+        subtotal: subtotal,
+        discount: discount,
+        vat: 0,
+        grandTotal
+      });
+
+      // Clear buyNowItem if it exists, otherwise clear cart
+      if (buyNowItem) {
+        setBuyNowItem(null);
+      } else {
+        clearCart();
+      }
+      router.push('/confirmation');
     }
-    router.push('/confirmation');
   };
 
   if (checkoutItems.length === 0) {
@@ -301,10 +365,14 @@ export default function Checkout() {
 
                   {/* Option 2: Credit/Debit Card */}
                   <div
-                    className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'card' ? 'active' : ''}`}
-                    onClick={() => handleDisabledPaymentSelect('card')}
+                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'card' ? 'active' : ''}`}
+                    onClick={() => {
+                      setPaymentMethod('card');
+                      setWalletType(null);
+                      setActiveTooltip(null);
+                      setPaymobError('');
+                    }}
                   >
-                    <span className="payment-option-badge-soon">قريباً</span>
                     <i className="fa-solid fa-credit-card text-xl"></i>
                     <span className="payment-option-title text-xs mt-1 block">بطاقة بنكية</span>
                   </div>
@@ -359,6 +427,14 @@ export default function Checkout() {
                   <div className="bg-yellow-950/20 border border-yellow-600/30 text-yellow-500 text-xs p-3 rounded-lg text-center mt-3 flex items-center justify-center gap-1.5 animate-fadeIn">
                     <i className="fa-solid fa-circle-info"></i>
                     {activeTooltip}
+                  </div>
+                )}
+
+                {/* Paymob Error display */}
+                {paymobError && (
+                  <div className="bg-red-950/20 border border-red-600/30 text-red-400 text-xs p-3 rounded-lg text-center mt-3 flex items-center justify-center gap-1.5 animate-fadeIn">
+                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    {paymobError}
                   </div>
                 )}
 
@@ -492,5 +568,18 @@ export default function Checkout() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Checkout() {
+  return (
+    <React.Suspense fallback={
+      <div className="text-center py-48 text-gray-400">
+        <i className="fa-solid fa-spinner fa-spin text-4xl mb-4 gold-text"></i>
+        <p>جاري تحميل صفحة الدفع...</p>
+      </div>
+    }>
+      <CheckoutContent />
+    </React.Suspense>
   );
 }
