@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+// The correct production domain — hardcoded to avoid env var misconfiguration issues
+const PRODUCTION_URL = 'https://scent-house-nine.vercel.app';
+
 export async function GET(req: NextRequest) {
   console.log('[Paymob Callback GET] Redirect callback received.');
   try {
@@ -13,8 +16,7 @@ export async function GET(req: NextRequest) {
 
     console.log(`[Paymob Callback GET] Redirect details: success=${success}, merchant_order_id=${merchantOrderId}, order=${orderId}, transaction=${txnId}`);
 
-    // Read the app base URL from environment variables, fallback to window origin on client or standard domain
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://scent-house-nine.vercel.app';
+    const baseUrl = PRODUCTION_URL;
 
     if (success === 'true' && merchantOrderId) {
       console.log(`[Paymob Callback GET] Payment succeeded! Redirecting to confirmation for ${merchantOrderId}`);
@@ -25,7 +27,6 @@ export async function GET(req: NextRequest) {
     }
   } catch (err: any) {
     console.error('[Paymob Callback GET] Callback router crashed:', err.message);
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://scent-house-nine.vercel.app';
-    return NextResponse.redirect(`${baseUrl}/checkout?error=paymob_failed`);
+    return NextResponse.redirect(`${PRODUCTION_URL}/checkout?error=paymob_failed`);
   }
 }
