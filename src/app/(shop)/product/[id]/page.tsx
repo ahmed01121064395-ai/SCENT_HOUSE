@@ -557,7 +557,7 @@ export default function ProductDetails() {
                       <h4 className="text-gray-300 font-bold text-sm">اختر عطورك المفضلة:</h4>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto p-1 scrollbar-thin">
+                    <div className="perfumes-grid max-h-[300px] overflow-y-auto p-1 scrollbar-thin">
                       {products
                         .filter(p => {
                           if (product.id === 9) return p.category === 'men';
@@ -582,23 +582,19 @@ export default function ProductDetails() {
                             <div
                               key={p.id}
                               onClick={handleSelect}
-                              className={`cursor-pointer border rounded-xl p-2 text-center transition-all flex flex-col items-center gap-1.5 ${
-                                isSelected
-                                  ? 'border-amber-500 bg-amber-500/5 shadow-[0_0_10px_rgba(212,175,55,0.15)]'
-                                  : 'border-gray-800 bg-black/20 hover:border-gray-700'
-                              }`}
+                              className={`perfume-selection-card ${isSelected ? 'selected' : ''}`}
                             >
-                              <div className="relative w-16 h-20 rounded overflow-hidden bg-neutral-900 border border-neutral-800">
+                              <div className="perfume-selection-card-img-wrapper">
                                 <Image
                                   src={p.image}
                                   alt={p.name}
                                   fill
-                                  sizes="80px"
+                                  sizes="120px"
                                   className="object-contain p-1"
                                 />
                               </div>
-                              <span className="text-xs font-bold text-gray-200 line-clamp-1">{p.name.split(' - ')[0]}</span>
-                              <span className="text-[10px] text-gray-500">
+                              <span className="perfume-selection-card-name">{p.name.split(' - ')[0]}</span>
+                              <span className="perfume-selection-card-category">
                                 {p.category === 'men' ? 'رجالي' : 'نسائي'}
                               </span>
                             </div>
