@@ -152,8 +152,21 @@ export async function POST(req: NextRequest) {
       };
 
       if (paymentMethod === 'wallet') {
+        const rawNumber = walletNumber || phone || '';
+        let cleaned = rawNumber.replace(/\D/g, ''); // Keep only digits
+        if (cleaned.startsWith('20') && cleaned.length > 10) {
+          cleaned = cleaned.slice(2);
+        } else if (cleaned.startsWith('0020') && cleaned.length > 12) {
+          cleaned = cleaned.slice(4);
+        }
+        // Prefix with 0 if it is a 10-digit number starting with 1 (e.g. 10xxxxxxxx -> 010xxxxxxxx)
+        if (cleaned.length === 10 && cleaned.startsWith('1')) {
+          cleaned = '0' + cleaned;
+        }
+        
+        console.log(`[Paymob Payment API] Sanitized wallet identifier: ${cleaned}`);
         payBody.source = {
-          identifier: walletNumber || phone,
+          identifier: cleaned,
           subtype: 'WALLET'
         };
       } else {
