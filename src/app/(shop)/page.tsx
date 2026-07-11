@@ -104,16 +104,7 @@ export default function Home() {
   return (
     <div id="view-home" className="active">
       {/* Premium Fullscreen Hero Banner */}
-      <div className="hero-section" style={{ backgroundImage: "url('/images/background.jpg')" }}>
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="hero-video-bg"
-        >
-          <source src="/videos/vidback.mp4" type="video/mp4" />
-        </video>
+      <div className="hero-section" style={{ backgroundImage: "url('/images/hero_sharp.jpg')" }}>
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title gold-text">{settings?.hero_title || "عطرٌ يليقُ بفخامتِك"}</h1>
@@ -129,60 +120,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom Feature Bar */}
-      <div className="hero-features-bar">
-        <div className="hero-features-container">
-          {homepageFeatures && homepageFeatures.length > 0 ? (
-            homepageFeatures.map((f: any, idx: number) => {
-              const parts = f.title.split('*');
-              const title = parts[0]?.trim() || '';
-              const description = parts[1]?.trim() || '';
-              return (
-                <div className="feature-card" key={f.id || idx}>
-                  <div className="feature-card-icon">
-                    <i className={`fa-solid ${f.icon}`}></i>
-                  </div>
-                  <div className="feature-card-content text-right">
-                    <h4 className="feature-card-title">{title}</h4>
-                    {description && <p className="feature-card-desc">{description}</p>}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <>
-              <div className="feature-card">
-                <div className="feature-card-icon"><i className="fa-solid fa-gem"></i></div>
-                <div className="feature-card-content text-right">
-                  <h4 className="feature-card-title">مكونات طبيعية نادرة</h4>
-                  <p className="feature-card-desc">زيوت عطرية مختارة بعناية فائقة ونقاوة 100%</p>
-                </div>
-              </div>
-              <div className="feature-card">
-                <div className="feature-card-icon"><i className="fa-solid fa-crown"></i></div>
-                <div className="feature-card-content text-right">
-                  <h4 className="feature-card-title">فخامة ملكية</h4>
-                  <p className="feature-card-desc">روائح وتصاميم مميزة تعكس الهوية العطرية الأصيلة</p>
-                </div>
-              </div>
-              <div className="feature-card">
-                <div className="feature-card-icon"><i className="fa-solid fa-hourglass-half"></i></div>
-                <div className="feature-card-content text-right">
-                  <h4 className="feature-card-title">ثبات ممتد</h4>
-                  <p className="feature-card-desc">أداء وتأثير يدوم لساعات طويلة لتجربة حضور لافت</p>
-                </div>
-              </div>
-              <div className="feature-card">
-                <div className="feature-card-icon"><i className="fa-solid fa-truck-fast"></i></div>
-                <div className="feature-card-content text-right">
-                  <h4 className="feature-card-title">شحن سريع وآمن</h4>
-                  <p className="feature-card-desc">تغليف فاخر وشحن سريع لجميع محافظات مصر</p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+
 
       {/* Featured Categories Section */}
       <div className="section-wrapper">
@@ -546,6 +484,40 @@ export default function Home() {
               sizes="(max-width: 800px) 100vw, 800px"
             />
           </a>
+        </div>
+      </div>
+
+      {/* Bottom Feature Bar */}
+      <div className="hero-features-bar" style={{ marginTop: '80px', marginBottom: '40px' }}>
+        <div className="hero-features-container">
+          <div className="feature-card">
+            <div className="feature-card-icon"><i className="fa-solid fa-hourglass-half"></i></div>
+            <div className="feature-card-content text-right">
+              <h4 className="feature-card-title">عطور معتقة بعناية</h4>
+              <p className="feature-card-desc">نُعتق جميع العطور قبل البيع للحصول على أفضل ثبات وفوحان</p>
+            </div>
+          </div>
+          <div className="feature-card">
+            <div className="feature-card-icon"><i className="fa-solid fa-gem"></i></div>
+            <div className="feature-card-content text-right">
+              <h4 className="feature-card-title">خامات عالية الجودة</h4>
+              <p className="feature-card-desc">زيوت عطرية مختارة بعناية لتجربة عطرية مميزة</p>
+            </div>
+          </div>
+          <div className="feature-card">
+            <div className="feature-card-icon"><i className="fa-solid fa-crown"></i></div>
+            <div className="feature-card-content text-right">
+              <h4 className="feature-card-title">ثبات وفوحان مميز</h4>
+              <p className="feature-card-desc">أداء يدوم لساعات ويمنحك حضورًا لافتًا</p>
+            </div>
+          </div>
+          <div className="feature-card">
+            <div className="feature-card-icon"><i className="fa-solid fa-truck-fast"></i></div>
+            <div className="feature-card-content text-right">
+              <h4 className="feature-card-title">شحن سريع لجميع المحافظات</h4>
+              <p className="feature-card-desc">تغليف آمن وشحن سريع مع متابعة الطلب حتى الاستلام</p>
+            </div>
+          </div>
         </div>
       </div>
 
