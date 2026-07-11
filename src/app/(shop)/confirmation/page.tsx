@@ -80,12 +80,28 @@ export default function Confirmation() {
                   >
                     <td className="py-3 font-medium">
                       {item.product.name.split(' - ')[0]}
-                      {item.size?.perfume1 && (
+                      {item.size?.perfumes ? (
+                        <span className="block text-[10px] text-gray-400">
+                          المكونات: {(() => {
+                            const grouped = item.size.perfumes.reduce((acc: any, p: any) => {
+                              const exist = acc.find((x: any) => x.name === p.name);
+                              if (exist) {
+                                exist.qty += 1;
+                                exist.sizes.push(p.size);
+                              } else {
+                                acc.push({ name: p.name, qty: 1, sizes: [p.size] });
+                              }
+                              return acc;
+                            }, []);
+                            return grouped.map((g: any) => `${g.name} × ${g.qty} (${g.sizes.map((s: any) => s + 'مل').join(' + ')})`).join('، ');
+                          })()}
+                        </span>
+                      ) : item.size?.perfume1 ? (
                         <span className="block text-[10px] text-gray-400">
                           المكونات: {item.size.perfume1} ({item.size.perfume1Size}مل) × {item.size.perfume2} ({item.size.perfume2Size}مل)
                           {item.size.perfume3 && ` × ${item.size.perfume3} (${item.size.perfume3Size}مل)`}
                         </span>
-                      )}
+                      ) : null}
                       {item.boxType && (
                         <span className="block text-[10px] text-yellow-500/80">
                           تغليف: {item.boxType === 'royal' ? 'ملكي فاخر' : 'بسيط'}
