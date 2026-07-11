@@ -1,115 +1,109 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
 function ConfirmationContent() {
-  const { lastPlacedOrder, clearCart, setLastPlacedOrder } = useApp();
+  const { lastPlacedOrder, clearCart } = useApp();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const orderIdParam = searchParams.get('orderId');
   const successParam = searchParams.get('success');
+
   const txnParam = searchParams.get('txn');
 
   const [dbOrder, setDbOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  // Clear cart on successful payment arrival
+  // Clear cart if card payment success is verified
   useEffect(() => {
     if (successParam === 'true') {
       clearCart();
     }
   }, [successParam, clearCart]);
 
-  // Fetch or poll for the order from DB
   useEffect(() => {
-    if (!orderIdParam) return;
-    if (lastPlacedOrder && lastPlacedOrder.orderId === orderIdParam) return; // already have it in context
-
-    let cancelled = false;
-    let pollCount = 0;
-    const MAX_POLLS = 8;
-
-    async function fetchAndPoll() {
-      setLoading(true);
-      console.log('[Confirmation] Fetching order from DB:', orderIdParam);
-
-      while (!cancelled && pollCount < MAX_POLLS) {
-        const { data, error } = await supabase
+    async function fetchOrder() {
+      if (!lastPlacedOrder && orderIdParam) {
+        setLoading(true);
+        console.log('[Confirmation] Fetching order from DB:', orderIdParam);
+        
+        let { data, error } = await supabase
           .from('orders')
           .select('*, order_items(*, product:products(*))')
           .eq('orderId', orderIdParam)
           .maybeSingle();
-
-        if (data) {
-          const isConfirmed = data.status === 'جديد';
-          if (isConfirmed || pollCount >= MAX_POLLS - 1) {
-            // Order found and confirmed (or we've polled enough)
-            const mappedOrder = {
-              orderId: data.orderId,
-              orderDate: data.orderDate,
-              fullname: data.fullname,
-              phone: data.phone,
-              phone2: data.phone2,
-              paymentMethodLabel: data.paymentMethodLabel,
-              items: (data.order_items || []).map((oi: any) => ({
-                product: oi.product,
-                size: oi.size,
-                quantity: oi.quantity,
-                boxType: oi.boxType,
-                giftMessage: oi.giftMessage
-              })),
-              subtotal: data.subtotal,
-              discount: data.discount,
-              vat: data.vat || 0,
-              grandTotal: data.grandTotal
-            };
-            if (!cancelled) {
-              setDbOrder(mappedOrder);
-              setPaymentConfirmed(isConfirmed);
-              setLoading(false);
+          
+        // Backup check: If order is not in DB yet but we have txnParam, verify with Paymob and create order
+        if (!data && txnParam) {
+          console.log('[Confirmation] Order not found in DB. Triggering verify-and-create API backup...');
+          try {
+            const verifyRes = await fetch('/api/verify-and-create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: orderIdParam, txnId: txnParam })
+            });
+            
+            if (verifyRes.ok) {
+              console.log('[Confirmation] Verify-and-create API succeeded. Fetching order again...');
+              const refetch = await supabase
+                .from('orders')
+                .select('*, order_items(*, product:products(*))')
+                .eq('orderId', orderIdParam)
+                .maybeSingle();
+              data = refetch.data;
+              error = refetch.error;
+            } else {
+              const errData = await verifyRes.json();
+              console.error('[Confirmation] Verify-and-create API failed:', errData.error);
             }
-            return;
-          } else {
-            // Order exists but still pending (ملغي) — wait for webhook
-            console.log(`[Confirmation] Order found but still pending (poll ${pollCount + 1}/${MAX_POLLS})...`);
-            pollCount++;
-            await new Promise(r => setTimeout(r, 2000)); // wait 2s
+          } catch (err: any) {
+            console.error('[Confirmation] Error during verify-and-create API backup call:', err.message);
           }
+        }
+          
+        if (!error && data) {
+          const mappedOrder = {
+            orderId: data.orderId,
+            orderDate: data.orderDate,
+            fullname: data.fullname,
+            phone: data.phone,
+            phone2: data.phone2,
+            paymentMethodLabel: data.paymentMethodLabel,
+            items: data.order_items.map((oi: any) => ({
+              product: oi.product || { name: 'عطر خاص', category: 'custom' },
+              size: oi.size,
+              quantity: oi.quantity,
+              boxType: oi.boxType,
+              giftMessage: oi.giftMessage
+            })),
+            subtotal: data.subtotal,
+            discount: data.discount,
+            vat: data.vat || 0,
+            grandTotal: data.grandTotal
+          };
+          setDbOrder(mappedOrder);
         } else {
           console.error('[Confirmation] Order not found in DB:', error?.message);
-          if (!cancelled) setLoading(false);
-          return;
         }
+        setLoading(false);
       }
-      if (!cancelled) setLoading(false);
     }
+    fetchOrder();
+  }, [orderIdParam, lastPlacedOrder, txnParam]);
 
-    fetchAndPoll();
-    return () => { cancelled = true; };
-  }, [orderIdParam, lastPlacedOrder]);
-
-  // Derive displayed order
-  const contextOrder = lastPlacedOrder?.orderId === orderIdParam ? lastPlacedOrder : null;
-  const order = contextOrder || dbOrder;
-
+  const order = lastPlacedOrder || dbOrder;
+  
   const isKiosk = order?.paymentMethodLabel && order.paymentMethodLabel.includes('كود الدفع:');
   const kioskCode = isKiosk ? order.paymentMethodLabel.split('كود الدفع:')[1]?.trim() : '';
-
-  const handleNavigateAway = useCallback(() => {
-    setLastPlacedOrder(null); // Clear so user isn't stuck
-  }, [setLastPlacedOrder]);
 
   if (loading) {
     return (
       <div className="text-center py-48 text-gray-400">
         <i className="fa-solid fa-spinner fa-spin text-4xl mb-4 gold-text"></i>
-        <p className="mb-2">جاري تأكيد عملية الدفع...</p>
-        <p className="text-sm opacity-60">يرجى الانتظار بضع ثوانٍ</p>
+        <p className="mb-6">جاري تحميل تفاصيل الطلب...</p>
       </div>
     );
   }
@@ -119,7 +113,7 @@ function ConfirmationContent() {
       <div className="text-center py-48 text-gray-400">
         <i className="fa-solid fa-receipt text-4xl mb-4 gold-text"></i>
         <p className="mb-6">لا يوجد أي تفاصيل طلب نشط لعرضها حالياً.</p>
-        <Link href="/" className="btn-premium" onClick={handleNavigateAway}>
+        <Link href="/" className="btn-premium">
           العودة للرئيسية
         </Link>
       </div>
@@ -205,7 +199,7 @@ function ConfirmationContent() {
                     className="border-b border-yellow-600/5 text-gray-300 text-sm last:border-0"
                   >
                     <td className="py-3 font-medium">
-                      {item.product.name.split(' - ')[0]}
+                      {item.product?.name ? item.product.name.split(' - ')[0] : 'عطر خاص'}
                       {item.size?.perfumes ? (
                         <span className="block text-[10px] text-gray-400">
                           المكونات: {(() => {
@@ -235,10 +229,10 @@ function ConfirmationContent() {
                       )}
                     </td>
                     <td className="py-3 english-num">
-                      {item.product.category === 'gifts' ? 'صندوق فاخر' : item.product.category === 'offer' ? 'عرض خاص' : `${item.size.ml}ml`}
+                      {item.product?.category === 'gifts' ? 'صندوق فاخر' : item.product?.category === 'offer' ? 'عرض خاص' : `${item.size?.ml || 50}ml`}
                     </td>
                     <td className="py-3 english-num">{item.quantity}</td>
-                    <td className="py-3 text-left font-mono english-num">{item.size.price * item.quantity} ج.م</td>
+                    <td className="py-3 text-left font-mono english-num">{(item.size?.price || 0) * item.quantity} ج.م</td>
                   </tr>
                 ))}
               </tbody>
