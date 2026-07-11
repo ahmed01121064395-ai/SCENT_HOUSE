@@ -45,38 +45,44 @@ export default function ProductDetails() {
   const [giftMessage, setGiftMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
 
-  // Custom Gift Box States
-  const [perfume1, setPerfume1] = useState('نقاء');
-  const [perfume1Size, setPerfume1Size] = useState(50);
-  const [perfume2, setPerfume2] = useState('هيبة');
-  const [perfume2Size, setPerfume2Size] = useState(50);
-  const [perfume3, setPerfume3] = useState('نبض');
-  const [perfume3Size, setPerfume3Size] = useState(50);
+  // Custom Gift Box Wizard States
+  const [mixedVariant, setMixedVariant] = useState<'2' | '3'>('2');
+  const [selectedPerfumes, setSelectedPerfumes] = useState<Product[]>([]);
+  const [uniformSizeMl, setUniformSizeMl] = useState<number>(30);
+  const [perfumeSizes, setPerfumeSizes] = useState<{ [id: number]: number }>({});
+  const [activeStep, setActiveStep] = useState<number>(1);
 
-  const getPriceForSize = (ml: number) => {
-    const sz = product?.sizes.find(s => s.ml === ml);
-    return sz ? sz.price : 350;
+  const getPerfumePrice = (p: Product, ml: number) => {
+    const sz = p.sizes.find(s => s.ml === ml);
+    return sz ? sz.price : (ml === 30 ? 350 : 450);
   };
 
   const dynamicPrice = (() => {
     if (!product || product.category !== 'gifts') return null;
     
-    if (product.id === 9) {
-      const p1Price = getPriceForSize(perfume1Size);
-      const p2Price = getPriceForSize(perfume2Size);
-      return p1Price + p2Price - 50;
+    const count = product.id === 13 && mixedVariant === '2' ? 2 : 3;
+    let sum = 0;
+    
+    for (let i = 0; i < count; i++) {
+      const p = selectedPerfumes[i];
+      if (p) {
+        const ml = (product.id === 13 && mixedVariant === '2') ? (perfumeSizes[p.id] || 30) : uniformSizeMl;
+        sum += getPerfumePrice(p, ml);
+      } else {
+        const ml = (product.id === 13 && mixedVariant === '2') ? 30 : uniformSizeMl;
+        sum += (ml === 30 ? 350 : 450);
+      }
     }
     
-    if (product.id === 11 || product.id === 12) {
-      const p1Price = getPriceForSize(perfume1Size);
-      const p2Price = getPriceForSize(perfume2Size);
-      const p3Price = getPriceForSize(perfume3Size);
-      return p1Price + p2Price + p3Price - 50;
-    }
+    return sum - 50; // flat 50 EGP discount
+  })();
+
+  const isSelectionComplete = (() => {
+    if (!product) return false;
+    if (product.category !== 'gifts') return true;
     
-    const p1Price = getPriceForSize(perfume1Size);
-    const p2Price = getPriceForSize(perfume2Size);
-    return p1Price + p2Price - 50;
+    const requiredPerfumeCount = product.id === 13 && mixedVariant === '2' ? 2 : 3;
+    return selectedPerfumes.length === requiredPerfumeCount;
   })();
 
   useEffect(() => {
@@ -118,9 +124,13 @@ export default function ProductDetails() {
       setQty(1);
       setBoxType('عطور رجالية');
       setGiftMessage('');
-      setPerfume1Size(50);
-      setPerfume2Size(50);
-      setPerfume3Size(50);
+      
+      // Reset custom gift box wizard states
+      setMixedVariant('2');
+      setSelectedPerfumes([]);
+      setUniformSizeMl(30);
+      setPerfumeSizes({});
+      setActiveStep(1);
     }
   }, [product]);
 
@@ -200,22 +210,32 @@ export default function ProductDetails() {
     }
 
     if (product.category === 'gifts') {
+      if (!isSelectionComplete) return;
       const customSizeObj = {
-        ml: perfume1Size,
+        isCustomGift: true,
+        box_type: product.id === 9 ? 'رجالي' : product.id === 11 ? 'نسائي' : 'مشترك',
+        box_variant: product.id === 13 ? (mixedVariant === '2' ? '2_perfumes' : '3_perfumes') : '3_perfumes',
+        ml: 100,
         price: dynamicPrice,
-        perfume1,
-        perfume1Size,
-        perfume2,
-        perfume2Size,
-        perfume3: (product.id === 11 || product.id === 12) ? perfume3 : undefined,
-        perfume3Size: (product.id === 11 || product.id === 12) ? perfume3Size : undefined
+        perfumes: selectedPerfumes.map(p => ({
+          id: p.id,
+          name: p.name.split(' - ')[0],
+          size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[p.id] || 30) : uniformSizeMl
+        })),
+        // Legacy compat fields
+        perfume1: selectedPerfumes[0]?.name.split(' - ')[0],
+        perfume1Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[0]?.id] || 30) : uniformSizeMl,
+        perfume2: selectedPerfumes[1]?.name.split(' - ')[0],
+        perfume2Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[1]?.id] || 30) : uniformSizeMl,
+        perfume3: selectedPerfumes[2]?.name.split(' - ')[0],
+        perfume3Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[2]?.id] || 30) : uniformSizeMl
       };
       addToCart(
         product.id,
         100,
         qty,
         undefined,
-        giftMessage,
+        undefined,
         customSizeObj
       );
     } else {
@@ -239,22 +259,32 @@ export default function ProductDetails() {
     }
 
     if (product.category === 'gifts') {
+      if (!isSelectionComplete) return;
       const customSizeObj = {
-        ml: perfume1Size,
+        isCustomGift: true,
+        box_type: product.id === 9 ? 'رجالي' : product.id === 11 ? 'نسائي' : 'مشترك',
+        box_variant: product.id === 13 ? (mixedVariant === '2' ? '2_perfumes' : '3_perfumes') : '3_perfumes',
+        ml: 100,
         price: dynamicPrice,
-        perfume1,
-        perfume1Size,
-        perfume2,
-        perfume2Size,
-        perfume3: (product.id === 11 || product.id === 12) ? perfume3 : undefined,
-        perfume3Size: (product.id === 11 || product.id === 12) ? perfume3Size : undefined
+        perfumes: selectedPerfumes.map(p => ({
+          id: p.id,
+          name: p.name.split(' - ')[0],
+          size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[p.id] || 30) : uniformSizeMl
+        })),
+        // Legacy compat fields
+        perfume1: selectedPerfumes[0]?.name.split(' - ')[0],
+        perfume1Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[0]?.id] || 30) : uniformSizeMl,
+        perfume2: selectedPerfumes[1]?.name.split(' - ')[0],
+        perfume2Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[1]?.id] || 30) : uniformSizeMl,
+        perfume3: selectedPerfumes[2]?.name.split(' - ')[0],
+        perfume3Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[2]?.id] || 30) : uniformSizeMl
       };
       buyNow(
         product.id,
         100,
         qty,
         undefined,
-        giftMessage,
+        undefined,
         customSizeObj
       );
     } else {
@@ -409,7 +439,7 @@ export default function ProductDetails() {
             </div>
 
             {/* Size Selector */}
-            {product.sizes.length > 1 && (
+            {product.category !== 'gifts' && product.sizes.length > 1 && (
               <div className="filter-group">
                 <h4 className="filter-title">الحجم المتوفر:</h4>
                 <div className="size-selector">
@@ -423,6 +453,277 @@ export default function ProductDetails() {
                       {sz.ml} ML
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Customizable Gift Box Wizard */}
+            {product.category === 'gifts' && (
+              <div className="gift-box-builder bg-[#171717]/60 border border-yellow-600/10 rounded-2xl p-5 mb-6 text-right">
+                <h3 className="gold-text font-bold text-base mb-4 flex items-center gap-2 justify-end">
+                  <i className="fa-solid fa-wand-magic-sparkles"></i>
+                  مصمم البوكس المخصص
+                </h3>
+
+                {/* Steps Navigation Header */}
+                <div className="flex justify-between items-center mb-6 border-b border-gray-800 pb-3" style={{ direction: 'rtl' }}>
+                  {product.id === 13 && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveStep(1)}
+                      className={`text-xs font-bold pb-2 border-b-2 transition-all ${
+                        activeStep === 1 ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-500'
+                      }`}
+                    >
+                      1. نوع البوكس
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (product.id !== 13 || activeStep >= 1) setActiveStep(product.id === 13 ? 2 : 1);
+                    }}
+                    className={`text-xs font-bold pb-2 border-b-2 transition-all ${
+                      activeStep === (product.id === 13 ? 2 : 1) ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-500'
+                    }`}
+                  >
+                    {product.id === 13 ? '2. اختيار العطور' : '1. اختيار العطور'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedPerfumes.length === (product.id === 13 && mixedVariant === '2' ? 2 : 3)) {
+                        setActiveStep(product.id === 13 ? 3 : 2);
+                      }
+                    }}
+                    className={`text-xs font-bold pb-2 border-b-2 transition-all ${
+                      activeStep === (product.id === 13 ? 3 : 2) ? 'border-amber-500 text-amber-500' : 'border-transparent text-gray-500'
+                    }`}
+                    disabled={selectedPerfumes.length < (product.id === 13 && mixedVariant === '2' ? 2 : 3)}
+                  >
+                    {product.id === 13 ? '3. تحديد الأحجام' : '2. تحديد الأحجام'}
+                  </button>
+                </div>
+
+                {/* Step 1: Choose Variant (Mixed Box Only) */}
+                {product.id === 13 && activeStep === 1 && (
+                  <div className="animate-fadeIn">
+                    <h4 className="text-gray-300 font-bold mb-3 text-sm">اختر نوع البوكس المفضل:</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMixedVariant('2');
+                          setSelectedPerfumes([]);
+                          setActiveStep(2);
+                        }}
+                        className={`p-4 rounded-xl border text-right transition-all flex flex-col justify-between h-[110px] ${
+                          mixedVariant === '2'
+                            ? 'border-amber-500 bg-amber-500/5'
+                            : 'border-gray-800 bg-black/20 hover:border-gray-700'
+                        }`}
+                      >
+                        <span className="gold-text font-bold text-xs md:text-sm">بوكس عطرين (أحجام مستقلة)</span>
+                        <span className="text-[10px] text-gray-400">تصفح واختيار عطرين بحرية وتحديد حجم مستقل لكل عطر.</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMixedVariant('3');
+                          setSelectedPerfumes([]);
+                          setActiveStep(2);
+                        }}
+                        className={`p-4 rounded-xl border text-right transition-all flex flex-col justify-between h-[110px] ${
+                          mixedVariant === '3'
+                            ? 'border-amber-500 bg-amber-500/5'
+                            : 'border-gray-800 bg-black/20 hover:border-gray-700'
+                        }`}
+                      >
+                        <span className="gold-text font-bold text-xs md:text-sm">بوكس ثلاث عطور (حجم موحد)</span>
+                        <span className="text-[10px] text-gray-400">اختيار 3 عطور رجالية أو نسائية بحجم موحد للبوكس بالكامل.</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Choose Perfumes */}
+                {activeStep === (product.id === 13 ? 2 : 1) && (
+                  <div className="animate-fadeIn">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-[11px] text-amber-500 font-bold">
+                        تم اختيار {selectedPerfumes.length} من {product.id === 13 && mixedVariant === '2' ? 2 : 3}
+                      </span>
+                      <h4 className="text-gray-300 font-bold text-sm">اختر عطورك المفضلة:</h4>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto p-1 scrollbar-thin">
+                      {products
+                        .filter(p => {
+                          if (product.id === 9) return p.category === 'men';
+                          if (product.id === 11) return p.category === 'women';
+                          return p.category === 'men' || p.category === 'women';
+                        })
+                        .map(p => {
+                          const isSelected = selectedPerfumes.some(sp => sp.id === p.id);
+                          const limit = product.id === 13 && mixedVariant === '2' ? 2 : 3;
+                          
+                          const handleSelect = () => {
+                            if (isSelected) {
+                              setSelectedPerfumes(selectedPerfumes.filter(sp => sp.id !== p.id));
+                            } else {
+                              if (selectedPerfumes.length < limit) {
+                                setSelectedPerfumes([...selectedPerfumes, p]);
+                              }
+                            }
+                          };
+
+                          return (
+                            <div
+                              key={p.id}
+                              onClick={handleSelect}
+                              className={`cursor-pointer border rounded-xl p-2 text-center transition-all flex flex-col items-center gap-1.5 ${
+                                isSelected
+                                  ? 'border-amber-500 bg-amber-500/5 shadow-[0_0_10px_rgba(212,175,55,0.15)]'
+                                  : 'border-gray-800 bg-black/20 hover:border-gray-700'
+                              }`}
+                            >
+                              <div className="relative w-16 h-20 rounded overflow-hidden bg-neutral-900 border border-neutral-800">
+                                <Image
+                                  src={p.image}
+                                  alt={p.name}
+                                  fill
+                                  sizes="80px"
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                              <span className="text-xs font-bold text-gray-200 line-clamp-1">{p.name.split(' - ')[0]}</span>
+                              <span className="text-[10px] text-gray-500">
+                                {p.category === 'men' ? 'رجالي' : 'نسائي'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                    </div>
+
+                    {selectedPerfumes.length === (product.id === 13 && mixedVariant === '2' ? 2 : 3) && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveStep(product.id === 13 ? 3 : 2)}
+                        className="btn-premium w-full mt-4 py-2.5 text-xs font-bold flex justify-center items-center gap-1"
+                      >
+                        الخطوة التالية: تحديد الأحجام
+                        <i className="fa-solid fa-arrow-left"></i>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Step 3: Choose Sizes */}
+                {activeStep === (product.id === 13 ? 3 : 2) && (
+                  <div className="animate-fadeIn">
+                    <h4 className="text-gray-300 font-bold mb-3 text-sm">حدد أحجام العطور المطلوبة:</h4>
+
+                    {/* Uniform Size Selector */}
+                    {!(product.id === 13 && mixedVariant === '2') ? (
+                      <div className="bg-black/20 p-4 rounded-xl border border-gray-800 text-center mb-4">
+                        <label className="text-[11px] text-gray-400 block mb-2.5">حجم موحد لكافة العطور في البوكس:</label>
+                        <div className="flex justify-center gap-4">
+                          {[30, 50].map(size => (
+                            <button
+                              key={size}
+                              type="button"
+                              onClick={() => setUniformSizeMl(size)}
+                              className={`px-6 py-2 rounded-lg border font-bold text-sm font-english transition-all ${
+                                uniformSizeMl === size
+                                  ? 'border-amber-500 bg-amber-500/5 text-amber-500'
+                                  : 'border-gray-800 bg-black/25 text-gray-400 hover:border-gray-700'
+                              }`}
+                            >
+                              {size} ML
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Independent Size Selectors */
+                      <div className="space-y-3 mb-4">
+                        {selectedPerfumes.map(p => {
+                          const currentSize = perfumeSizes[p.id] || 30;
+                          return (
+                            <div key={p.id} className="flex justify-between items-center p-3 rounded-xl border border-gray-800 bg-black/20">
+                              <div className="flex items-center gap-3">
+                                <div className="relative w-8 h-10">
+                                  <Image
+                                    src={p.image}
+                                    alt={p.name}
+                                    fill
+                                    className="object-contain"
+                                    sizes="30px"
+                                  />
+                                </div>
+                                <span className="text-xs font-bold text-gray-300">{p.name.split(' - ')[0]}</span>
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                {[30, 50].map(size => (
+                                  <button
+                                    key={size}
+                                    type="button"
+                                    onClick={() => setPerfumeSizes({ ...perfumeSizes, [p.id]: size })}
+                                    className={`px-3 py-1.5 rounded-lg border font-bold text-xs font-english transition-all ${
+                                      currentSize === size
+                                        ? 'border-amber-500 bg-amber-500/5 text-amber-500'
+                                        : 'border-gray-800 bg-black/25 text-gray-400 hover:border-gray-700'
+                                    }`}
+                                  >
+                                    {size} ML
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Running Summary / Preview Panel */}
+                <div className="mt-4 p-3 bg-black/30 border border-gray-800/80 rounded-xl text-right">
+                  <h4 className="text-[10px] text-gray-400 font-bold mb-2">ملخص البوكس الجاري تصميمه:</h4>
+                  <div className="space-y-1.5 text-xs text-gray-300">
+                    <div className="flex justify-between">
+                      <span className="font-bold gold-text">
+                        {product.id === 9 ? 'رجالي' : product.id === 11 ? 'نسائي' : 'مشترك'} 
+                        ({product.id === 13 && mixedVariant === '2' ? 'عطرين' : '3 عطور'})
+                      </span>
+                      <span>نوع البوكس:</span>
+                    </div>
+
+                    {selectedPerfumes.length > 0 ? (
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col items-end gap-0.5">
+                          {selectedPerfumes.map(sp => {
+                            const size = product.id === 13 && mixedVariant === '2' ? (perfumeSizes[sp.id] || 30) : uniformSizeMl;
+                            return (
+                              <span key={sp.id} className="text-gray-300">
+                                {sp.name.split(' - ')[0]} ({size}مل)
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <span>العطور المختارة:</span>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-center py-1">لم يتم اختيار أي عطور بعد.</div>
+                    )}
+
+                    <div className="border-t border-gray-800/60 pt-2 flex justify-between font-bold text-sm">
+                      <span className="gold-text"><span className="english-num">{dynamicPrice}</span> جنيه</span>
+                      <span>السعر الإجمالي (شامل الخصم):</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -459,6 +760,8 @@ export default function ProductDetails() {
                   className="btn-premium btn-add-cart-large"
                   onClick={handleAddToCart}
                   type="button"
+                  disabled={!isSelectionComplete}
+                  style={{ opacity: isSelectionComplete ? 1 : 0.5, cursor: isSelectionComplete ? 'pointer' : 'not-allowed' }}
                 >
                   <i className="fa-solid fa-bag-shopping"></i> إضافة إلى السلة
                 </button>
@@ -469,6 +772,8 @@ export default function ProductDetails() {
                 className="buy-now-btn-large"
                 onClick={handleBuyNow}
                 type="button"
+                disabled={!isSelectionComplete}
+                style={{ opacity: isSelectionComplete ? 1 : 0.5, cursor: isSelectionComplete ? 'pointer' : 'not-allowed' }}
               >
                 <i className="fa-solid fa-bolt"></i> اشتري الان
               </button>
@@ -486,98 +791,7 @@ export default function ProductDetails() {
 
             <p className="details-desc">{product.description}</p>
 
-            {/* Custom Packaging options for Gift Boxes */}
-            {product.category === 'gifts' && (
-              <div className="gift-box-customizer">
-                <h4 className="gift-custom-title">
-                  <i className="fa-solid fa-gift"></i> تخصيص بوكس الهدايا
-                </h4>
 
-                {/* Conditional custom selectors depending on box product ID */}
-                {product.id === 9 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }} className="text-right">
-                    <div className="form-group flex flex-col gap-1">
-                      <label className="text-xs text-gray-400 font-bold">حجم عطر غرام (Gharam):</label>
-                      <select className="select-premium text-gray-200" value={perfume1Size} onChange={(e) => setPerfume1Size(Number(e.target.value))}>
-                        <option value={30}>30 ML</option>
-                        <option value={50}>50 ML</option>
-                      </select>
-                    </div>
-                    <div className="form-group flex flex-col gap-1">
-                      <label className="text-xs text-gray-400 font-bold">حجم عطر دلع (Dala'):</label>
-                      <select className="select-premium text-gray-200" value={perfume2Size} onChange={(e) => setPerfume2Size(Number(e.target.value))}>
-                        <option value={30}>30 ML</option>
-                        <option value={50}>50 ML</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {(product.id === 11 || product.id === 12) && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '15px' }} className="text-right">
-                    <div className="form-group flex flex-col gap-1">
-                      <label className="text-[10px] text-gray-400 font-bold">حجم نقاء (Naqaa):</label>
-                      <select className="select-premium text-gray-200" value={perfume1Size} onChange={(e) => setPerfume1Size(Number(e.target.value))}>
-                        <option value={30}>30 ML</option>
-                        <option value={50}>50 ML</option>
-                      </select>
-                    </div>
-                    <div className="form-group flex flex-col gap-1">
-                      <label className="text-[10px] text-gray-400 font-bold">حجم هيبة (Heiba):</label>
-                      <select className="select-premium text-gray-200" value={perfume2Size} onChange={(e) => setPerfume2Size(Number(e.target.value))}>
-                        <option value={30}>30 ML</option>
-                        <option value={50}>50 ML</option>
-                      </select>
-                    </div>
-                    <div className="form-group flex flex-col gap-1">
-                      <label className="text-[10px] text-gray-400 font-bold">حجم نبض (Nabd):</label>
-                      <select className="select-premium text-gray-200" value={perfume3Size} onChange={(e) => setPerfume3Size(Number(e.target.value))}>
-                        <option value={30}>30 ML</option>
-                        <option value={50}>50 ML</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {product.id !== 9 && product.id !== 11 && product.id !== 12 && (
-                  <div className="gift-perfume-selectors bg-[#171717] p-4 border border-yellow-600/5 rounded-xl mb-4 text-right">
-                    <h4 className="gold-text font-bold mb-3 text-[11px] md:text-xs">اختر العطور والأحجام بداخل البوكس:</h4>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-                      <div className="form-group flex flex-col gap-1">
-                        <label className="text-[10px] text-gray-400 font-bold">العطر الأول:</label>
-                        <select className="select-premium text-gray-200" value={perfume1} onChange={(e) => setPerfume1(e.target.value)}>
-                          {PERFUMES_LIST.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                      </div>
-                      <div className="form-group flex flex-col gap-1">
-                        <label className="text-[10px] text-gray-400 font-bold">حجم العطر الأول:</label>
-                        <select className="select-premium text-gray-200" value={perfume1Size} onChange={(e) => setPerfume1Size(Number(e.target.value))}>
-                          <option value={30}>30 ML</option>
-                          <option value={50}>50 ML</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div className="form-group flex flex-col gap-1">
-                        <label className="text-[10px] text-gray-400 font-bold">العطر الثاني:</label>
-                        <select className="select-premium text-gray-200" value={perfume2} onChange={(e) => setPerfume2(e.target.value)}>
-                          {PERFUMES_LIST.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                      </div>
-                      <div className="form-group flex flex-col gap-1">
-                        <label className="text-[10px] text-gray-400 font-bold">حجم العطر الثاني:</label>
-                        <select className="select-premium text-gray-200" value={perfume2Size} onChange={(e) => setPerfume2Size(Number(e.target.value))}>
-                          <option value={30}>30 ML</option>
-                          <option value={50}>50 ML</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Fragrance Notes Display */}
             {product.notes && (
