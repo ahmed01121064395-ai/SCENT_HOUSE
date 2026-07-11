@@ -1,13 +1,81 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import { supabase } from '@/lib/supabase';
 
-export default function Confirmation() {
-  const { lastPlacedOrder } = useApp();
+function ConfirmationContent() {
+  const { lastPlacedOrder, clearCart } = useApp();
+  const searchParams = useSearchParams();
+  const orderIdParam = searchParams.get('orderId');
+  const successParam = searchParams.get('success');
 
-  if (!lastPlacedOrder) {
+  const [dbOrder, setDbOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Clear cart if card payment success is verified
+  useEffect(() => {
+    if (successParam === 'true') {
+      clearCart();
+    }
+  }, [successParam, clearCart]);
+
+  useEffect(() => {
+    async function fetchOrder() {
+      if (!lastPlacedOrder && orderIdParam) {
+        setLoading(true);
+        console.log('[Confirmation] Fetching order from DB:', orderIdParam);
+        
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items(*, product:products(*))')
+          .eq('orderId', orderIdParam)
+          .single();
+          
+        if (!error && data) {
+          const mappedOrder = {
+            orderId: data.orderId,
+            orderDate: data.orderDate,
+            fullname: data.fullname,
+            phone: data.phone,
+            phone2: data.phone2,
+            paymentMethodLabel: data.paymentMethodLabel,
+            items: data.order_items.map((oi: any) => ({
+              product: oi.product,
+              size: oi.size,
+              quantity: oi.quantity,
+              boxType: oi.boxType,
+              giftMessage: oi.giftMessage
+            })),
+            subtotal: data.subtotal,
+            discount: data.discount,
+            vat: data.vat || 0,
+            grandTotal: data.grandTotal
+          };
+          setDbOrder(mappedOrder);
+        } else {
+          console.error('[Confirmation] Order not found in DB:', error?.message);
+        }
+        setLoading(false);
+      }
+    }
+    fetchOrder();
+  }, [orderIdParam, lastPlacedOrder]);
+
+  const order = lastPlacedOrder || dbOrder;
+
+  if (loading) {
+    return (
+      <div className="text-center py-48 text-gray-400">
+        <i className="fa-solid fa-spinner fa-spin text-4xl mb-4 gold-text"></i>
+        <p className="mb-6">جاري تحميل تفاصيل الطلب...</p>
+      </div>
+    );
+  }
+
+  if (!order) {
     return (
       <div className="text-center py-48 text-gray-400">
         <i className="fa-solid fa-receipt text-4xl mb-4 gold-text"></i>
@@ -41,23 +109,23 @@ export default function Confirmation() {
             <div className="cart-summary-line flex justify-between py-1 text-sm">
               <span className="text-gray-400">رقم الفاتورة:</span>
               <span className="english-num font-bold text-[var(--primary-gold)]">
-                #{lastPlacedOrder.orderId}
+                #{order.orderId}
               </span>
             </div>
             
             <div className="cart-summary-line flex justify-between py-1 text-sm">
               <span className="text-gray-400">تاريخ المعاملة:</span>
-              <span className="english-num">{lastPlacedOrder.orderDate}</span>
+              <span className="english-num">{order.orderDate}</span>
             </div>
             
             <div className="cart-summary-line flex justify-between py-1 text-sm">
               <span className="text-gray-400">العميل المستلم:</span>
-              <span>{lastPlacedOrder.fullname}</span>
+              <span>{order.fullname}</span>
             </div>
             
             <div className="cart-summary-line flex justify-between py-1 text-sm">
               <span className="text-gray-400">طريقة الدفع:</span>
-              <span>{lastPlacedOrder.paymentMethodLabel}</span>
+              <span>{order.paymentMethodLabel}</span>
             </div>
           </div>
 
@@ -73,7 +141,7 @@ export default function Confirmation() {
                 </tr>
               </thead>
               <tbody>
-                {lastPlacedOrder.items.map((item, index) => (
+                {order.items.map((item, index) => (
                   <tr
                     key={index}
                     className="border-b border-yellow-600/5 text-gray-300 text-sm last:border-0"
@@ -123,7 +191,7 @@ export default function Confirmation() {
           <div className="max-w-2xl mx-auto border-t border-yellow-600/10 pt-4 flex justify-between items-center text-right font-bold text-[var(--text-primary)] mb-8">
             <span>المجموع الكلي للفاتورة:</span>
             <span className="gold-text text-xl font-mono">
-              <span className="english-num">{lastPlacedOrder.grandTotal}</span> جنيه
+              <span className="english-num">{order.grandTotal}</span> جنيه
             </span>
           </div>
 
@@ -133,5 +201,18 @@ export default function Confirmation() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Confirmation() {
+  return (
+    <React.Suspense fallback={
+      <div className="text-center py-48 text-gray-400">
+        <i className="fa-solid fa-spinner fa-spin text-4xl mb-4 gold-text"></i>
+        <p>جاري تحميل تأكيد الطلب...</p>
+      </div>
+    }>
+      <ConfirmationContent />
+    </React.Suspense>
   );
 }
