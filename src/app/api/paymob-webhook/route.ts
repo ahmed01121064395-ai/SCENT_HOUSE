@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
+import { createOrderFromPaymob, logOrderCreationError } from '@/lib/orderCreation';
 
 // Standard HMAC validation for Paymob webhook callbacks
 function verifyPaymobHmac(body: any, receivedHmac: string): boolean {
@@ -84,52 +84,27 @@ export async function POST(req: NextRequest) {
     const transaction = body.obj;
 
     if (type === 'TRANSACTION' && transaction) {
-      const isSuccess = transaction.success;
+      const isSuccess = transaction.success === true || transaction.success === 'true';
       const amount = transaction.amount_cents / 100;
       const currency = transaction.currency;
       
-      // Paymob order ID or custom merchant order ID from billing data/payload
       const paymobOrderId = transaction.order?.id || transaction.order;
-      const merchantOrderId = transaction.merchant_order_id; // Passed as merchant_order_id during checkout
+      const merchantOrderId = transaction.merchant_order_id || transaction.order?.merchant_order_id;
       const integrationId = Number(transaction.integration_id);
-
-      let paymentLabel = 'بطاقة بنكية';
-      if (integrationId === 5774297) {
-        paymentLabel = 'محفظة هاتف محمول';
-      } else if (integrationId === 5774294) {
-        paymentLabel = 'دفع كشك (أمان/مصاري)';
-      }
 
       console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Amount=${amount} ${currency}, Integration=${integrationId}, PaymobOrder=${paymobOrderId}, MerchantOrder=${merchantOrderId}`);
 
       if (isSuccess) {
-        const { data, error } = await supabase
-          .from('orders')
-          .update({ 
-            status: 'جديد',
-            paymentMethodLabel: `${paymentLabel} - تم الدفع`
-          })
-          .eq('orderId', merchantOrderId);
-        
-        if (error) {
-          console.error(`[Paymob Webhook] Error updating order ${merchantOrderId} to paid:`, error.message);
-        } else {
-          console.log(`[Paymob Webhook] Order ${merchantOrderId} marked as paid successfully!`);
+        if (!transaction.order) {
+          throw new Error('Transaction order object is empty - cannot create order in DB');
         }
+
+        // Trigger dynamic order creation helper
+        await createOrderFromPaymob(transaction.order, integrationId);
+        console.log(`[Paymob Webhook] Order ${merchantOrderId} processed & inserted successfully via Webhook.`);
       } else {
-        const { data, error } = await supabase
-          .from('orders')
-          .update({ 
-            status: 'ملغي',
-            paymentMethodLabel: `${paymentLabel} - فشل الدفع`
-          })
-          .eq('orderId', merchantOrderId);
-        
-        if (error) {
-          console.error(`[Paymob Webhook] Error updating order ${merchantOrderId} to failed:`, error.message);
-        } else {
-          console.warn(`[Paymob Webhook] Transaction ${transaction.id} failed. Order ${merchantOrderId} marked as cancelled/failed.`);
-        }
+        console.warn(`[Paymob Webhook] Transaction ${transaction.id} failed. Skipping database insertion (no unpaid order created).`);
+        await logOrderCreationError(merchantOrderId || 'UNKNOWN', `Paymob transaction failed with code: ${transaction.txn_response_code}`, transaction);
       }
     }
 
