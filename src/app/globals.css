@@ -295,8 +295,8 @@ header {
 /* Hero Section Style */
 .hero-section {
     position: relative;
-    min-height: 75vh;
-    padding: 100px 0 70px 0; /* Reduced top padding to move content closer to header */
+    min-height: 52vh; /* Reduced from 75vh */
+    padding: 100px 0 50px 0; /* Reduced bottom padding */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -572,7 +572,7 @@ header {
 /* Category Cards Layout */
 .section-wrapper {
     max-width: 1200px;
-    margin: 72px auto;
+    margin: 48px auto; /* Reduced from 72px */
     padding: 0 24px;
 }
 
@@ -2848,6 +2848,10 @@ footer {
     .nav-links li a {
         padding: 6px 12px;
         font-size: 0.78rem;
+    }
+    .hero-section {
+        min-height: 45vh; /* Compact on mobile */
+        padding: 80px 0 36px 0;
     }
     .hero-title {
         font-size: 2rem;
