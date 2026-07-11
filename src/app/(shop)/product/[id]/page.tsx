@@ -576,18 +576,6 @@ export default function ProductDetails() {
                     </div>
                   </div>
                 )}
-
-
-
-                <div className="form-group-checkout">
-                  <label className="block text-sm mb-1 text-gray-300">اكتب رسالة الإهداء (تُطبع بخط مذهب يدوي)</label>
-                  <textarea
-                    placeholder="اكتب هنا العبارة التي تريد إرفاقها بالبوكس..."
-                    className="custom-textarea w-full"
-                    value={giftMessage}
-                    onChange={(e) => setGiftMessage(e.target.value)}
-                  ></textarea>
-                </div>
               </div>
             )}
 
