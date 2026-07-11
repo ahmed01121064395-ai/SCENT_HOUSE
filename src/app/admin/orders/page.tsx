@@ -48,6 +48,29 @@ export default function AdminOrders() {
   // Search & Filter State
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [showFailedPayments, setShowFailedPayments] = useState(false);
+
+  const getPaymentStatus = (label: string = '') => {
+    if (!label) return { text: 'غير محدد', style: 'bg-gray-800 text-gray-400' };
+    
+    if (label.includes('تم الدفع')) {
+      return { text: 'مدفوع', style: 'bg-emerald-950/40 border border-emerald-600/30 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-medium' };
+    }
+    
+    if (label.includes('فشل') || label.includes('انتهت صلاحية')) {
+      return { text: 'فشل الدفع', style: 'bg-red-950/40 border border-red-600/30 text-red-400 text-[10px] px-2 py-0.5 rounded-full font-medium' };
+    }
+    
+    if (label.includes('الدفع عند الاستلام')) {
+      return { text: 'الدفع عند الاستلام', style: 'bg-gray-800 border border-gray-700 text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-medium' };
+    }
+    
+    if (label.includes('قيد الدفع') || label.includes('كود الدفع:')) {
+      return { text: 'بانتظار الدفع', style: 'bg-amber-950/40 border border-amber-600/30 text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-medium' };
+    }
+    
+    return { text: label, style: 'bg-gray-800 text-gray-400' };
+  };
 
   // Expanded Order State
   const [expandedOrder, setExpandedOrder] = useState<Order | null>(null);
@@ -224,6 +247,18 @@ ${itemListText}
       list = list.filter(o => o.status === selectedStatus);
     }
 
+    // Hide failed/pending payments by default
+    if (!showFailedPayments) {
+      list = list.filter(o => {
+        const label = o.paymentMethodLabel || '';
+        const isFailedOrPending = label.includes('فشل الدفع') || 
+                                  label.includes('انتهت صلاحية') || 
+                                  label.includes('قيد الدفع') || 
+                                  (label.includes('دفع كشك') && !label.includes('تم الدفع'));
+        return !isFailedOrPending;
+      });
+    }
+
     // Search Query Filter (name, phone, invoice orderId)
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -255,32 +290,48 @@ ${itemListText}
       </div>
 
       {/* Search and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#121212] border border-gray-800 p-4 rounded-2xl">
-        {/* Search */}
-        <div className="relative md:col-span-2">
-          <input
-            type="text"
-            placeholder="بحث باسم العميل، رقم الهاتف، أو كود الفاتورة (SH-XXXXX)..."
-            className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-right pr-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <i className="fa-solid fa-magnifying-glass absolute right-3 top-3.5 text-gray-500 text-xs"></i>
+      <div className="flex flex-col gap-3 bg-[#121212] border border-gray-800 p-4 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
+          <div className="relative md:col-span-2">
+            <input
+              type="text"
+              placeholder="بحث باسم العميل، رقم الهاتف، أو كود الفاتورة (SH-XXXXX)..."
+              className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-right pr-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <i className="fa-solid fa-magnifying-glass absolute right-3 top-3.5 text-gray-500 text-xs"></i>
+          </div>
+
+          {/* Status Filter */}
+          <select
+            className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-gray-300 focus:ring-1 focus:ring-[#D4AF37] focus:ring-opacity-20 text-right"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+          >
+            <option value="all">جميع الحالات</option>
+            <option value="جديد">جديد (بانتظار المراجعة)</option>
+            <option value="قيد التجهيز">قيد التجهيز</option>
+            <option value="تم الشحن">تم الشحن</option>
+            <option value="تم التسليم">تم التسليم</option>
+            <option value="ملغي">ملغي</option>
+          </select>
         </div>
 
-        {/* Status Filter */}
-        <select
-          className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-gray-300 focus:ring-1 focus:ring-[#D4AF37] focus:ring-opacity-20 text-right"
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-        >
-          <option value="all">جميع الحالات</option>
-          <option value="جديد">جديد (بانتظار المراجعة)</option>
-          <option value="قيد التجهيز">قيد التجهيز</option>
-          <option value="تم الشحن">تم الشحن</option>
-          <option value="تم التسليم">تم التسليم</option>
-          <option value="ملغي">ملغي</option>
-        </select>
+        {/* Failed/Pending Payment Filter Checkbox */}
+        <div className="flex items-center gap-2 mt-1 justify-end text-xs text-gray-400">
+          <label htmlFor="failed-payments-toggle" className="cursor-pointer select-none">
+            إظهار محاولات الدفع الإلكتروني المعلقة والفاشلة / غير المكتملة
+          </label>
+          <input
+            type="checkbox"
+            id="failed-payments-toggle"
+            checked={showFailedPayments}
+            onChange={(e) => setShowFailedPayments(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-800 bg-[#1A1A1A] text-[#D4AF37] focus:ring-0 focus:ring-offset-0 cursor-pointer"
+          />
+        </div>
       </div>
 
       {/* Orders Table/Cards */}
@@ -307,7 +358,8 @@ ${itemListText}
                   <th className="py-4 px-6">المدينة</th>
                   <th className="py-4 px-6 text-center">الإجمالي الكلي</th>
                   <th className="py-4 px-6">طريقة الدفع</th>
-                  <th className="py-4 px-6 text-center w-40">الحالة</th>
+                  <th className="py-4 px-6 text-center">حالة الدفع</th>
+                  <th className="py-4 px-6 text-center w-40">حالة الطلب</th>
                   <th className="py-4 px-6 text-center w-28">التفاصيل</th>
                 </tr>
               </thead>
@@ -361,7 +413,34 @@ ${itemListText}
                       <span className="text-[10px] text-gray-500 font-normal">جنيه</span>
                     </td>
                     {/* Payment Method */}
-                    <td className="py-4 px-6 text-xs text-gray-400">{o.paymentMethodLabel}</td>
+                    <td className="py-4 px-6 text-xs text-gray-400">
+                      {(() => {
+                        const label = o.paymentMethodLabel || '';
+                        if (label.includes('بطاقة بنكية')) return 'بطاقة بنكية';
+                        if (label.includes('محفظة هاتف')) return 'محفظة هاتف محمول';
+                        if (label.includes('دفع كشك')) return 'كشك (أمان/مصاري)';
+                        return label || 'الدفع عند الاستلام';
+                      })()}
+                    </td>
+                    {/* Payment Status Badge */}
+                    <td className="py-4 px-6 text-center">
+                      {(() => {
+                        const label = o.paymentMethodLabel || '';
+                        if (label.includes('تم الدفع')) {
+                          return <span className="inline-flex items-center gap-1 bg-emerald-950/40 border border-emerald-600/30 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-circle-check text-[9px]"></i>مدفوع</span>;
+                        }
+                        if (label.includes('فشل الدفع') || label.includes('انتهت صلاحية')) {
+                          return <span className="inline-flex items-center gap-1 bg-red-950/40 border border-red-600/30 text-red-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-circle-xmark text-[9px]"></i>لم يتم الدفع</span>;
+                        }
+                        if (label.includes('قيد الدفع')) {
+                          return <span className="inline-flex items-center gap-1 bg-amber-950/40 border border-amber-600/30 text-amber-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-clock text-[9px]"></i>بانتظار الدفع</span>;
+                        }
+                        if (label.includes('كود الدفع:')) {
+                          return <span className="inline-flex items-center gap-1 bg-blue-950/40 border border-blue-600/30 text-blue-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-barcode text-[9px]"></i>كود كشك</span>;
+                        }
+                        return <span className="inline-flex items-center gap-1 bg-gray-800 border border-gray-700 text-gray-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-handshake text-[9px]"></i>عند الاستلام</span>;
+                      })()}
+                    </td>
                     {/* Status inline change */}
                     <td className="py-4 px-6 text-center">
                       <select
@@ -420,7 +499,36 @@ ${itemListText}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">طريقة الدفع:</span>
-                    <span className="text-gray-400">{o.paymentMethodLabel}</span>
+                    <span className="text-gray-400">
+                      {(() => {
+                        const label = o.paymentMethodLabel || '';
+                        if (label.includes('بطاقة بنكية')) return 'بطاقة بنكية';
+                        if (label.includes('محفظة هاتف')) return 'محفظة هاتف محمول';
+                        if (label.includes('دفع كشك')) return 'كشك (أمان/مصاري)';
+                        return label || 'الدفع عند الاستلام';
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">حالة الدفع:</span>
+                    <span>
+                      {(() => {
+                        const label = o.paymentMethodLabel || '';
+                        if (label.includes('تم الدفع')) {
+                          return <span className="inline-flex items-center gap-1 bg-emerald-950/40 border border-emerald-600/30 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-circle-check text-[9px]"></i>مدفوع</span>;
+                        }
+                        if (label.includes('فشل الدفع') || label.includes('انتهت صلاحية')) {
+                          return <span className="inline-flex items-center gap-1 bg-red-950/40 border border-red-600/30 text-red-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-circle-xmark text-[9px]"></i>لم يتم الدفع</span>;
+                        }
+                        if (label.includes('قيد الدفع')) {
+                          return <span className="inline-flex items-center gap-1 bg-amber-950/40 border border-amber-600/30 text-amber-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-clock text-[9px]"></i>بانتظار الدفع</span>;
+                        }
+                        if (label.includes('كود الدفع:')) {
+                          return <span className="inline-flex items-center gap-1 bg-blue-950/40 border border-blue-600/30 text-blue-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-barcode text-[9px]"></i>كود كشك</span>;
+                        }
+                        return <span className="inline-flex items-center gap-1 bg-gray-800 border border-gray-700 text-gray-400 text-[10px] px-2.5 py-1 rounded-full font-bold"><i className="fa-solid fa-handshake text-[9px]"></i>عند الاستلام</span>;
+                      })()}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pt-1.5 border-t border-gray-800/40">
                     <span className="text-gray-500">إجمالي الفاتورة:</span>
@@ -480,16 +588,35 @@ ${itemListText}
             <div className="p-6 overflow-y-auto flex-1 space-y-6 text-right text-xs md:text-sm">
               
               {/* Status Indicator */}
-              <div className="flex items-center justify-between bg-[#1A1A1A] border border-gray-800 p-4 rounded-2xl">
+              <div className="grid grid-cols-3 gap-3 bg-[#1A1A1A] border border-gray-800 p-4 rounded-2xl">
                 <div>
-                  <span className="text-gray-400 block mb-1">الحالة الحالية للطلب</span>
-                  <span className={`inline-block text-xs font-black rounded-lg py-1 px-3 border ${getStatusBadgeStyle(expandedOrder.status)}`}>
+                  <span className="text-gray-400 block mb-2 text-[11px]">حالة الدفع</span>
+                  {(() => {
+                    const label = expandedOrder.paymentMethodLabel || '';
+                    if (label.includes('تم الدفع')) {
+                      return <span className="inline-flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-600/30 text-emerald-400 text-[10px] px-2.5 py-1.5 rounded-full font-bold"><i className="fa-solid fa-circle-check"></i>مدفوع ✓</span>;
+                    }
+                    if (label.includes('فشل الدفع') || label.includes('انتهت صلاحية')) {
+                      return <span className="inline-flex items-center gap-1.5 bg-red-950/40 border border-red-600/30 text-red-400 text-[10px] px-2.5 py-1.5 rounded-full font-bold"><i className="fa-solid fa-circle-xmark"></i>لم يتم الدفع</span>;
+                    }
+                    if (label.includes('قيد الدفع')) {
+                      return <span className="inline-flex items-center gap-1.5 bg-amber-950/40 border border-amber-600/30 text-amber-400 text-[10px] px-2.5 py-1.5 rounded-full font-bold"><i className="fa-solid fa-clock"></i>بانتظار الدفع</span>;
+                    }
+                    if (label.includes('كود الدفع:')) {
+                      return <span className="inline-flex items-center gap-1.5 bg-blue-950/40 border border-blue-600/30 text-blue-400 text-[10px] px-2.5 py-1.5 rounded-full font-bold"><i className="fa-solid fa-barcode"></i>كود كشك</span>;
+                    }
+                    return <span className="inline-flex items-center gap-1.5 bg-gray-800 border border-gray-700 text-gray-400 text-[10px] px-2.5 py-1.5 rounded-full font-bold"><i className="fa-solid fa-handshake"></i>عند الاستلام</span>;
+                  })()}
+                </div>
+                <div>
+                  <span className="text-gray-400 block mb-2 text-[11px]">حالة الطلب</span>
+                  <span className={`inline-block text-[10px] font-black rounded-full py-1 px-3 border ${getStatusBadgeStyle(expandedOrder.status)}`}>
                     {expandedOrder.status}
                   </span>
                 </div>
                 <div className="text-left">
-                  <span className="text-gray-400 block mb-1">تاريخ المعاملة</span>
-                  <span className="font-semibold text-gray-200 font-english">
+                  <span className="text-gray-400 block mb-2 text-[11px]">تاريخ الطلب</span>
+                  <span className="font-semibold text-gray-200 font-english text-[11px]">
                     {new Date(expandedOrder.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
