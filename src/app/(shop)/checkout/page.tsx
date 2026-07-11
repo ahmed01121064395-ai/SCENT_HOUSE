@@ -421,6 +421,22 @@ export default function Checkout() {
                     <span className="text-xs text-gray-400 block mt-0.5">
                       {item.product.category === 'offer' ? (
                         <span className="text-[#D4AF37] font-bold">عرض خاص</span>
+                      ) : item.product.category === 'gifts' && item.size.perfumes ? (
+                        <span className="text-gray-300 block text-[11px] leading-relaxed">
+                          المكونات: {(() => {
+                            const grouped = item.size.perfumes.reduce((acc: any, p: any) => {
+                              const exist = acc.find((x: any) => x.name === p.name);
+                              if (exist) {
+                                exist.qty += 1;
+                                exist.sizes.push(p.size);
+                              } else {
+                                acc.push({ name: p.name, qty: 1, sizes: [p.size] });
+                              }
+                              return acc;
+                            }, []);
+                            return grouped.map((g: any) => `${g.name} × ${g.qty} (${g.sizes.map((s: any) => s + 'مل').join(' + ')})`).join('، ');
+                          })()}
+                        </span>
                       ) : item.product.category === 'gifts' && item.size.perfume1 ? (
                         <span className="text-gray-300 block text-[11px] leading-relaxed">
                           المكونات: {item.size.perfume1} ({item.size.perfume1Size}مل) × {item.size.perfume2} ({item.size.perfume2Size}مل)
