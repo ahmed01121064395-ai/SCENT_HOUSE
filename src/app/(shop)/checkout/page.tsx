@@ -25,8 +25,9 @@ function CheckoutContent() {
   const [phone2, setPhone2] = useState('');
   const [city, setCity] = useState('الفيوم');
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'wallet' | 'applepay'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'wallet' | 'kiosk' | 'applepay'>('cod');
   const [walletType, setWalletType] = useState<'mobile' | 'instapay' | null>(null);
+  const [walletNumber, setWalletNumber] = useState('');
   const [isAppleDevice, setIsAppleDevice] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
@@ -82,8 +83,14 @@ function CheckoutContent() {
     setIsSubmitting(true);
     setDbError('');
 
-    if (paymentMethod !== 'cod' && paymentMethod !== 'card') {
-      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار الدفع عند الاستلام أو الدفع بالبطاقة البنكية لإتمام الطلب.');
+    if (paymentMethod !== 'cod' && paymentMethod !== 'card' && paymentMethod !== 'wallet' && paymentMethod !== 'kiosk') {
+      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار أحد الخيارات المفعلة لإتمام الطلب.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (paymentMethod === 'wallet' && (!walletType || walletType !== 'mobile' || !walletNumber.trim())) {
+      setActiveTooltip('يرجى إدخال رقم محفظة الهاتف المحمول بشكل صحيح.');
       setIsSubmitting(false);
       return;
     }
@@ -98,13 +105,9 @@ function CheckoutContent() {
     } else if (paymentMethod === 'card') {
       paymentMethodLabel = 'بطاقة بنكية - قيد الدفع';
     } else if (paymentMethod === 'wallet') {
-      if (walletType === 'mobile') {
-        paymentMethodLabel = 'المحفظة الإلكترونية - محفظة الهاتف المحمول';
-      } else if (walletType === 'instapay') {
-        paymentMethodLabel = 'المحفظة الإلكترونية - إنستاباي (InstaPay)';
-      } else {
-        paymentMethodLabel = 'المحفظة الإلكترونية';
-      }
+      paymentMethodLabel = 'محفظة هاتف محمول - قيد الدفع';
+    } else if (paymentMethod === 'kiosk') {
+      paymentMethodLabel = 'دفع كشك (أمان/مصاري) - قيد الدفع';
     }
 
     // ── Step 1: Insert into orders (column names match your real schema) ──
@@ -149,10 +152,10 @@ function CheckoutContent() {
       console.warn('order_items insert failed (non-blocking):', itemsError.message);
     }
 
-    // ── Step 3: Handle card payment redirect or Cash on Delivery completion ──
-    if (paymentMethod === 'card') {
+    // ── Step 3: Handle card/wallet/kiosk payment redirect or Cash on Delivery completion ──
+    if (paymentMethod === 'card' || paymentMethod === 'wallet' || paymentMethod === 'kiosk') {
       try {
-        console.log('[Checkout] Initiating Paymob card payment for order:', orderRow.orderId);
+        console.log(`[Checkout] Initiating Paymob ${paymentMethod} payment for order:`, orderRow.orderId);
         const res = await fetch('/api/create-paymob-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -164,7 +167,9 @@ function CheckoutContent() {
             city,
             address,
             amount: grandTotal,
-            items: checkoutItems
+            items: checkoutItems,
+            paymentMethod,
+            walletNumber
           })
         });
 
@@ -173,8 +178,25 @@ function CheckoutContent() {
           throw new Error(errData.error || 'Failed to initialize payment at Paymob');
         }
 
-        const { redirectUrl } = await res.json();
+        const data = await res.json();
         
+        let finalLabel = paymentMethodLabel;
+        if (paymentMethod === 'kiosk') {
+          // Kiosk payment returns a reference code instead of redirecting
+          const billRef = data.billReference;
+          finalLabel = `دفع كشك (أمان/مصاري) - كود الدفع: ${billRef}`;
+          
+          // Update the order row in DB to save the kiosk payment code
+          const { error: updateError } = await supabase
+            .from('orders')
+            .update({ paymentMethodLabel: finalLabel })
+            .eq('id', orderRow.id);
+            
+          if (updateError) {
+            console.error('[Checkout] Failed to save kiosk bill reference in DB:', updateError.message);
+          }
+        }
+
         // Save to context for confirmation page
         setLastPlacedOrder({
           orderId: orderRow.orderId,
@@ -182,7 +204,7 @@ function CheckoutContent() {
           fullname,
           phone,
           phone2,
-          paymentMethodLabel,
+          paymentMethodLabel: finalLabel,
           items: [...checkoutItems],
           subtotal: subtotal,
           discount: discount,
@@ -191,8 +213,19 @@ function CheckoutContent() {
         });
 
         setIsSubmitting(false);
-        // Redirect client to Paymob checkout
-        window.location.href = redirectUrl;
+
+        if (paymentMethod === 'kiosk') {
+          // Kiosk option clears cart immediately because it doesn't leave the site
+          if (buyNowItem) {
+            setBuyNowItem(null);
+          } else {
+            clearCart();
+          }
+          router.push('/confirmation');
+        } else {
+          // Card or Wallet redirects to external page (redirectUrl)
+          window.location.href = data.redirectUrl;
+        }
       } catch (err: any) {
         console.error('[Checkout] Paymob Payment initiation failed:', err.message);
         setDbError(`خطأ في تهيئة بوابة الدفع: ${err.message}`);
@@ -349,7 +382,7 @@ function CheckoutContent() {
                   <i className="fa-regular fa-credit-card"></i> طريقة الدفع المفضلة
                 </h3>
                 
-                <div className={`payment-method-selector grid ${isAppleDevice ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3`}>
+                <div className="payment-method-selector grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {/* Option 1: Cash on Delivery (COD) */}
                   <div
                     className={`payment-option-btn cursor-pointer ${paymentMethod === 'cod' ? 'active' : ''}`}
@@ -379,15 +412,33 @@ function CheckoutContent() {
 
                   {/* Option 3: Digital Wallet */}
                   <div
-                    className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'wallet' ? 'active' : ''}`}
-                    onClick={() => handleDisabledPaymentSelect('wallet')}
+                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'wallet' ? 'active' : ''}`}
+                    onClick={() => {
+                      setPaymentMethod('wallet');
+                      setWalletType('mobile');
+                      setActiveTooltip(null);
+                      setPaymobError('');
+                    }}
                   >
-                    <span className="payment-option-badge-soon">قريباً</span>
                     <i className="fa-solid fa-wallet text-xl"></i>
                     <span className="payment-option-title text-xs mt-1 block">المحفظة الإلكترونية</span>
                   </div>
 
-                  {/* Option 4: Apple Pay (Only for Safari/Apple users) */}
+                  {/* Option 4: Aman/Masary Cash Kiosk */}
+                  <div
+                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'kiosk' ? 'active' : ''}`}
+                    onClick={() => {
+                      setPaymentMethod('kiosk');
+                      setWalletType(null);
+                      setActiveTooltip(null);
+                      setPaymobError('');
+                    }}
+                  >
+                    <i className="fa-solid fa-shop text-xl"></i>
+                    <span className="payment-option-title text-xs mt-1 block">أمان / مصاري (نقداً)</span>
+                  </div>
+
+                  {/* Option 5: Apple Pay (Only for Safari/Apple users) */}
                   {isAppleDevice && (
                     <div
                       className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'applepay' ? 'active' : ''}`}
@@ -404,10 +455,13 @@ function CheckoutContent() {
                 {paymentMethod === 'wallet' && (
                   <div className="wallet-sub-choices grid grid-cols-2 gap-3 mt-3 p-3 bg-black/25 border border-yellow-600/10 rounded-lg animate-fadeIn text-right">
                     <div
-                      className={`payment-option-btn disabled cursor-pointer ${walletType === 'mobile' ? 'active' : ''}`}
-                      onClick={() => handleDisabledPaymentSelect('wallet', 'mobile')}
+                      className={`payment-option-btn cursor-pointer ${walletType === 'mobile' ? 'active' : ''}`}
+                      onClick={() => {
+                        setWalletType('mobile');
+                        setActiveTooltip(null);
+                        setPaymobError('');
+                      }}
                     >
-                      <span className="payment-option-badge-soon">قريباً</span>
                       <i className="fa-solid fa-mobile-screen-button text-xl"></i>
                       <span className="payment-option-title text-xs mt-1 block">محفظة هاتف محمول</span>
                     </div>
@@ -419,6 +473,29 @@ function CheckoutContent() {
                       <i className="fa-solid fa-money-bill-transfer text-xl"></i>
                       <span className="payment-option-title text-xs mt-1 block">إنستاباي (InstaPay)</span>
                     </div>
+                  </div>
+                )}
+
+                {/* Mobile Wallet Number Input */}
+                {paymentMethod === 'wallet' && walletType === 'mobile' && (
+                  <div className="form-group-checkout mt-3 text-right animate-fadeIn">
+                    <label className="block text-sm mb-1 text-gray-300">رقم محفظة الهاتف المحمول (فودافون كاش / أورنج / اتصالات)</label>
+                    <input
+                      type="tel"
+                      placeholder="مثال: 01012345678"
+                      className="premium-input w-full text-right"
+                      required
+                      value={walletNumber}
+                      onChange={(e) => setWalletNumber(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* Kiosk Cash Explanation */}
+                {paymentMethod === 'kiosk' && (
+                  <div className="bg-yellow-950/20 border border-yellow-600/30 text-yellow-500 text-xs p-3 rounded-lg text-right mt-3 animate-fadeIn">
+                    <i className="fa-solid fa-circle-info"></i>
+                    <span className="mr-1"><strong>الدفع نقداً عبر أمان/مصاري:</strong> ادفع نقداً في أقرب نقطة أمان أو مصاري خلال 24 ساعة، وسيتم شحن طلبك بعد تأكيد الدفع.</span>
                   </div>
                 )}
 
