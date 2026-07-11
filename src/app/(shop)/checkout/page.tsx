@@ -110,6 +110,8 @@ function CheckoutContent() {
       paymentMethodLabel = 'دفع كشك (أمان/مصاري) - قيد الدفع';
     }
 
+    const initialStatus = paymentMethod === 'cod' ? 'جديد' : 'ملغي';
+
     // ── Step 1: Insert into orders (column names match your real schema) ──
     const { data: orderRow, error: orderError } = await supabase
       .from('orders')
@@ -125,7 +127,7 @@ function CheckoutContent() {
         discount: discount,
         vat: 0,
         grandTotal,            // matches "grandTotal" column
-        status: 'جديد',        // matches CHECK constraint values
+        status: initialStatus,  // matches CHECK constraint values
       })
       .select('id, "orderId"') // get back UUID id + trigger-generated orderId
       .single();
