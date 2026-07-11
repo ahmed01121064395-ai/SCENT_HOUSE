@@ -47,10 +47,8 @@ export default function ProductDetails() {
 
   // Custom Gift Box Wizard States
   const [mixedVariant, setMixedVariant] = useState<'2' | '3'>('2');
-  const [selectedPerfumes, setSelectedPerfumes] = useState<Product[]>([]);
+  const [selectedSlots, setSelectedSlots] = useState<{ product: Product, sizeMl: number }[]>([]);
   const [uniformSizeMl, setUniformSizeMl] = useState<number>(30);
-  const [perfumeSizes, setPerfumeSizes] = useState<{ [id: number]: number }>({});
-  const [activeStep, setActiveStep] = useState<number>(1);
 
   const getPerfumePrice = (p: Product, ml: number) => {
     const sz = p.sizes.find(s => s.ml === ml);
@@ -60,14 +58,13 @@ export default function ProductDetails() {
   const dynamicPrice = (() => {
     if (!product || product.category !== 'gifts') return null;
     
-    const count = product.id === 13 && mixedVariant === '2' ? 2 : 3;
+    const limit = product.id === 13 && mixedVariant === '2' ? 2 : 3;
     let sum = 0;
     
-    for (let i = 0; i < count; i++) {
-      const p = selectedPerfumes[i];
-      if (p) {
-        const ml = (product.id === 13 && mixedVariant === '2') ? (perfumeSizes[p.id] || 30) : uniformSizeMl;
-        sum += getPerfumePrice(p, ml);
+    for (let i = 0; i < limit; i++) {
+      const slot = selectedSlots[i];
+      if (slot) {
+        sum += getPerfumePrice(slot.product, slot.sizeMl);
       } else {
         const ml = (product.id === 13 && mixedVariant === '2') ? 30 : uniformSizeMl;
         sum += (ml === 30 ? 350 : 450);
@@ -82,7 +79,7 @@ export default function ProductDetails() {
     if (product.category !== 'gifts') return true;
     
     const requiredPerfumeCount = product.id === 13 && mixedVariant === '2' ? 2 : 3;
-    return selectedPerfumes.length === requiredPerfumeCount;
+    return selectedSlots.length === requiredPerfumeCount;
   })();
 
   useEffect(() => {
@@ -127,10 +124,8 @@ export default function ProductDetails() {
       
       // Reset custom gift box wizard states
       setMixedVariant('2');
-      setSelectedPerfumes([]);
+      setSelectedSlots([]);
       setUniformSizeMl(30);
-      setPerfumeSizes({});
-      setActiveStep(1);
     }
   }, [product]);
 
@@ -217,18 +212,18 @@ export default function ProductDetails() {
         box_variant: product.id === 13 ? (mixedVariant === '2' ? '2_perfumes' : '3_perfumes') : '3_perfumes',
         ml: 100,
         price: dynamicPrice,
-        perfumes: selectedPerfumes.map(p => ({
-          id: p.id,
-          name: p.name.split(' - ')[0],
-          size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[p.id] || 30) : uniformSizeMl
+        perfumes: selectedSlots.map(s => ({
+          id: s.product.id,
+          name: s.product.name.split(' - ')[0],
+          size: s.sizeMl
         })),
         // Legacy compat fields
-        perfume1: selectedPerfumes[0]?.name.split(' - ')[0],
-        perfume1Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[0]?.id] || 30) : uniformSizeMl,
-        perfume2: selectedPerfumes[1]?.name.split(' - ')[0],
-        perfume2Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[1]?.id] || 30) : uniformSizeMl,
-        perfume3: selectedPerfumes[2]?.name.split(' - ')[0],
-        perfume3Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[2]?.id] || 30) : uniformSizeMl
+        perfume1: selectedSlots[0]?.product.name.split(' - ')[0],
+        perfume1Size: selectedSlots[0]?.sizeMl || uniformSizeMl,
+        perfume2: selectedSlots[1]?.product.name.split(' - ')[0],
+        perfume2Size: selectedSlots[1]?.sizeMl || uniformSizeMl,
+        perfume3: selectedSlots[2]?.product.name.split(' - ')[0],
+        perfume3Size: selectedSlots[2]?.sizeMl || uniformSizeMl
       };
       addToCart(
         product.id,
@@ -266,18 +261,18 @@ export default function ProductDetails() {
         box_variant: product.id === 13 ? (mixedVariant === '2' ? '2_perfumes' : '3_perfumes') : '3_perfumes',
         ml: 100,
         price: dynamicPrice,
-        perfumes: selectedPerfumes.map(p => ({
-          id: p.id,
-          name: p.name.split(' - ')[0],
-          size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[p.id] || 30) : uniformSizeMl
+        perfumes: selectedSlots.map(s => ({
+          id: s.product.id,
+          name: s.product.name.split(' - ')[0],
+          size: s.sizeMl
         })),
         // Legacy compat fields
-        perfume1: selectedPerfumes[0]?.name.split(' - ')[0],
-        perfume1Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[0]?.id] || 30) : uniformSizeMl,
-        perfume2: selectedPerfumes[1]?.name.split(' - ')[0],
-        perfume2Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[1]?.id] || 30) : uniformSizeMl,
-        perfume3: selectedPerfumes[2]?.name.split(' - ')[0],
-        perfume3Size: product.id === 13 && mixedVariant === '2' ? (perfumeSizes[selectedPerfumes[2]?.id] || 30) : uniformSizeMl
+        perfume1: selectedSlots[0]?.product.name.split(' - ')[0],
+        perfume1Size: selectedSlots[0]?.sizeMl || uniformSizeMl,
+        perfume2: selectedSlots[1]?.product.name.split(' - ')[0],
+        perfume2Size: selectedSlots[1]?.sizeMl || uniformSizeMl,
+        perfume3: selectedSlots[2]?.product.name.split(' - ')[0],
+        perfume3Size: selectedSlots[2]?.sizeMl || uniformSizeMl
       };
       buyNow(
         product.id,
@@ -470,7 +465,7 @@ export default function ProductDetails() {
                         type="button"
                         onClick={() => {
                           setMixedVariant('3');
-                          setSelectedPerfumes([]);
+                          setSelectedSlots([]);
                         }}
                         className={`flex-1 py-2 rounded-lg border font-bold text-xs transition-all text-center ${
                           mixedVariant === '3'
@@ -484,7 +479,7 @@ export default function ProductDetails() {
                         type="button"
                         onClick={() => {
                           setMixedVariant('2');
-                          setSelectedPerfumes([]);
+                          setSelectedSlots([]);
                         }}
                         className={`flex-1 py-2 rounded-lg border font-bold text-xs transition-all text-center ${
                           mixedVariant === '2'
@@ -502,7 +497,7 @@ export default function ProductDetails() {
                 <div className="mb-5">
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-[11px] text-amber-500 font-bold">
-                      تم اختيار {selectedPerfumes.length} من {product.id === 13 && mixedVariant === '2' ? 2 : 3}
+                      تم اختيار {selectedSlots.length} من {product.id === 13 && mixedVariant === '2' ? 2 : 3}
                     </span>
                     <h4 className="text-gray-300 font-bold text-xs">اختر عطورك المفضلة:</h4>
                   </div>
@@ -515,24 +510,31 @@ export default function ProductDetails() {
                         return p.category === 'men' || p.category === 'women';
                       })
                       .map(p => {
-                        const isSelected = selectedPerfumes.some(sp => sp.id === p.id);
+                        const count = selectedSlots.filter(s => s.product.id === p.id).length;
                         const limit = product.id === 13 && mixedVariant === '2' ? 2 : 3;
                         
-                        const handleSelect = () => {
-                          if (isSelected) {
-                            setSelectedPerfumes(selectedPerfumes.filter(sp => sp.id !== p.id));
-                          } else {
-                            if (selectedPerfumes.length < limit) {
-                              setSelectedPerfumes([...selectedPerfumes, p]);
-                            }
+                        const handleIncrement = (e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          if (selectedSlots.length < limit) {
+                            setSelectedSlots([...selectedSlots, { product: p, sizeMl: 30 }]);
+                          }
+                        };
+
+                        const handleDecrement = (e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          const idx = selectedSlots.map(s => s.product.id).lastIndexOf(p.id);
+                          if (idx > -1) {
+                            const updated = [...selectedSlots];
+                            updated.splice(idx, 1);
+                            setSelectedSlots(updated);
                           }
                         };
 
                         return (
                           <div
                             key={p.id}
-                            onClick={handleSelect}
-                            className={`perfume-selection-card ${isSelected ? 'selected' : ''}`}
+                            onClick={handleIncrement}
+                            className={`perfume-selection-card ${count > 0 ? 'selected' : ''}`}
                           >
                             <div className="perfume-selection-card-img-wrapper">
                               <Image
@@ -547,6 +549,27 @@ export default function ProductDetails() {
                             <span className="perfume-selection-card-category">
                               {p.category === 'men' ? 'رجالي' : 'نسائي'}
                             </span>
+                            
+                            {/* Quantity Stepper Controls */}
+                            <div className="flex items-center gap-2.5 mt-1" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={handleDecrement}
+                                disabled={count === 0}
+                                className="w-6 h-6 rounded bg-neutral-800 border border-neutral-700 font-bold text-xs flex items-center justify-center text-gray-200 disabled:opacity-30 cursor-pointer"
+                              >
+                                -
+                              </button>
+                              <span className="text-xs font-bold text-gray-200 min-w-[12px] text-center font-english">{count}</span>
+                              <button
+                                type="button"
+                                onClick={handleIncrement}
+                                disabled={selectedSlots.length >= limit}
+                                className="w-6 h-6 rounded bg-neutral-800 border border-neutral-700 font-bold text-xs flex items-center justify-center text-gray-200 disabled:opacity-30 cursor-pointer"
+                              >
+                                +
+                              </button>
+                            </div>
                           </div>
                         );
                       })}
@@ -564,7 +587,11 @@ export default function ProductDetails() {
                           <button
                             key={size}
                             type="button"
-                            onClick={() => setUniformSizeMl(size)}
+                            onClick={() => {
+                              setUniformSizeMl(size);
+                              // Sync all slot sizes
+                              setSelectedSlots(selectedSlots.map(s => ({ ...s, sizeMl: size })));
+                            }}
                             className={`px-6 py-2 rounded-lg border font-bold text-xs font-english transition-all ${
                               uniformSizeMl === size
                                 ? 'border-amber-500 bg-amber-500/5 text-amber-500'
@@ -580,23 +607,32 @@ export default function ProductDetails() {
                     /* Independent Size Selectors for Selected Perfumes */
                     <div>
                       <label className="text-[11px] text-gray-400 block mb-2 font-bold text-right">أحجام العطور المختارة:</label>
-                      {selectedPerfumes.length > 0 ? (
+                      {selectedSlots.length > 0 ? (
                         <div className="space-y-2">
-                          {selectedPerfumes.map(p => {
-                            const currentSize = perfumeSizes[p.id] || 30;
+                          {selectedSlots.map((slot, index) => {
+                            const handleUpdateSlotSize = (size: number) => {
+                              const updated = [...selectedSlots];
+                              if (updated[index]) {
+                                updated[index].sizeMl = size;
+                                setSelectedSlots(updated);
+                              }
+                            };
+
                             return (
-                              <div key={p.id} className="flex justify-between items-center py-2.5 border-b border-gray-800/40 last:border-b-0">
+                              <div key={index} className="flex justify-between items-center py-2.5 border-b border-gray-800/40 last:border-b-0">
                                 <div className="flex items-center gap-3">
                                   <div className="relative w-8 h-10">
                                     <Image
-                                      src={p.image}
-                                      alt={p.name}
+                                      src={slot.product.image}
+                                      alt={slot.product.name}
                                       fill
                                       className="object-contain"
                                       sizes="30px"
                                     />
                                   </div>
-                                  <span className="text-xs font-bold text-gray-300">{p.name.split(' - ')[0]}</span>
+                                  <span className="text-xs font-bold text-gray-300">
+                                    {slot.product.name.split(' - ')[0]} (عطر {index + 1})
+                                  </span>
                                 </div>
                                 
                                 <div className="flex gap-2">
@@ -604,9 +640,9 @@ export default function ProductDetails() {
                                     <button
                                       key={size}
                                       type="button"
-                                      onClick={() => setPerfumeSizes({ ...perfumeSizes, [p.id]: size })}
+                                      onClick={() => handleUpdateSlotSize(size)}
                                       className={`px-3 py-1 rounded-lg border font-bold text-[11px] font-english transition-all ${
-                                        currentSize === size
+                                        slot.sizeMl === size
                                           ? 'border-amber-500 bg-amber-500/5 text-amber-500'
                                           : 'border-gray-800 bg-black/25 text-gray-400 hover:border-gray-700'
                                       }`}
@@ -638,17 +674,27 @@ export default function ProductDetails() {
                       <span>نوع البوكس:</span>
                     </div>
 
-                    {selectedPerfumes.length > 0 ? (
+                    {selectedSlots.length > 0 ? (
                       <div className="flex justify-between items-start">
-                        <div className="flex flex-col items-end gap-0.5">
-                          {selectedPerfumes.map(sp => {
-                            const size = product.id === 13 && mixedVariant === '2' ? (perfumeSizes[sp.id] || 30) : uniformSizeMl;
-                            return (
-                              <span key={sp.id} className="text-gray-300">
-                                {sp.name.split(' - ')[0]} ({size}مل)
+                        <div className="flex flex-col items-end gap-1">
+                          {(() => {
+                            const grouped = selectedSlots.reduce((acc, slot) => {
+                              const existing = acc.find(item => item.product.id === slot.product.id);
+                              if (existing) {
+                                existing.qty += 1;
+                                existing.sizes.push(slot.sizeMl);
+                              } else {
+                                acc.push({ product: slot.product, qty: 1, sizes: [slot.sizeMl] });
+                              }
+                              return acc;
+                            }, [] as { product: Product, qty: number, sizes: number[] }[]);
+
+                            return grouped.map(g => (
+                              <span key={g.product.id} className="text-gray-300">
+                                {g.product.name.split(' - ')[0]} × {g.qty} ({g.sizes.map(sz => sz + 'مل').join(' + ')})
                               </span>
-                            );
-                          })}
+                            ));
+                          })()}
                         </div>
                         <span>العطور المختارة:</span>
                       </div>
