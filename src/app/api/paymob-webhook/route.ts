@@ -91,15 +91,23 @@ export async function POST(req: NextRequest) {
       // Paymob order ID or custom merchant order ID from billing data/payload
       const paymobOrderId = transaction.order?.id || transaction.order;
       const merchantOrderId = transaction.merchant_order_id; // Passed as merchant_order_id during checkout
+      const integrationId = Number(transaction.integration_id);
 
-      console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Amount=${amount} ${currency}, PaymobOrder=${paymobOrderId}, MerchantOrder=${merchantOrderId}`);
+      let paymentLabel = 'بطاقة بنكية';
+      if (integrationId === 5774297) {
+        paymentLabel = 'محفظة هاتف محمول';
+      } else if (integrationId === 5774294) {
+        paymentLabel = 'دفع كشك (أمان/مصاري)';
+      }
+
+      console.log(`[Paymob Webhook] Transaction ${transaction.id}: Success=${isSuccess}, Amount=${amount} ${currency}, Integration=${integrationId}, PaymobOrder=${paymobOrderId}, MerchantOrder=${merchantOrderId}`);
 
       if (isSuccess) {
         const { data, error } = await supabase
           .from('orders')
           .update({ 
             status: 'جديد',
-            paymentMethodLabel: 'بطاقة بنكية - تم الدفع'
+            paymentMethodLabel: `${paymentLabel} - تم الدفع`
           })
           .eq('orderId', merchantOrderId);
         
@@ -113,7 +121,7 @@ export async function POST(req: NextRequest) {
           .from('orders')
           .update({ 
             status: 'ملغي',
-            paymentMethodLabel: 'بطاقة بنكية - فشل الدفع'
+            paymentMethodLabel: `${paymentLabel} - فشل الدفع`
           })
           .eq('orderId', merchantOrderId);
         
