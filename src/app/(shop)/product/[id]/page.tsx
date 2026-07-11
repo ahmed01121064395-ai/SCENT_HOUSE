@@ -557,7 +557,7 @@ export default function ProductDetails() {
                 <div className="border-t border-gray-800/60 pt-4 mb-4">
                   {!(product.id === 13 && mixedVariant === '2') ? (
                     /* Uniform Size Selector */
-                    <div className="bg-black/20 p-3 rounded-xl border border-gray-800/80 text-center">
+                    <div className="text-center pt-2">
                       <label className="text-[11px] text-gray-400 block mb-2 font-bold">حجم موحد لكافة عطور البوكس:</label>
                       <div className="flex justify-center gap-3">
                         {[30, 50].map(size => (
@@ -585,7 +585,7 @@ export default function ProductDetails() {
                           {selectedPerfumes.map(p => {
                             const currentSize = perfumeSizes[p.id] || 30;
                             return (
-                              <div key={p.id} className="flex justify-between items-center p-2.5 rounded-xl border border-gray-800 bg-black/20">
+                              <div key={p.id} className="flex justify-between items-center py-2.5 border-b border-gray-800/40 last:border-b-0">
                                 <div className="flex items-center gap-3">
                                   <div className="relative w-8 h-10">
                                     <Image
@@ -627,7 +627,7 @@ export default function ProductDetails() {
                 </div>
 
                 {/* Running Summary / Preview Panel */}
-                <div className="mt-4 p-3 bg-black/30 border border-gray-800/80 rounded-xl text-right">
+                <div className="mt-4 pt-3 border-t border-gray-800/60 text-right">
                   <h4 className="text-[10px] text-gray-400 font-bold mb-2">ملخص البوكس الجاري تصميمه:</h4>
                   <div className="space-y-1.5 text-xs text-gray-300">
                     <div className="flex justify-between">
