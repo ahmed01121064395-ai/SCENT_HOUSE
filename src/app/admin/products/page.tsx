@@ -235,7 +235,9 @@ export default function AdminProducts() {
         price_before_discount: priceBeforeDiscount ? Number(priceBeforeDiscount) : null,
         price_after_discount: priceAfterDiscount ? Number(priceAfterDiscount) : null,
         image: imageUrl,
-        images: [imageUrl],
+        images: editingProduct && imageUrl === editingProduct.image && editingProduct.images && editingProduct.images.length > 0
+          ? editingProduct.images
+          : [imageUrl],
         isBestSeller,
         isNew,
         description,
