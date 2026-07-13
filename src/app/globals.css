@@ -10,29 +10,29 @@
 
 /* index.css - Scent House Luxury Theme */
 
-/* Core Custom Properties */
+/* Core Custom Properties (Set permanently to Light Theme) */
 :root {
-    --bg-primary: #121212;
-    --bg-secondary: #1C1C1C;
-    --bg-tertiary: #242424;
-    --bg-glass: rgba(28, 28, 28, 0.75);
+    --bg-primary: #FAF9F6;
+    --bg-secondary: #F1EFEA;
+    --bg-tertiary: #E8E6DD;
+    --bg-glass: rgba(250, 249, 246, 0.85);
     
     --primary-gold: #D4AF37;
-    --primary-gold-text: #D4AF37;
+    --primary-gold-text: #8B6914;
     --secondary-gold: #F3E5AB;
     --dark-gold: #AA7C11;
     --gold-gradient: linear-gradient(135deg, #AA7C11 0%, #D4AF37 50%, #F3E5AB 100%);
     --gold-text-gradient: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 60%, #AA7C11 100%);
     
-    --text-primary: #FAFAFA;
-    --text-secondary: #ECECEC;
-    --text-muted: #B5B5B5;
+    --text-primary: #1A1A1A;
+    --text-secondary: #333333;
+    --text-muted: #595959;
     
-    --border-color: rgba(212, 175, 55, 0.15);
-    --border-gold: rgba(212, 175, 55, 0.4);
+    --border-color: rgba(139, 105, 20, 0.15);
+    --border-gold: rgba(139, 105, 20, 0.35);
     
-    --glow-gold: 0 0 15px rgba(212, 175, 55, 0.25);
-    --glow-gold-strong: 0 0 25px rgba(212, 175, 55, 0.45);
+    --glow-gold: 0 4px 18px rgba(139, 105, 20, 0.08);
+    --glow-gold-strong: 0 6px 28px rgba(139, 105, 20, 0.15);
     
     --font-arabic: var(--font-cairo), 'Cairo', sans-serif;
     --font-english: var(--font-montserrat), 'Montserrat', sans-serif;
@@ -41,6 +41,14 @@
     --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-quick: all 0.2s ease;
 }
+
+/* ── Permanent Tailwind Gray Text Overrides (Light Theme) ──
+   These replace the previously [data-theme="monochrome_gold"]-scoped versions.
+   !important is required to override Tailwind's own utility specificity. */
+.text-gray-200 { color: #2A2A2A !important; }
+.text-gray-300 { color: #4A4A4A !important; }
+.text-gray-400 { color: #5A5A5A !important; }
+.text-gray-500 { color: #6C6C6C !important; }
 
 /* Global Reset and Layout */
 * {
@@ -55,10 +63,7 @@ body {
     text-align: right;
     font-size: 16px;
     background-color: var(--bg-primary);
-    background-image: linear-gradient(rgba(10, 10, 10, 0.92), rgba(10, 10, 10, 0.96)), url('/images/background.jpg');
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
+    background-image: none;
     color: var(--text-primary);
     font-family: var(--font-arabic);
     overflow-x: hidden;
@@ -143,18 +148,18 @@ header {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: var(--bg-glass);
+    background: rgba(255, 255, 255, 0.92); /* Light glass — was dark rgba(28,28,28,0.75) */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 2px solid var(--primary-gold);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* was rgba(212,175,55,0.08) */
     transition: var(--transition-smooth);
 }
 
 .header-active {
-    background: rgba(8, 8, 8, 0.96);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+    background: rgba(255, 255, 255, 0.97); /* was rgba(8,8,8,0.96) dark */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
@@ -200,7 +205,7 @@ header {
 }
 
 .nav-links li a {
-    color: var(--text-muted);
+    color: #333333; /* was var(--text-muted) dark — now dark text on light bg */
     text-decoration: none;
     font-weight: 600;
     font-size: 0.88rem;
@@ -214,9 +219,9 @@ header {
 .nav-links li a:hover,
 .nav-links li.active a {
     color: var(--primary-gold);
-    background: rgba(212, 175, 55, 0.06);
-    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.15);
-    text-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+    background: rgba(212, 175, 55, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.2);
+    text-shadow: none; /* removed dark-mode glow */
 }
 
 .nav-actions {
@@ -305,6 +310,8 @@ header {
     justify-content: center;
     overflow: hidden;
     box-sizing: border-box;
+    background-color: #FAFAFA;
+    background-image: none !important;
 }
 
 .hero-video-bg {
@@ -324,7 +331,7 @@ header {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.94) 90%);
     z-index: 2;
 }
 
@@ -355,13 +362,17 @@ header {
     font-weight: 800;
     margin-bottom: 15px;
     letter-spacing: 1px;
+    background: var(--gold-text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero-slogan {
     font-size: 1.4rem;
     font-weight: 300;
-    color: var(--text-secondary);
+    color: #2F2F2F;
     margin-bottom: 35px;
+    text-shadow: none;
 }
 
 .hero-buttons {
@@ -709,7 +720,7 @@ header {
 /* Luxury Product Card */
 .product-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     border-radius: 8px;
     overflow: hidden;
     position: relative;
@@ -905,7 +916,7 @@ header {
 
 .product-card:hover {
     border-color: var(--primary-gold);
-    box-shadow: var(--glow-gold);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.18);
     transform: translateY(-5px);
 }
 
@@ -998,10 +1009,16 @@ header {
 
 /* About Scent House Panel */
 .about-panel {
-    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    background: #FDFDFD;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.06);
     padding: 80px 0;
+}
+
+/* Added for light theme */
+.about-desc {
+    color: var(--text-secondary); /* #333333 */
 }
 
 .about-panel-container {
@@ -1199,14 +1216,18 @@ header {
 
 .premium-input {
     flex-grow: 1;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    background: #FFFFFF; /* was var(--bg-primary) dark */
+    border: 1px solid rgba(0, 0, 0, 0.12); /* was var(--border-color) */
     color: var(--text-primary);
     padding: 12px 20px;
     border-radius: 4px;
     font-family: var(--font-arabic);
     font-size: 0.95rem;
     transition: var(--transition-quick);
+}
+
+.premium-input::placeholder {
+    color: #888888;
 }
 
 .premium-input:focus {
@@ -1392,8 +1413,8 @@ header {
 }
 
 .select-premium {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.12);
     color: var(--text-primary);
     padding: 10px 15px;
     border-radius: 4px;
@@ -1525,7 +1546,7 @@ header {
 
 .note-display-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     padding: 18px 12px;
     transition: var(--transition-smooth);
@@ -1555,6 +1576,11 @@ header {
     padding-bottom: 8px;
 }
 
+/* Added for light theme: ensure note card header text is dark */
+.note-card-header span {
+    color: var(--text-primary); /* #1A1A1A on light bg */
+}
+
 .note-icon {
     font-size: 1.25rem;
     margin-bottom: 2px;
@@ -1578,7 +1604,7 @@ header {
 }
 
 .size-option-btn {
-    border: 1px solid var(--border-gold);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     background: var(--bg-secondary);
     color: var(--text-primary);
     padding: 8px 20px;
@@ -1591,10 +1617,9 @@ header {
 
 .size-option-btn.active,
 .size-option-btn:hover {
-    background: var(--gold-gradient);
-    color: var(--bg-primary);
+    background: var(--primary-gold);
+    color: #0A0A0A; /* dark text on gold bg */
     border-color: var(--primary-gold);
-    box-shadow: var(--glow-gold);
 }
 
 /* Quantity & CTA actions block */
@@ -1614,7 +1639,7 @@ header {
 .qty-control {
     display: flex;
     align-items: center;
-    border: 1px solid var(--border-gold);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 4px;
     background: var(--bg-secondary);
     height: 48px;
@@ -1804,13 +1829,14 @@ header {
     width: 450px;
     max-width: 90vw;
     height: 100%;
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border-gold);
+    background: #FFFFFF;
+    color: var(--text-primary);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
     z-index: 10001;
     display: flex;
     flex-direction: column;
     transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
 }
 
 .cart-drawer-backdrop.active .cart-drawer,
@@ -1820,7 +1846,7 @@ header {
 
 .cart-drawer-header {
     padding: 25px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1829,6 +1855,7 @@ header {
 .cart-drawer-header h3 {
     font-size: 1.3rem;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .close-drawer-btn {
@@ -1872,7 +1899,7 @@ header {
 .cart-item-row {
     display: flex;
     gap: 15px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     padding-bottom: 15px;
 }
 
@@ -1925,7 +1952,7 @@ header {
 
 .cart-item-price {
     font-weight: 700;
-    color: var(--primary-gold);
+    color: var(--text-primary);
     font-family: var(--font-english);
 }
 
@@ -1950,8 +1977,8 @@ header {
 
 .cart-drawer-footer {
     padding: 25px;
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-tertiary);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #F9F9F9;
 }
 
 .cart-summary-line {
@@ -2026,7 +2053,7 @@ header {
 
 .checkout-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     padding: 30px;
 }
@@ -2204,9 +2231,15 @@ header {
 }
 
 .invoice-table td {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06); /* was var(--border-color) */
     padding: 12px 10px;
     font-size: 0.95rem;
+    color: var(--text-secondary); /* dark readable text */
+}
+
+/* Added for light theme — control row separator color */
+.invoice-table tr {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
 .invoice-table tr:last-child td {
@@ -2582,10 +2615,9 @@ header {
     border-right-color: #e74c3c;
 }
 
-/* Footer Section */
 footer {
-    background-color: var(--bg-primary);
-    border-top: 1px solid var(--border-gold);
+    background-color: #FFFFFF;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     padding: 70px 20px 30px;
 }
 
@@ -2601,7 +2633,7 @@ footer {
 .footer-column h4 {
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--primary-gold);
+    color: var(--text-primary);
     margin-bottom: 20px;
 }
 
@@ -2619,7 +2651,7 @@ footer {
 }
 
 .footer-column ul li a {
-    color: var(--text-muted);
+    color: #444444; /* was var(--text-muted) dark; now dark on light bg */
     text-decoration: none;
     font-size: 0.9rem;
     transition: var(--transition-quick);
@@ -2630,6 +2662,10 @@ footer {
     color: var(--primary-gold);
     padding-right: 5px;
 }
+
+/* Aliases for light theme compatibility */
+.footer-links a { color: #444444; }
+.footer-links a:hover { color: var(--primary-gold); }
 
 .contact-info-list {
     display: flex;
@@ -2653,12 +2689,13 @@ footer {
     max-width: 1200px;
     margin: 0 auto;
     padding-top: 25px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
+    color: #666666;
 }
 
 .footer-copy {
@@ -2700,7 +2737,7 @@ footer {
 
 .value-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     border-radius: 8px;
     padding: 30px;
     text-align: center;
@@ -2723,6 +2760,7 @@ footer {
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 12px;
+    color: var(--text-primary);
 }
 
 .value-desc {
@@ -2914,6 +2952,9 @@ footer {
     .feature-item {
         font-size: 0.72rem;
         justify-content: center;
+    }
+    .feature-item span {
+        color: #333333; /* dark text on light background */
     }
 
     /* Mobile optimization for Product Detail template */
@@ -3107,13 +3148,13 @@ footer {
 
 /* ==================== SCENT HOUSE OFFERS SECTION ==================== */
 .offers-section {
-    background: linear-gradient(135deg, #050505 0%, #120e00 50%, #050505 100%);
+    background: var(--bg-primary);
     padding: 90px 0 70px 0;
     margin: 40px 0;
     width: 100%;
     position: relative;
-    border-top: 1px solid rgba(212, 175, 55, 0.15);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .offers-container {
@@ -3131,9 +3172,9 @@ footer {
 }
 
 .offer-card {
-    background: rgba(15, 15, 15, 0.7);
+    background: var(--bg-secondary);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
     overflow: hidden;
     position: relative;
@@ -3142,23 +3183,24 @@ footer {
                 border-color 0.4s ease;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 .offer-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.12);
+    box-shadow: 0 20px 40px rgba(139, 105, 20, 0.08);
     border-color: var(--primary-gold);
 }
 
 .offer-card.featured {
     border: 2px solid var(--primary-gold);
     transform: scale(1.03);
-    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.08);
+    box-shadow: 0 15px 35px rgba(139, 105, 20, 0.08);
 }
 
 .offer-card.featured:hover {
     transform: scale(1.03) translateY(-10px);
-    box-shadow: 0 25px 50px rgba(212, 175, 55, 0.22);
+    box-shadow: 0 25px 50px rgba(139, 105, 20, 0.15);
 }
 
 .offer-badge {
@@ -3190,8 +3232,8 @@ footer {
     height: 260px;
     position: relative;
     overflow: hidden;
-    background: #111;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    background: #EAE6DC;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .offer-img {
@@ -3222,8 +3264,8 @@ footer {
 }
 
 .offer-details {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 20px;
@@ -3231,7 +3273,7 @@ footer {
 }
 
 .detail-item {
-    color: #ddd;
+    color: var(--text-primary);
     font-size: 0.95rem;
     margin-bottom: 10px;
     display: flex;
@@ -3284,8 +3326,8 @@ footer {
 
 .offers-bottom-bar {
     margin-top: 60px;
-    background: rgba(212, 175, 55, 0.05);
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(139, 105, 20, 0.05);
+    border: 1px solid rgba(139, 105, 20, 0.15);
     border-radius: 16px;
     padding: 24px 35px;
     display: flex;
@@ -3299,7 +3341,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #e0e0e0;
+    color: var(--text-primary);
     font-size: 1.05rem;
     font-weight: 600;
 }
@@ -3506,7 +3548,7 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background: #0d0d0d;
+    background: #F5F5F5;
     display: block;
 }
 
@@ -3518,7 +3560,7 @@ footer {
 }
 
 .scroller-btn {
-    background: rgba(15, 15, 15, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid var(--primary-gold);
     color: var(--primary-gold);
     width: 45px;
@@ -3534,7 +3576,7 @@ footer {
 
 .scroller-btn:hover {
     background: var(--primary-gold);
-    color: #000;
+    color: #FFFFFF;
     box-shadow: var(--glow-gold-small);
 }
 
@@ -3587,325 +3629,6 @@ footer {
     .mobile-only {
         display: inline;
     }
-}
-
-/* ── Monochrome Gold Light Theme Overrides ── */
-html[data-theme="monochrome_gold"] {
-    --bg-primary: #FAF9F6;
-    --bg-secondary: #F1EFEA;
-    --bg-tertiary: #E8E6DD;
-    --bg-glass: rgba(250, 249, 246, 0.85);
-
-    --text-primary: #1A1A1A;
-    --text-secondary: #333333;
-    --text-muted: #595959;
-
-    --primary-gold-text: #8B6914;
-
-    --border-color: rgba(139, 105, 20, 0.15);
-    --border-gold: rgba(139, 105, 20, 0.35);
-
-    --glow-gold: 0 4px 18px rgba(139, 105, 20, 0.08);
-    --glow-gold-strong: 0 6px 28px rgba(139, 105, 20, 0.15);
-}
-
-/* Adjustments for monochrome_gold theme readability */
-html[data-theme="monochrome_gold"] body {
-    color: var(--text-primary);
-    background-color: var(--bg-primary);
-    background-image: none !important;
-}
-
-/* Header link visibility */
-html[data-theme="monochrome_gold"] .header-wrapper {
-    background: rgba(255, 255, 255, 0.92);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="monochrome_gold"] .nav-link {
-    color: #333333;
-}
-
-html[data-theme="monochrome_gold"] .nav-link:hover,
-html[data-theme="monochrome_gold"] .nav-link.active {
-    color: var(--primary-gold);
-}
-
-/* Hero section overlay and elements */
-html[data-theme="monochrome_gold"] .hero-section {
-    background-color: #FAFAFA;
-    background-image: none !important;
-}
-
-html[data-theme="monochrome_gold"] .hero-overlay {
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.94) 90%);
-}
-
-html[data-theme="monochrome_gold"] .hero-title {
-    background: var(--gold-text-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-html[data-theme="monochrome_gold"] .hero-slogan {
-    color: #2F2F2F;
-    text-shadow: none;
-}
-
-html[data-theme="monochrome_gold"] .feature-item span {
-    color: #333333;
-}
-
-/* Product Card */
-html[data-theme="monochrome_gold"] .product-card {
-    background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="monochrome_gold"] .product-card-title {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .product-card-notes {
-    color: var(--text-muted);
-}
-
-html[data-theme="monochrome_gold"] .product-card:hover {
-    border-color: var(--primary-gold);
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.18);
-}
-
-/* Product Detail note cards */
-html[data-theme="monochrome_gold"] .note-display-card {
-    background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="monochrome_gold"] .note-card-header span {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .note-card-content {
-    color: var(--text-secondary);
-}
-
-/* Form and Quantity controls */
-html[data-theme="monochrome_gold"] .qty-control {
-    background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="monochrome_gold"] .qty-btn {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .qty-input {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .size-option-btn {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border-color: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="monochrome_gold"] .size-option-btn.active {
-    background: var(--primary-gold);
-    color: #0A0A0A;
-    border-color: var(--primary-gold);
-}
-
-/* Checkout and Confirmation Cards */
-html[data-theme="monochrome_gold"] .checkout-card {
-    background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="monochrome_gold"] .premium-input {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .premium-input::placeholder {
-    color: #888888;
-}
-
-html[data-theme="monochrome_gold"] .select-premium {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .invoice-table tr {
-    border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
-html[data-theme="monochrome_gold"] .invoice-table th,
-html[data-theme="monochrome_gold"] .invoice-table td {
-    color: var(--text-secondary);
-}
-
-/* Cart Drawer */
-html[data-theme="monochrome_gold"] .cart-drawer {
-    background: #FFFFFF;
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .cart-drawer-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="monochrome_gold"] .cart-drawer-header h3 {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .cart-item-row {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-html[data-theme="monochrome_gold"] .cart-item-name {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .cart-item-meta {
-    color: var(--text-muted);
-}
-
-html[data-theme="monochrome_gold"] .cart-item-price {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .cart-drawer-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    background: #F9F9F9;
-}
-
-html[data-theme="monochrome_gold"] .cart-summary-line {
-    color: var(--text-secondary);
-}
-
-html[data-theme="monochrome_gold"] .cart-summary-total {
-    color: var(--text-primary);
-}
-
-/* About Panel & Footer */
-html[data-theme="monochrome_gold"] .about-panel {
-    background: #FDFDFD;
-    border-color: rgba(0, 0, 0, 0.06);
-}
-
-html[data-theme="monochrome_gold"] .about-desc {
-    color: var(--text-secondary);
-}
-
-html[data-theme="monochrome_gold"] footer {
-    background-color: #FFFFFF;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="monochrome_gold"] .footer-column h4 {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .footer-links a {
-    color: #444444;
-}
-
-html[data-theme="monochrome_gold"] .footer-links a:hover {
-    color: var(--primary-gold);
-}
-
-html[data-theme="monochrome_gold"] .footer-bottom {
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    color: #666666;
-}
-
-/* Tailwind text-gray overrides in light theme to ensure high contrast and readability */
-html[data-theme="monochrome_gold"] .text-gray-200 {
-    color: #2A2A2A !important;
-}
-html[data-theme="monochrome_gold"] .text-gray-300 {
-    color: #4A4A4A !important;
-}
-html[data-theme="monochrome_gold"] .text-gray-400 {
-    color: #5A5A5A !important;
-}
-html[data-theme="monochrome_gold"] .text-gray-500 {
-    color: #6C6C6C !important;
-}
-
-
-/* Reviews and Values */
-html[data-theme="monochrome_gold"] .value-card {
-    background: var(--bg-secondary);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="monochrome_gold"] .value-title {
-    color: var(--text-primary);
-}
-
-html[data-theme="monochrome_gold"] .review-screenshot-card img {
-    background: #F5F5F5;
-}
-
-html[data-theme="monochrome_gold"] .scroller-btn {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--primary-gold);
-    color: var(--primary-gold);
-}
-
-html[data-theme="monochrome_gold"] .scroller-btn:hover {
-    background: var(--primary-gold);
-    color: #FFFFFF;
-}
-
-/* Special Offers Section Light Theme Overrides */
-html[data-theme="monochrome_gold"] .offers-section {
-    background: var(--bg-primary) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-card {
-    background: var(--bg-secondary) !important;
-    border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-card:hover {
-    box-shadow: 0 20px 40px rgba(139, 105, 20, 0.08) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-card.featured {
-    border-color: var(--primary-gold) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-card.featured:hover {
-    box-shadow: 0 25px 50px rgba(139, 105, 20, 0.15) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-img-wrapper {
-    background: #EAE6DC !important;
-    border-bottom-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-html[data-theme="monochrome_gold"] .offer-details {
-    background: rgba(0, 0, 0, 0.02) !important;
-    border-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-html[data-theme="monochrome_gold"] .detail-item {
-    color: var(--text-primary) !important;
-}
-
-html[data-theme="monochrome_gold"] .offers-bottom-bar {
-    background: rgba(139, 105, 20, 0.05) !important;
-    border-color: rgba(139, 105, 20, 0.15) !important;
-}
-
-html[data-theme="monochrome_gold"] .offers-bottom-bar .bottom-item {
-    color: var(--text-primary) !important;
 }
 
 /* Custom Gift Box Designer Perfume Selection Cards */
