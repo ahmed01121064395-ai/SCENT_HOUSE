@@ -27,6 +27,8 @@ export interface Product {
   contents?: string;
   sizes: ProductSize[];
   created_at?: string;
+  price_before_discount?: number | null;
+  price_after_discount?: number | null;
 }
 
 export const productsDatabase: Product[] = [
