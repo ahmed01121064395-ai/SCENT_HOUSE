@@ -48,8 +48,6 @@ interface AppContextType {
   clearCart: () => void;
   lastPlacedOrder: OrderInfo | null;
   setLastPlacedOrder: (order: OrderInfo | null) => void;
-  theme: 'current' | 'monochrome_gold';
-  setTheme: (theme: 'current' | 'monochrome_gold') => void;
   settings: SiteSettings | null;
   refreshSettings: () => Promise<void>;
   coupons: any[];
@@ -63,7 +61,6 @@ interface AppContextType {
 }
 
 export interface SiteSettings {
-  active_theme: 'current' | 'monochrome_gold';
   announcement_bar_text: string;
   hero_title: string;
   hero_subtitle: string;
@@ -95,7 +92,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [lastPlacedOrder, setLastPlacedOrder] = useState<OrderInfo | null>(null);
   const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
-  const [theme, setThemeState] = useState<'current' | 'monochrome_gold'>('current');
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   const [coupons, setCoupons] = useState<any[]>([]);
@@ -172,34 +168,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Fetch theme and subscribe to changes in real-time
+  // Fetch site settings and subscribe to realtime changes
   useEffect(() => {
-    async function initTheme() {
+    async function initSettings() {
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
         .eq('id', 1)
         .single();
-        
       if (!error && data) {
         setSettings(data as SiteSettings);
-        const activeTheme = data.active_theme as 'current' | 'monochrome_gold';
-        setThemeState(activeTheme);
-        
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
-          if (activeTheme === 'monochrome_gold') {
-            document.documentElement.setAttribute('data-theme', 'monochrome_gold');
-          } else {
-            document.documentElement.removeAttribute('data-theme');
-          }
-        }
       }
     }
-    
-    initTheme();
+    initSettings();
 
     const channel = supabase
-      .channel('theme-changes')
+      .channel('settings-changes')
       .on(
         'postgres_changes',
         {
@@ -211,16 +195,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           if (payload.new) {
             setSettings(payload.new as SiteSettings);
-            const activeTheme = payload.new.active_theme as 'current' | 'monochrome_gold';
-            setThemeState(activeTheme);
-            
-            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
-              if (activeTheme === 'monochrome_gold') {
-                document.documentElement.setAttribute('data-theme', 'monochrome_gold');
-              } else {
-                document.documentElement.removeAttribute('data-theme');
-              }
-            }
           }
         }
       )
@@ -230,21 +204,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
   }, []);
-
-  const setTheme = async (newTheme: 'current' | 'monochrome_gold') => {
-    setThemeState(newTheme);
-    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
-      if (newTheme === 'monochrome_gold') {
-        document.documentElement.setAttribute('data-theme', 'monochrome_gold');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-      }
-    }
-    await supabase
-      .from('site_settings')
-      .update({ active_theme: newTheme })
-      .eq('id', 1);
-  };
 
   // Fetch real product data from Supabase
   useEffect(() => {
@@ -494,8 +453,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       lastPlacedOrder,
       setLastPlacedOrder,
-      theme,
-      setTheme,
       settings,
       refreshSettings,
       coupons,
