@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 // The correct production domain — hardcoded to avoid env var misconfiguration issues
-const PRODUCTION_URL = 'https://scent-house-nine.vercel.app';
+const PRODUCTION_URL = 'https://www.scenthouse.online';
 
 export async function GET(req: NextRequest) {
   console.log('[Paymob Callback GET] Redirect callback received.');
