@@ -207,6 +207,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch real product data from Supabase
   useEffect(() => {
+    const mapProductSizes = (prodList: any[]): Product[] => {
+      return prodList.map(p => {
+        if (p.sizes && Array.isArray(p.sizes)) {
+          p.sizes = p.sizes.map((s: any) => ({
+            ...s,
+            price: s.price_after_discount !== undefined ? s.price_after_discount : (s.price || 0),
+            originalPrice: s.price_before_discount !== undefined ? (s.price_before_discount || undefined) : (s.originalPrice || undefined)
+          }));
+        }
+        return p as Product;
+      });
+    };
+
     async function loadRealProducts() {
       const { data, error } = await supabase
         .from('products')
@@ -247,18 +260,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               .select('*')
               .order('id', { ascending: true });
             if (refetchedData) {
-              setProducts(refetchedData as Product[]);
+              setProducts(mapProductSizes(refetchedData));
             }
           } else {
             console.error('Failed to seed products:', seedError);
-            setProducts(productsDatabase); // fallback to static array
+            setProducts(mapProductSizes(productsDatabase)); // fallback to static array
           }
         } else {
-          setProducts(data as Product[]);
+          setProducts(mapProductSizes(data));
         }
       } else {
         console.error('Failed to fetch products:', error);
-        setProducts(productsDatabase); // fallback on offline or query error
+        setProducts(mapProductSizes(productsDatabase)); // fallback on offline or query error
       }
     }
     loadRealProducts();
@@ -279,7 +292,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             .select('*')
             .order('id', { ascending: true });
           if (!error && data) {
-            setProducts(data as Product[]);
+            setProducts(mapProductSizes(data));
           }
         }
       )
@@ -315,16 +328,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updatedCart = cart.map(item => {
         const prod = products.find(p => p.id === item.product.id);
         if (prod) {
-          const hasDiscount = prod.price_before_discount != null && prod.price_after_discount != null;
-          const expectedPrice = hasDiscount ? prod.price_after_discount : (prod.sizes.find(s => s.ml === item.size.ml)?.price || item.size.price);
-          
-          if (item.size.price !== expectedPrice) {
-            changed = true;
-            return {
-              ...item,
-              product: prod,
-              size: { ...item.size, price: expectedPrice }
-            };
+          const dbSize = prod.sizes.find(s => s.ml === item.size.ml);
+          if (dbSize) {
+            const expectedPrice = dbSize.price_after_discount;
+            const expectedOriginalPrice = dbSize.price_before_discount || null;
+            if (item.size.price !== expectedPrice || item.size.originalPrice !== (expectedOriginalPrice || undefined)) {
+              changed = true;
+              return {
+                ...item,
+                product: prod,
+                size: {
+                  ...item.size,
+                  price: expectedPrice,
+                  price_after_discount: expectedPrice,
+                  price_before_discount: expectedOriginalPrice,
+                  originalPrice: expectedOriginalPrice || undefined
+                }
+              };
+            }
           }
         }
         return item;
@@ -344,10 +365,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    let sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
-    if (product.price_before_discount != null && product.price_after_discount != null) {
-      sizeObj = { ...sizeObj, price: product.price_after_discount };
-    }
+    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
 
     const existingIndex = cart.findIndex(item => {
       if (item.product.id !== productId) return false;
@@ -382,10 +400,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    let sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
-    if (product.price_before_discount != null && product.price_after_discount != null) {
-      sizeObj = { ...sizeObj, price: product.price_after_discount };
-    }
+    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
 
     setBuyNowItem({
       product,
@@ -408,12 +423,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     const newCart = cart.map(item => {
       if (item.product.id === productId && item.size.ml === sizeMl) {
-        let sizeObj = { ...item.size };
-        const prod = products.find(p => p.id === productId);
-        if (prod && prod.price_before_discount != null && prod.price_after_discount != null) {
-          sizeObj.price = prod.price_after_discount;
-        }
-        return { ...item, size: sizeObj, quantity };
+        return { ...item, quantity };
       }
       return item;
     });
@@ -467,7 +477,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Calculations
-  const cartSubtotal = cart.reduce((sum, item) => sum + (item.size.price * item.quantity), 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + ((item.size.price_after_discount ?? item.size.price) * item.quantity), 0);
   const cartDiscount = Math.round(cartSubtotal * (discountPercent / 100));
   const cartTotal = cartSubtotal - cartDiscount;
 
