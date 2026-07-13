@@ -51,6 +51,9 @@ export default function ProductDetails() {
   const [uniformSizeMl, setUniformSizeMl] = useState<number>(30);
 
   const getPerfumePrice = (p: Product, ml: number) => {
+    if (p.price_before_discount != null && p.price_after_discount != null) {
+      return p.price_after_discount;
+    }
     const sz = p.sizes.find(s => s.ml === ml);
     return sz ? sz.price : (ml === 30 ? 350 : 450);
   };
@@ -160,6 +163,9 @@ export default function ProductDetails() {
 
   // Get active size details
   const sizeObj = product.sizes.find(s => s.ml === selectedSizeMl) || product.sizes[0];
+  const hasDiscount = product.price_before_discount != null && product.price_after_discount != null;
+  const originalPriceToShow = hasDiscount ? product.price_before_discount : sizeObj.originalPrice;
+  const currentPriceToShow = hasDiscount ? product.price_after_discount : (product.category === 'gifts' ? dynamicPrice! : sizeObj.price);
 
   // Wishlist state
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
@@ -408,14 +414,14 @@ export default function ProductDetails() {
 
             <div className="details-price-bar">
               <div className="details-price-block">
-                {sizeObj.originalPrice && (
+                {originalPriceToShow && (
                   <span className="details-original-price">
-                    <span className="english-num">{sizeObj.originalPrice * qty}</span> جنيه
+                    <span className="english-num">{originalPriceToShow * qty}</span> جنيه
                   </span>
                 )}
                 <span className="details-price">
                   <span className="english-num">
-                    {product.category === 'gifts' ? (dynamicPrice! * qty) : (sizeObj.price * qty)}
+                    {currentPriceToShow * qty}
                   </span>{' '}
                   جنيه
                 </span>
@@ -546,9 +552,21 @@ export default function ProductDetails() {
                               />
                             </div>
                             <span className="perfume-selection-card-name">{p.name.split(' - ')[0]}</span>
-                            <span className="perfume-selection-card-category">
-                              {p.category === 'men' ? 'رجالي' : 'نسائي'}
-                            </span>
+                            <div className="flex items-center gap-1.5 justify-center mt-0.5">
+                              <span className="perfume-selection-card-category">
+                                {p.category === 'men' ? 'رجالي' : 'نسائي'}
+                              </span>
+                              <span className="text-[10px] text-gray-500 font-bold english-num">
+                                {p.price_before_discount != null && p.price_after_discount != null ? (
+                                  <>
+                                    <span className="line-through text-gray-400 mr-1">{p.price_before_discount}</span>
+                                    <span className="text-amber-600">{p.price_after_discount}ج</span>
+                                  </>
+                                ) : (
+                                  <span>{p.sizes[0]?.price || p.price}ج</span>
+                                )}
+                              </span>
+                            </div>
                             
                             {/* Quantity Stepper Controls */}
                             <div className="flex items-center gap-2.5 mt-1" onClick={(e) => e.stopPropagation()}>
