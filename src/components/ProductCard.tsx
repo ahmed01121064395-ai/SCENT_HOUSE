@@ -23,15 +23,14 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     <div className="product-card-badge">جديد بالدار</div>
   ) : null;
 
-  // Show first size price on card (with originalPrice if available)
-  const hasDiscount = product.price_before_discount != null && product.price_after_discount != null;
+  // Show first size price on card (with size-level price_before_discount if available)
   const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
   const displayPrice = overridePrice !== undefined
     ? overridePrice
-    : (hasDiscount ? product.price_after_discount : (defaultSize ? defaultSize.price : product.price));
+    : (defaultSize ? defaultSize.price_after_discount : product.price);
   const displayOriginalPrice = overridePrice !== undefined
     ? undefined
-    : (hasDiscount ? product.price_before_discount : defaultSize?.originalPrice);
+    : (defaultSize?.price_before_discount || undefined);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
