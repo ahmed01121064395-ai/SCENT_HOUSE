@@ -86,13 +86,13 @@ function ShopContent() {
       return b.rating - a.rating;
     }
     if (sortBy === 'price-asc') {
-      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price : a.price;
-      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price : b.price;
+      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price_after_discount : a.price;
+      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price_after_discount : b.price;
       return priceA - priceB;
     }
     if (sortBy === 'price-desc') {
-      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price : a.price;
-      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price : b.price;
+      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price_after_discount : a.price;
+      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price_after_discount : b.price;
       return priceB - priceA;
     }
     return 0;
@@ -102,11 +102,11 @@ function ShopContent() {
   const getOverridePrice = (p: Product) => {
     if (selectedSizes.includes(30) && !selectedSizes.includes(50)) {
       const size30 = p.sizes.find(s => s.ml === 30);
-      if (size30) return size30.price;
+      if (size30) return size30.price_after_discount;
     }
     if (selectedSizes.includes(50) && !selectedSizes.includes(30)) {
       const size50 = p.sizes.find(s => s.ml === 50);
-      if (size50) return size50.price;
+      if (size50) return size50.price_after_discount;
     }
     return undefined;
   };
