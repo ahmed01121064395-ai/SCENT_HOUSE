@@ -308,6 +308,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('scent_cart', JSON.stringify(newCart));
   };
 
+  // Sync cart items prices with database discounts when products list is loaded or changed
+  useEffect(() => {
+    if (products.length > 0 && cart.length > 0) {
+      let changed = false;
+      const updatedCart = cart.map(item => {
+        const prod = products.find(p => p.id === item.product.id);
+        if (prod) {
+          const hasDiscount = prod.price_before_discount != null && prod.price_after_discount != null;
+          const expectedPrice = hasDiscount ? prod.price_after_discount : (prod.sizes.find(s => s.ml === item.size.ml)?.price || item.size.price);
+          
+          if (item.size.price !== expectedPrice) {
+            changed = true;
+            return {
+              ...item,
+              product: prod,
+              size: { ...item.size, price: expectedPrice }
+            };
+          }
+        }
+        return item;
+      });
+      if (changed) {
+        saveCart(updatedCart);
+      }
+    }
+  }, [products]);
+
   const saveWishlist = (newWishlist: number[]) => {
     setWishlist(newWishlist);
     localStorage.setItem('scent_wishlist', JSON.stringify(newWishlist));
@@ -317,7 +344,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    let sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    if (product.price_before_discount != null && product.price_after_discount != null) {
+      sizeObj = { ...sizeObj, price: product.price_after_discount };
+    }
+
     const existingIndex = cart.findIndex(item => {
       if (item.product.id !== productId) return false;
       if (product.category === 'gifts') {
@@ -329,6 +360,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newCart = [...cart];
     if (existingIndex > -1) {
       newCart[existingIndex].quantity += quantity;
+      newCart[existingIndex].size = sizeObj; // make sure size price is updated
       if (boxType) newCart[existingIndex].boxType = boxType;
       if (giftMessage) newCart[existingIndex].giftMessage = giftMessage;
     } else {
@@ -350,7 +382,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    const sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    let sizeObj = customSizeObj || product.sizes.find(s => s.ml === sizeMl) || product.sizes[0];
+    if (product.price_before_discount != null && product.price_after_discount != null) {
+      sizeObj = { ...sizeObj, price: product.price_after_discount };
+    }
+
     setBuyNowItem({
       product,
       size: sizeObj,
@@ -372,7 +408,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     const newCart = cart.map(item => {
       if (item.product.id === productId && item.size.ml === sizeMl) {
-        return { ...item, quantity };
+        let sizeObj = { ...item.size };
+        const prod = products.find(p => p.id === productId);
+        if (prod && prod.price_before_discount != null && prod.price_after_discount != null) {
+          sizeObj.price = prod.price_after_discount;
+        }
+        return { ...item, size: sizeObj, quantity };
       }
       return item;
     });
