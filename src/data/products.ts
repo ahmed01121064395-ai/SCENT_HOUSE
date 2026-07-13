@@ -6,8 +6,8 @@ export interface ProductNote {
 
 export interface ProductSize {
   ml: number;
-  price: number;
-  originalPrice?: number;
+  price_after_discount: number;
+  price_before_discount?: number | null;
 }
 
 export interface Product {
@@ -27,8 +27,6 @@ export interface Product {
   contents?: string;
   sizes: ProductSize[];
   created_at?: string;
-  price_before_discount?: number | null;
-  price_after_discount?: number | null;
 }
 
 export const productsDatabase: Product[] = [
