@@ -133,23 +133,7 @@ export default function ProductDetails() {
     }
   }, [product]);
 
-  // Update active image dynamically when size changes
-  useEffect(() => {
-    if (product && product.category !== 'gifts' && selectedSizeMl !== null) {
-      const sizes = product.sizes || [];
-      const sizeIndex = sizes.findIndex(s => s.ml === selectedSizeMl);
-      const imgs = product.images || [];
-      
-      if (sizeIndex === 0 && imgs[1]) {
-        setActiveImage(imgs[1]);
-      } else if (sizeIndex === 1 && imgs[2]) {
-        setActiveImage(imgs[2]);
-      } else {
-        const sizeImg = getSizeImage(product.name, selectedSizeMl);
-        setActiveImage(sizeImg);
-      }
-    }
-  }, [selectedSizeMl, product]);
+  // (image navigation is handled directly in size button onClick)
 
   if (loading) {
     return (
@@ -535,11 +519,19 @@ export default function ProductDetails() {
               <div className="filter-group">
                 <h4 className="filter-title">الحجم المتوفر:</h4>
                 <div className="size-selector">
-                  {product.sizes.map(sz => (
+                  {product.sizes.map((sz, sIdx) => (
                     <button
                       key={sz.ml}
                       className={`size-option-btn ${selectedSizeMl === sz.ml ? 'active' : ''}`}
-                      onClick={() => setSelectedSizeMl(sz.ml)}
+                      onClick={() => {
+                        setSelectedSizeMl(sz.ml);
+                        // Navigate carousel to the image that matches this size
+                        // Image layout: [0]=hero, [1]=1st-size-img, [2]=2nd-size-img, [3]=4th-dalaa-img
+                        const targetImgIndex = sIdx + 1; // offset by 1 to skip hero image
+                        if (galleryImages[targetImgIndex]) {
+                          setActiveImage(galleryImages[targetImgIndex]);
+                        }
+                      }}
                       type="button"
                     >
                       {sz.ml} ML
