@@ -49,8 +49,8 @@ export const productsDatabase: Product[] = [
       base: "خشب الصندل، المسك الأبيض، نجيل الهند"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   {
@@ -72,8 +72,8 @@ export const productsDatabase: Product[] = [
       base: "أخشاب الأرز، العنبر الكشميري، المسك الملكي"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   {
@@ -95,8 +95,8 @@ export const productsDatabase: Product[] = [
       base: "مسك الرمان، بودرة ناعمة، لمحة كراميل دافئة"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   {
@@ -118,8 +118,8 @@ export const productsDatabase: Product[] = [
       base: "خشب الصندل، العنبر الكشميري، المسك الأبيض النقي"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   {
@@ -141,8 +141,8 @@ export const productsDatabase: Product[] = [
       base: "فانيليا دافئة + خشب + مسك (ثبات عالي جدًا ودفا بيكمل معاك طول اليوم)"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   {
@@ -164,8 +164,8 @@ export const productsDatabase: Product[] = [
       base: "فانيليا دافئة + مسك ثابت (ثبات ودفا يفضل على الجلد)"
     },
     sizes: [
-      { ml: 50, price: 650, originalPrice: 800 },
-      { ml: 30, price: 400, originalPrice: 500 }
+      { ml: 50, price_after_discount: 650, price_before_discount: 800 },
+      { ml: 30, price_after_discount: 400, price_before_discount: 500 }
     ]
   },
   // Gift Boxes
@@ -182,7 +182,7 @@ export const productsDatabase: Product[] = [
     reviewsCount: 38,
     description: "بوكس مناسبات مخملي راقي يجمع ما بين عطر غرام الفاتن وعطر دلع الهادئ ليمنحك نعومة وجاذبية لا تقاوم.",
     contents: "عطر غرام 50مل، عطر دلع 50مل، مبخرة سيراميك مذهبة، كرت إهداء فاخر.",
-    sizes: [{ ml: 100, price: 690 }]
+    sizes: [{ ml: 100, price_after_discount: 690, price_before_discount: null }]
   },
   {
     id: 10,
@@ -197,7 +197,7 @@ export const productsDatabase: Product[] = [
     reviewsCount: 47,
     description: "صندوق الإهداء النخبوي المتميز، يحتوي على عطر هيبة الرجالي الفخم وعطر مجد المتزن بنكهة الفواكه والأخشاب الدافئة.",
     contents: "عطر هيبة 50مل، عطر مجد 50مل، كبك مذهب فاخر، ربع تولة دهن عود معتق.",
-    sizes: [{ ml: 100, price: 850 }]
+    sizes: [{ ml: 100, price_after_discount: 850, price_before_discount: null }]
   },
   {
     id: 11,
@@ -212,7 +212,7 @@ export const productsDatabase: Product[] = [
     reviewsCount: 22,
     description: "صندوق هدية مميز يفوح برائحة النظافة والنقاء والعبير اليومي المنعش.",
     contents: "عطر نبض 50مل، عطر نقاء 50مل، عينة مسك أبيض صغيرة، كرت إهداء.",
-    sizes: [{ ml: 100, price: 520 }]
+    sizes: [{ ml: 100, price_after_discount: 520, price_before_discount: null }]
   },
   {
     id: 12,
