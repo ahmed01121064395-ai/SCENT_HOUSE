@@ -76,17 +76,17 @@ export async function POST(req: NextRequest) {
             const perfumesList = item.size.perfumes.map((p: any) => p.name).join(', ');
             itemName = `${itemName} (${perfumesList})`;
           }
-          // Serialize item metadata inside description field
+          const itemPrice = Number(item.size.price_after_discount ?? item.size.price);
           const itemMeta = {
             productId: Number(item.product.id),
             ml: Number(item.size.ml),
-            price: Number(item.size.price),
+            price: itemPrice,
             boxType: item.boxType || null,
             giftMessage: item.giftMessage || null
           };
           return {
             name: itemName.substring(0, 80),
-            amount_cents: Math.round(item.size.price * 100).toString(),
+            amount_cents: Math.round(itemPrice * 100).toString(),
             description: JSON.stringify(itemMeta),
             quantity: item.quantity.toString()
           };
