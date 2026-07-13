@@ -210,7 +210,7 @@ export default function AdminOrders() {
         const sizeStr = item.size?.ml ? `${item.size.ml} مل` : '';
         const name = item.productName || '';
         const qty = item.quantity || 1;
-        const price = item.size?.price || 0;
+        const price = item.size?.price_after_discount ?? item.size?.price ?? 0;
         itemListText += `• ${name} ${sizeStr ? `(${sizeStr})` : ''} - العدد: ${qty} - السعر: ${price} جنيه\n`;
       });
 
@@ -755,8 +755,8 @@ ${itemListText}
                         </div>
 
                         <div className="text-left shrink-0">
-                          <span className="text-xs font-bold text-gray-400 block font-english">{formatPriceVal(item.size?.price)}ج × {item.quantity}</span>
-                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{formatPriceFull(item.size?.price * item.quantity)}</span>
+                          <span className="text-xs font-bold text-gray-400 block font-english">{formatPriceVal(item.size?.price_after_discount ?? item.size?.price)}ج × {item.quantity}</span>
+                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{formatPriceFull((item.size?.price_after_discount ?? item.size?.price) * item.quantity)}</span>
                         </div>
                       </div>
                     ))}
