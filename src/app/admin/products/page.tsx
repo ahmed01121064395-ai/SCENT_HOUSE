@@ -497,7 +497,7 @@ export default function AdminProducts() {
                         <div className="flex flex-wrap gap-1 justify-center">
                           {(p.sizes || []).map((sz, i: number) => (
                             <span key={i} className="bg-gray-800/60 border border-gray-800 rounded-lg py-0.5 px-2 text-[10px] font-bold text-gray-300 font-english">
-                              {sz.ml}ml: {sz.price}
+                              {sz.ml}ml: {sz.price_after_discount ?? sz.price}
                             </span>
                           ))}
                         </div>
