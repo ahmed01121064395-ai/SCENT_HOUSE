@@ -28,8 +28,6 @@ export default function AdminProducts() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'men' | 'women' | 'unisex' | 'gifts'>('men');
   const [price, setPrice] = useState('');
-  const [priceBeforeDiscount, setPriceBeforeDiscount] = useState('');
-  const [priceAfterDiscount, setPriceAfterDiscount] = useState('');
   const [stock, setStock] = useState('15');
   const [description, setDescription] = useState('');
   const [topNotes, setTopNotes] = useState('');
@@ -39,13 +37,18 @@ export default function AdminProducts() {
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [isNew, setIsNew] = useState(true);
 
-  // Sizes Checkboxes
+  // Sizes Checkboxes & Price/Discount states per size
   const [size30Checked, setSize30Checked] = useState(false);
-  const [size30Price, setSize30Price] = useState('');
+  const [size30PriceBefore, setSize30PriceBefore] = useState('');
+  const [size30PriceAfter, setSize30PriceAfter] = useState('');
+
   const [size50Checked, setSize50Checked] = useState(true);
-  const [size50Price, setSize50Price] = useState('');
+  const [size50PriceBefore, setSize50PriceBefore] = useState('');
+  const [size50PriceAfter, setSize50PriceAfter] = useState('');
+
   const [size100Checked, setSize100Checked] = useState(false);
-  const [size100Price, setSize100Price] = useState('');
+  const [size100PriceBefore, setSize100PriceBefore] = useState('');
+  const [size100PriceAfter, setSize100PriceAfter] = useState('');
 
   // Image Upload State
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -130,14 +133,15 @@ export default function AdminProducts() {
     setContents('');
     setIsBestSeller(false);
     setIsNew(true);
-    setPriceBeforeDiscount('');
-    setPriceAfterDiscount('');
     setSize30Checked(false);
-    setSize30Price('');
+    setSize30PriceBefore('');
+    setSize30PriceAfter('');
     setSize50Checked(true);
-    setSize50Price('');
+    setSize50PriceBefore('');
+    setSize50PriceAfter('');
     setSize100Checked(false);
-    setSize100Price('');
+    setSize100PriceBefore('');
+    setSize100PriceAfter('');
     setImageUrl0('');
     setImageUrl1('');
     setImageUrl2('');
@@ -155,8 +159,6 @@ export default function AdminProducts() {
     setName(product.name);
     setCategory(product.category);
     setPrice(String(product.price));
-    setPriceBeforeDiscount(product.price_before_discount ? String(product.price_before_discount) : '');
-    setPriceAfterDiscount(product.price_after_discount ? String(product.price_after_discount) : '');
     setStock(String(product.stock || 15));
     setDescription(product.description || '');
     setTopNotes(product.notes?.top || '');
@@ -173,11 +175,16 @@ export default function AdminProducts() {
     const s100 = sizes.find(s => s.ml === 100);
 
     setSize30Checked(!!s30);
-    setSize30Price(s30 ? String(s30.price) : '');
+    setSize30PriceBefore(s30?.price_before_discount ? String(s30.price_before_discount) : '');
+    setSize30PriceAfter(s30 ? String(s30.price_after_discount) : '');
+
     setSize50Checked(!!s50);
-    setSize50Price(s50 ? String(s50.price) : '');
+    setSize50PriceBefore(s50?.price_before_discount ? String(s50.price_before_discount) : '');
+    setSize50PriceAfter(s50 ? String(s50.price_after_discount) : '');
+
     setSize100Checked(!!s100);
-    setSize100Price(s100 ? String(s100.price) : '');
+    setSize100PriceBefore(s100?.price_before_discount ? String(s100.price_before_discount) : '');
+    setSize100PriceAfter(s100 ? String(s100.price_after_discount) : '');
 
     const imgs = product.images || [product.image];
     setImageUrl0(product.image || imgs[0] || '');
@@ -202,16 +209,28 @@ export default function AdminProducts() {
       // 1. Validate Form Inputs
       const sizesArray: ProductSize[] = [];
       if (size30Checked) {
-        if (!size30Price) throw new Error('يرجى تحديد سعر العبوة 30 مل.');
-        sizesArray.push({ ml: 30, price: Number(size30Price) });
+        if (!size30PriceAfter) throw new Error('يرجى تحديد سعر بعد الخصم لعبوة 30 مل.');
+        sizesArray.push({
+          ml: 30,
+          price_after_discount: Number(size30PriceAfter),
+          price_before_discount: size30PriceBefore ? Number(size30PriceBefore) : null
+        });
       }
       if (size50Checked) {
-        if (!size50Price) throw new Error('يرجى تحديد سعر العبوة 50 مل.');
-        sizesArray.push({ ml: 50, price: Number(size50Price) });
+        if (!size50PriceAfter) throw new Error('يرجى تحديد سعر بعد الخصم لعبوة 50 مل.');
+        sizesArray.push({
+          ml: 50,
+          price_after_discount: Number(size50PriceAfter),
+          price_before_discount: size50PriceBefore ? Number(size50PriceBefore) : null
+        });
       }
       if (size100Checked) {
-        if (!size100Price) throw new Error('يرجى تحديد سعر العبوة 100 مل.');
-        sizesArray.push({ ml: 100, price: Number(size100Price) });
+        if (!size100PriceAfter) throw new Error('يرجى تحديد سعر بعد الخصم لعبوة 100 مل.');
+        sizesArray.push({
+          ml: 100,
+          price_after_discount: Number(size100PriceAfter),
+          price_before_discount: size100PriceBefore ? Number(size100PriceBefore) : null
+        });
       }
 
       if (sizesArray.length === 0) {
@@ -261,10 +280,8 @@ export default function AdminProducts() {
         name,
         category,
         categoryNameAr,
-        price: Number(price) || sizesArray[0].price,
+        price: Number(price) || sizesArray[0].price_after_discount,
         stock: Number(stock) || 0,
-        price_before_discount: priceBeforeDiscount ? Number(priceBeforeDiscount) : null,
-        price_after_discount: priceAfterDiscount ? Number(priceAfterDiscount) : null,
         image: finalUrl0,
         images: galleryUrls,
         isBestSeller,
@@ -750,56 +767,101 @@ export default function AdminProducts() {
                 <h4 className="text-xs font-black text-[#D4AF37]">تحديد الأحجام المتاحة وأسعارها</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* 30 ML */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 border border-gray-800/60 p-3 rounded-xl bg-[#121212]/50">
                     <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
                       <input type="checkbox" checked={size30Checked} onChange={(e) => setSize30Checked(e.target.checked)} />
-                      <span className="font-english">30 ML</span>
+                      <span className="font-english text-[#D4AF37]">30 ML</span>
                     </label>
                     {size30Checked && (
-                      <input
-                        type="number"
-                        placeholder="السعر لعبوة 30مل"
-                        required
-                        className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-1.5 px-2 text-xs text-white font-english text-right"
-                        value={size30Price}
-                        onChange={(e) => setSize30Price(e.target.value)}
-                      />
+                      <div className="space-y-2 pt-1">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر قبل الخصم (اختياري)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 450"
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size30PriceBefore}
+                            onChange={(e) => setSize30PriceBefore(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر بعد الخصم (مطلوب)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 350"
+                            required
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size30PriceAfter}
+                            onChange={(e) => setSize30PriceAfter(e.target.value)}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
 
                   {/* 50 ML */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 border border-gray-800/60 p-3 rounded-xl bg-[#121212]/50">
                     <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
                       <input type="checkbox" checked={size50Checked} onChange={(e) => setSize50Checked(e.target.checked)} />
-                      <span className="font-english">50 ML</span>
+                      <span className="font-english text-[#D4AF37]">50 ML</span>
                     </label>
                     {size50Checked && (
-                      <input
-                        type="number"
-                        placeholder="السعر لعبوة 50مل"
-                        required
-                        className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-1.5 px-2 text-xs text-white font-english text-right"
-                        value={size50Price}
-                        onChange={(e) => setSize50Price(e.target.value)}
-                      />
+                      <div className="space-y-2 pt-1">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر قبل الخصم (اختياري)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 600"
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size50PriceBefore}
+                            onChange={(e) => setSize50PriceBefore(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر بعد الخصم (مطلوب)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 499"
+                            required
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size50PriceAfter}
+                            onChange={(e) => setSize50PriceAfter(e.target.value)}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
 
                   {/* 100 ML */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 border border-gray-800/60 p-3 rounded-xl bg-[#121212]/50">
                     <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
                       <input type="checkbox" checked={size100Checked} onChange={(e) => setSize100Checked(e.target.checked)} />
-                      <span className="font-english">100 ML</span>
+                      <span className="font-english text-[#D4AF37]">100 ML</span>
                     </label>
                     {size100Checked && (
-                      <input
-                        type="number"
-                        placeholder="السعر لعبوة 100مل"
-                        required
-                        className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-1.5 px-2 text-xs text-white font-english text-right"
-                        value={size100Price}
-                        onChange={(e) => setSize100Price(e.target.value)}
-                      />
+                      <div className="space-y-2 pt-1">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر قبل الخصم (اختياري)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 850"
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size100PriceBefore}
+                            onChange={(e) => setSize100PriceBefore(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] text-gray-400">السعر بعد الخصم (مطلوب)</label>
+                          <input
+                            type="number"
+                            placeholder="مثال: 750"
+                            required
+                            className="w-full bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1.5 px-2 text-xs text-white font-english text-right"
+                            value={size100PriceAfter}
+                            onChange={(e) => setSize100PriceAfter(e.target.value)}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
