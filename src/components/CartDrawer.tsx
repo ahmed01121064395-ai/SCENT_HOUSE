@@ -156,7 +156,7 @@ export default function CartDrawer() {
                         <span
                           className="cart-item-price english-num"
                         >
-                          {(item.size.price * item.quantity).toFixed(2)} جنيه
+                          {((item.size.price_after_discount ?? item.size.price) * item.quantity).toFixed(2)} جنيه
                         </span>
                         <button
                           className="cart-item-remove-btn"
