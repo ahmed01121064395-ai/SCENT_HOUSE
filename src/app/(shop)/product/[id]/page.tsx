@@ -55,11 +55,8 @@ export default function ProductDetails() {
   const [uniformSizeMl, setUniformSizeMl] = useState<number>(30);
 
   const getPerfumePrice = (p: Product, ml: number) => {
-    if (p.price_before_discount != null && p.price_after_discount != null) {
-      return p.price_after_discount;
-    }
     const sz = p.sizes.find(s => s.ml === ml);
-    return sz ? sz.price : (ml === 30 ? 350 : 450);
+    return sz ? sz.price_after_discount : (ml === 30 ? 350 : 450);
   };
 
   const dynamicPrice = (() => {
@@ -177,9 +174,8 @@ export default function ProductDetails() {
 
   // Get active size details
   const sizeObj = product.sizes.find(s => s.ml === selectedSizeMl) || product.sizes[0];
-  const hasDiscount = product.price_before_discount != null && product.price_after_discount != null;
-  const originalPriceToShow = hasDiscount ? product.price_before_discount : sizeObj.originalPrice;
-  const currentPriceToShow = hasDiscount ? product.price_after_discount : (product.category === 'gifts' ? dynamicPrice! : sizeObj.price);
+  const originalPriceToShow = sizeObj?.price_before_discount || null;
+  const currentPriceToShow = product.category === 'gifts' ? dynamicPrice! : (sizeObj?.price_after_discount || product.price);
 
   // Wishlist state
   const isWishlisted = wishlist.includes(product.id) ? 'active' : '';
@@ -190,7 +186,38 @@ export default function ProductDetails() {
     .slice(0, 4);
 
   // Get dynamic gallery images
-  const galleryImages = product ? (product.images || [product.image]) : [];
+  const galleryImages = (() => {
+    if (!product) return [];
+    if (product.category === 'gifts') return product.images || [product.image];
+
+    const imgs = product.images || [product.image];
+    
+    // Check if 30ml and 50ml images already exist in the gallery list
+    const has30 = imgs.some(img => img.includes('30ml') || img.includes('30_ml') || img.includes('30-ml') || img.includes('mm30ml'));
+    const has50 = imgs.some(img => img.includes('50ml') || img.includes('50_ml') || img.includes('50-ml') || img.includes('heeba2') || img.includes('sehr2') || img.includes('nabd2'));
+    
+    const size30Img = getSizeImage(product.name, 30);
+    const size50Img = getSizeImage(product.name, 50);
+    
+    let result = [...imgs];
+    
+    // Insert 30ml image if missing and product supports it
+    if (!has30 && product.sizes.some(s => s.ml === 30)) {
+      result.splice(1, 0, size30Img);
+    }
+    
+    // Insert 50ml image if missing and product supports it
+    if (!has50 && product.sizes.some(s => s.ml === 50)) {
+      const idx = result.indexOf(size30Img);
+      if (idx > -1) {
+        result.splice(idx + 1, 0, size50Img);
+      } else {
+        result.splice(1, 0, size50Img);
+      }
+    }
+    
+    return Array.from(new Set(result));
+  })();
 
   const handlePrevImage = () => {
     if (!galleryImages || galleryImages.length === 0) return;
@@ -621,13 +648,13 @@ export default function ProductDetails() {
                                 {p.category === 'men' ? 'رجالي' : 'نسائي'}
                               </span>
                               <span className="text-[10px] text-gray-500 font-bold english-num">
-                                {p.price_before_discount != null && p.price_after_discount != null ? (
+                                {p.sizes[0]?.price_before_discount ? (
                                   <>
-                                    <span className="line-through text-gray-400 mr-1">{p.price_before_discount}</span>
-                                    <span className="text-amber-600">{p.price_after_discount}ج</span>
+                                    <span className="line-through text-gray-400 mr-1">{p.sizes[0].price_before_discount}</span>
+                                    <span className="text-amber-600">{p.sizes[0].price_after_discount}ج</span>
                                   </>
                                 ) : (
-                                  <span>{p.sizes[0]?.price || p.price}ج</span>
+                                  <span>{p.sizes[0]?.price_after_discount || p.price}ج</span>
                                 )}
                               </span>
                             </div>
