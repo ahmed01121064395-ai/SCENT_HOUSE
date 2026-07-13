@@ -69,7 +69,7 @@ function CheckoutContent() {
 
   // Calculations
   const subtotal = buyNowItem
-    ? buyNowItem.size.price * buyNowItem.quantity
+    ? (buyNowItem.size.price_after_discount ?? buyNowItem.size.price) * buyNowItem.quantity
     : cartSubtotal;
   const discount = buyNowItem
     ? Math.round(subtotal * (discountPercent / 100))
@@ -638,7 +638,7 @@ function CheckoutContent() {
                     </span>
                   </div>
                   <div className="text-left font-mono text-sm">
-                    <span className="english-num">{item.size.price * item.quantity}</span> ج.م
+                    <span className="english-num">{(item.size.price_after_discount ?? item.size.price) * item.quantity}</span> ج.م
                   </div>
                 </div>
               ))}
