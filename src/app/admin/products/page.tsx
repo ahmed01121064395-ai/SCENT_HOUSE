@@ -49,6 +49,15 @@ export default function AdminProducts() {
 
   // Image Upload State
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFile1, setImageFile1] = useState<File | null>(null);
+  const [imageFile2, setImageFile2] = useState<File | null>(null);
+  const [imageFile3, setImageFile3] = useState<File | null>(null);
+
+  const [imageUrl0, setImageUrl0] = useState('');
+  const [imageUrl1, setImageUrl1] = useState('');
+  const [imageUrl2, setImageUrl2] = useState('');
+  const [imageUrl3, setImageUrl3] = useState('');
+
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -129,7 +138,14 @@ export default function AdminProducts() {
     setSize50Price('');
     setSize100Checked(false);
     setSize100Price('');
+    setImageUrl0('');
+    setImageUrl1('');
+    setImageUrl2('');
+    setImageUrl3('');
     setImageFile(null);
+    setImageFile1(null);
+    setImageFile2(null);
+    setImageFile3(null);
     setFormError('');
     setIsModalOpen(true);
   };
@@ -163,7 +179,16 @@ export default function AdminProducts() {
     setSize100Checked(!!s100);
     setSize100Price(s100 ? String(s100.price) : '');
 
+    const imgs = product.images || [product.image];
+    setImageUrl0(product.image || imgs[0] || '');
+    setImageUrl1(imgs[1] || '');
+    setImageUrl2(imgs[2] || '');
+    setImageUrl3(imgs[3] || '');
+
     setImageFile(null);
+    setImageFile1(null);
+    setImageFile2(null);
+    setImageFile3(null);
     setFormError('');
     setIsModalOpen(true);
   };
@@ -198,17 +223,16 @@ export default function AdminProducts() {
       if (category === 'unisex') categoryNameAr = 'عطور للجنسين';
       if (category === 'gifts') categoryNameAr = 'بوكسات الهدايا';
 
-      let imageUrl = editingProduct ? editingProduct.image : '';
-
-      // 2. Upload image to Storage if selected
-      if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
+      // Helper function to upload an image to Supabase and return URL
+      const uploadImageHelper = async (file: File | null, existingUrl: string) => {
+        if (!file) return existingUrl;
+        const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         const filePath = `products/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(filePath, imageFile, {
+          .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false,
           });
@@ -219,12 +243,19 @@ export default function AdminProducts() {
           .from('product-images')
           .getPublicUrl(filePath);
 
-        imageUrl = publicUrl;
+        return publicUrl;
+      };
+
+      const finalUrl0 = await uploadImageHelper(imageFile, imageUrl0);
+      const finalUrl1 = await uploadImageHelper(imageFile1, imageUrl1);
+      const finalUrl2 = await uploadImageHelper(imageFile2, imageUrl2);
+      const finalUrl3 = await uploadImageHelper(imageFile3, imageUrl3);
+
+      if (!finalUrl0) {
+        throw new Error('يرجى اختيار الصورة الأساسية للمنتج.');
       }
 
-      if (!imageUrl) {
-        throw new Error('يرجى اختيار صورة للمنتج.');
-      }
+      const galleryUrls = [finalUrl0, finalUrl1, finalUrl2, finalUrl3].filter(url => url && url.trim() !== '');
 
       const productPayload = {
         name,
@@ -234,10 +265,8 @@ export default function AdminProducts() {
         stock: Number(stock) || 0,
         price_before_discount: priceBeforeDiscount ? Number(priceBeforeDiscount) : null,
         price_after_discount: priceAfterDiscount ? Number(priceAfterDiscount) : null,
-        image: imageUrl,
-        images: editingProduct && imageUrl === editingProduct.image && editingProduct.images && editingProduct.images.length > 0
-          ? editingProduct.images
-          : [imageUrl],
+        image: finalUrl0,
+        images: galleryUrls,
         isBestSeller,
         isNew,
         description,
@@ -802,21 +831,110 @@ export default function AdminProducts() {
                   </label>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-300">
-                    صورة المنتج {editingProduct && <span className="text-[10px] text-gray-500">(اتركها فارغة للاحتفاظ بالصورة الحالية)</span>}
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    required={!editingProduct}
-                    className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs text-gray-400"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        setImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
+                <div className="w-full col-span-1 md:col-span-2 space-y-1.5">
+                  <label className="block text-xs font-black text-[#D4AF37]">معرض صور المنتج (الصور الأربعة)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Slot 1: Main Image */}
+                    <div className="space-y-1 bg-[#121212] p-3 rounded-xl border border-gray-800">
+                      <label className="block text-xs font-bold text-gray-300">
+                        الصورة الأساسية (Main Image) {editingProduct && <span className="text-[9px] text-gray-500">(اختياري للاستبدال)</span>}
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        required={!editingProduct}
+                        className="w-full text-xs text-gray-400 mt-1"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setImageFile(e.target.files[0]);
+                          }
+                        }}
+                      />
+                      {imageUrl0 && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                          <span>الحالية:</span>
+                          <a href={imageUrl0} target="_blank" rel="noreferrer" className="text-[#D4AF37] underline truncate max-w-[150px]">
+                            {imageUrl0}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Slot 2: Image 2 */}
+                    <div className="space-y-1 bg-[#121212] p-3 rounded-xl border border-gray-800">
+                      <label className="block text-xs font-bold text-gray-300">
+                        صورة المعرض 2 (30مل/حجم 1) <span className="text-[9px] text-gray-500">(اختياري)</span>
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full text-xs text-gray-400 mt-1"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setImageFile1(e.target.files[0]);
+                          }
+                        }}
+                      />
+                      {imageUrl1 && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                          <span>الحالية:</span>
+                          <a href={imageUrl1} target="_blank" rel="noreferrer" className="text-[#D4AF37] underline truncate max-w-[150px]">
+                            {imageUrl1}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Slot 3: Image 3 */}
+                    <div className="space-y-1 bg-[#121212] p-3 rounded-xl border border-gray-800">
+                      <label className="block text-xs font-bold text-gray-300">
+                        صورة المعرض 3 (50مل/حجم 2) <span className="text-[9px] text-gray-500">(اختياري)</span>
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full text-xs text-gray-400 mt-1"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setImageFile2(e.target.files[0]);
+                          }
+                        }}
+                      />
+                      {imageUrl2 && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                          <span>الحالية:</span>
+                          <a href={imageUrl2} target="_blank" rel="noreferrer" className="text-[#D4AF37] underline truncate max-w-[150px]">
+                            {imageUrl2}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Slot 4: Image 4 */}
+                    <div className="space-y-1 bg-[#121212] p-3 rounded-xl border border-gray-800">
+                      <label className="block text-xs font-bold text-gray-300">
+                        صورة المعرض 4 (إضافية/Dala2) <span className="text-[9px] text-gray-500">(اختياري)</span>
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full text-xs text-gray-400 mt-1"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setImageFile3(e.target.files[0]);
+                          }
+                        }}
+                      />
+                      {imageUrl3 && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
+                          <span>الحالية:</span>
+                          <a href={imageUrl3} target="_blank" rel="noreferrer" className="text-[#D4AF37] underline truncate max-w-[150px]">
+                            {imageUrl3}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
