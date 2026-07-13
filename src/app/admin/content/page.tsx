@@ -92,11 +92,14 @@ export default function AdminContent() {
   const [prodIsBestSeller, setProdIsBestSeller] = useState(false);
   const [prodIsNew, setProdIsNew] = useState(true);
   const [prodSize30Checked, setProdSize30Checked] = useState(false);
-  const [prodSize30Price, setProdSize30Price] = useState('');
+  const [prodSize30PriceBefore, setProdSize30PriceBefore] = useState('');
+  const [prodSize30PriceAfter, setProdSize30PriceAfter] = useState('');
   const [prodSize50Checked, setProdSize50Checked] = useState(true);
-  const [prodSize50Price, setProdSize50Price] = useState('');
+  const [prodSize50PriceBefore, setProdSize50PriceBefore] = useState('');
+  const [prodSize50PriceAfter, setProdSize50PriceAfter] = useState('');
   const [prodSize100Checked, setProdSize100Checked] = useState(false);
-  const [prodSize100Price, setProdSize100Price] = useState('');
+  const [prodSize100PriceBefore, setProdSize100PriceBefore] = useState('');
+  const [prodSize100PriceAfter, setProdSize100PriceAfter] = useState('');
   const [prodImageFile, setProdImageFile] = useState<File | null>(null);
 
   // Modals / Forms
@@ -405,11 +408,16 @@ export default function AdminContent() {
       const s100 = sizesArray.find((s: any) => s.ml === 100);
 
       setProdSize30Checked(!!s30);
-      setProdSize30Price(s30 ? String(s30.price) : '');
+      setProdSize30PriceBefore(s30?.price_before_discount ? String(s30.price_before_discount) : '');
+      setProdSize30PriceAfter(s30 ? String(s30.price_after_discount) : '');
+
       setProdSize50Checked(!!s50);
-      setProdSize50Price(s50 ? String(s50.price) : '');
+      setProdSize50PriceBefore(s50?.price_before_discount ? String(s50.price_before_discount) : '');
+      setProdSize50PriceAfter(s50 ? String(s50.price_after_discount) : '');
+
       setProdSize100Checked(!!s100);
-      setProdSize100Price(s100 ? String(s100.price) : '');
+      setProdSize100PriceBefore(s100?.price_before_discount ? String(s100.price_before_discount) : '');
+      setProdSize100PriceAfter(s100 ? String(s100.price_after_discount) : '');
       setProdImageFile(null);
     }
     
@@ -559,16 +567,28 @@ export default function AdminContent() {
         // Build sizes array
         const sizesArray = [];
         if (prodSize30Checked) {
-          if (!prodSize30Price) throw new Error('يرجى كتابة سعر عبوة 30 مل');
-          sizesArray.push({ ml: 30, price: Number(prodSize30Price) });
+          if (!prodSize30PriceAfter) throw new Error('يرجى كتابة سعر بعد الخصم لعبوة 30 مل');
+          sizesArray.push({
+            ml: 30,
+            price_after_discount: Number(prodSize30PriceAfter),
+            price_before_discount: prodSize30PriceBefore ? Number(prodSize30PriceBefore) : null
+          });
         }
         if (prodSize50Checked) {
-          if (!prodSize50Price) throw new Error('يرجى كتابة سعر عبوة 50 مل');
-          sizesArray.push({ ml: 50, price: Number(prodSize50Price) });
+          if (!prodSize50PriceAfter) throw new Error('يرجى كتابة سعر بعد الخصم لعبوة 50 مل');
+          sizesArray.push({
+            ml: 50,
+            price_after_discount: Number(prodSize50PriceAfter),
+            price_before_discount: prodSize50PriceBefore ? Number(prodSize50PriceBefore) : null
+          });
         }
         if (prodSize100Checked) {
-          if (!prodSize100Price) throw new Error('يرجى كتابة سعر عبوة 100 مل');
-          sizesArray.push({ ml: 100, price: Number(prodSize100Price) });
+          if (!prodSize100PriceAfter) throw new Error('يرجى كتابة سعر بعد الخصم لعبوة 100 مل');
+          sizesArray.push({
+            ml: 100,
+            price_after_discount: Number(prodSize100PriceAfter),
+            price_before_discount: prodSize100PriceBefore ? Number(prodSize100PriceBefore) : null
+          });
         }
         if (sizesArray.length === 0) throw new Error('يرجى اختيار حجم واحد على الأقل للمنتج');
 
@@ -610,7 +630,7 @@ export default function AdminContent() {
           name: prodName,
           category: prodCategory,
           categoryNameAr,
-          price: sizesArray[0].price, // Base price is the first size price
+          price: sizesArray[0].price_after_discount, // Base price is the first size price
           stock: parseInt(prodStock) || 15,
           description: prodDescription,
           notes: {
@@ -1936,8 +1956,8 @@ export default function AdminContent() {
                     <h4 className="text-xs text-gray-300 font-bold">الحجم والأسعار (اختر حجمًا واحدًا على الأقل):</h4>
                     
                     {/* Size 30ML */}
-                    <div className="flex items-center gap-3 justify-between">
-                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                    <div className="space-y-2 border border-gray-800/50 p-3 rounded-xl bg-[#121212]/50">
+                      <label className="flex items-center gap-2 text-xs font-bold text-[#D4AF37] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={prodSize30Checked}
@@ -1947,19 +1967,34 @@ export default function AdminContent() {
                         عبوة 30 ML
                       </label>
                       {prodSize30Checked && (
-                        <input
-                          type="number"
-                          placeholder="السعر بالجنيه"
-                          value={prodSize30Price}
-                          onChange={(e) => setProdSize30Price(e.target.value)}
-                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
-                        />
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">قبل الخصم (اختياري)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 450"
+                              value={prodSize30PriceBefore}
+                              onChange={(e) => setProdSize30PriceBefore(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">بعد الخصم (مطلوب)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 350"
+                              value={prodSize30PriceAfter}
+                              onChange={(e) => setProdSize30PriceAfter(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                        </div>
                       )}
                     </div>
 
                     {/* Size 50ML */}
-                    <div className="flex items-center gap-3 justify-between">
-                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                    <div className="space-y-2 border border-gray-800/50 p-3 rounded-xl bg-[#121212]/50">
+                      <label className="flex items-center gap-2 text-xs font-bold text-[#D4AF37] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={prodSize50Checked}
@@ -1969,19 +2004,34 @@ export default function AdminContent() {
                         عبوة 50 ML
                       </label>
                       {prodSize50Checked && (
-                        <input
-                          type="number"
-                          placeholder="السعر بالجنيه"
-                          value={prodSize50Price}
-                          onChange={(e) => setProdSize50Price(e.target.value)}
-                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
-                        />
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">قبل الخصم (اختياري)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 600"
+                              value={prodSize50PriceBefore}
+                              onChange={(e) => setProdSize50PriceBefore(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">بعد الخصم (مطلوب)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 499"
+                              value={prodSize50PriceAfter}
+                              onChange={(e) => setProdSize50PriceAfter(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                        </div>
                       )}
                     </div>
 
                     {/* Size 100ML */}
-                    <div className="flex items-center gap-3 justify-between">
-                      <label className="flex items-center gap-2 text-xs font-bold text-gray-300">
+                    <div className="space-y-2 border border-gray-800/50 p-3 rounded-xl bg-[#121212]/50">
+                      <label className="flex items-center gap-2 text-xs font-bold text-[#D4AF37] cursor-pointer">
                         <input
                           type="checkbox"
                           checked={prodSize100Checked}
@@ -1991,13 +2041,28 @@ export default function AdminContent() {
                         عبوة 100 ML
                       </label>
                       {prodSize100Checked && (
-                        <input
-                          type="number"
-                          placeholder="السعر بالجنيه"
-                          value={prodSize100Price}
-                          onChange={(e) => setProdSize100Price(e.target.value)}
-                          className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2.5 outline-none text-xs text-right text-gray-200 font-english w-32"
-                        />
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">قبل الخصم (اختياري)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 850"
+                              value={prodSize100PriceBefore}
+                              onChange={(e) => setProdSize100PriceBefore(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="block text-[10px] text-gray-500">بعد الخصم (مطلوب)</label>
+                            <input
+                              type="number"
+                              placeholder="مثال: 750"
+                              value={prodSize100PriceAfter}
+                              onChange={(e) => setProdSize100PriceAfter(e.target.value)}
+                              className="bg-[#121212] border border-gray-800 focus:border-[#D4AF37] rounded-lg py-1 px-2 outline-none text-xs text-right text-gray-200 font-english w-full"
+                            />
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
