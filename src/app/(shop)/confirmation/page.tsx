@@ -7,7 +7,7 @@ import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
 function ConfirmationContent() {
-  const { lastPlacedOrder, clearCart } = useApp();
+  const { lastPlacedOrder, clearCart, setCartOpen } = useApp();
   const searchParams = useSearchParams();
   const orderIdParam = searchParams.get('orderId');
   const successParam = searchParams.get('success');
@@ -16,6 +16,11 @@ function ConfirmationContent() {
 
   const [dbOrder, setDbOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+
+  // Close cart drawer on mount to prevent the transparent backdrop from overlaying and blocking clicks
+  useEffect(() => {
+    setCartOpen(false);
+  }, [setCartOpen]);
 
   // Clear cart if card payment success is verified
   useEffect(() => {
