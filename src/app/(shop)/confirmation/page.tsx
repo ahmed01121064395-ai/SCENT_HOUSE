@@ -237,7 +237,7 @@ function ConfirmationContent() {
                       {item.product?.category === 'gifts' ? 'صندوق فاخر' : item.product?.category === 'offer' ? 'عرض خاص' : `${item.size?.ml || 50}ml`}
                     </td>
                     <td className="py-3 english-num">{item.quantity}</td>
-                    <td className="py-3 text-left font-mono english-num">{(item.size?.price || 0) * item.quantity} ج.م</td>
+                    <td className="py-3 text-left font-mono english-num">{((item.size?.price_after_discount ?? item.size?.price) || 0) * item.quantity} ج.م</td>
                   </tr>
                 ))}
               </tbody>
