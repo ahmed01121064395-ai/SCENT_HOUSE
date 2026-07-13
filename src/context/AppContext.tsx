@@ -6,7 +6,15 @@ import { supabase } from '../lib/supabase';
 
 export interface CartItem {
   product: Product;
-  size: { ml: number; price: number };
+  size: {
+    ml: number;
+    price: number;
+    price_after_discount?: number | null;
+    price_before_discount?: number | null;
+    originalPrice?: number | null;
+    perfumes?: any[];
+    [key: string]: any;
+  };
   quantity: number;
   boxType?: string;
   giftMessage?: string;
