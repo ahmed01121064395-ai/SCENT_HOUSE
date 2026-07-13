@@ -45,6 +45,10 @@ export default function ProductDetails() {
   const [giftMessage, setGiftMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
 
+  // Swipe and Gallery Navigation States
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   // Custom Gift Box Wizard States
   const [mixedVariant, setMixedVariant] = useState<'2' | '3'>('2');
   const [selectedSlots, setSelectedSlots] = useState<{ product: Product, sizeMl: number }[]>([]);
@@ -202,6 +206,42 @@ export default function ProductDetails() {
     }
     return gallery;
   })();
+
+  const handlePrevImage = () => {
+    if (!galleryImages || galleryImages.length === 0) return;
+    const currentIdx = galleryImages.indexOf(activeImage || product.image);
+    const prevIdx = (currentIdx - 1 + galleryImages.length) % galleryImages.length;
+    setActiveImage(galleryImages[prevIdx]);
+  };
+
+  const handleNextImage = () => {
+    if (!galleryImages || galleryImages.length === 0) return;
+    const currentIdx = galleryImages.indexOf(activeImage || product.image);
+    const nextIdx = (currentIdx + 1) % galleryImages.length;
+    setActiveImage(galleryImages[nextIdx]);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) {
+      handleNextImage();
+    } else if (isRightSwipe) {
+      handlePrevImage();
+    }
+  };
 
   const handleAddToCart = () => {
     if (product.category !== 'gifts' && selectedSizeMl === null) {
@@ -373,7 +413,12 @@ export default function ProductDetails() {
         <div className="product-details-container">
           {/* Left: Gallery */}
           <div className="details-gallery">
-            <div className="gallery-main">
+            <div
+              className="gallery-main relative group"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               <Image
                 src={activeImage || product.image}
                 alt={product.name}
@@ -382,6 +427,40 @@ export default function ProductDetails() {
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
+
+              {/* Navigation Arrows & Swipe indicators */}
+              {galleryImages && galleryImages.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center border border-gray-700/30 transition-all opacity-0 group-hover:opacity-100 md:opacity-100 cursor-pointer z-10"
+                    title="الصورة السابقة"
+                  >
+                    <i className="fa-solid fa-chevron-left text-sm"></i>
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center border border-gray-700/30 transition-all opacity-0 group-hover:opacity-100 md:opacity-100 cursor-pointer z-10"
+                    title="الصورة التالية"
+                  >
+                    <i className="fa-solid fa-chevron-right text-sm"></i>
+                  </button>
+                  
+                  {/* Slide indicators / dots */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-black/40 px-2.5 py-1 rounded-full">
+                    {galleryImages.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          galleryImages.indexOf(activeImage || product.image) === i 
+                            ? 'bg-[#D4AF37] scale-125' 
+                            : 'bg-gray-400/60'
+                        }`}
+                      ></span>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
             
             {/* Gallery Thumbnails (only if product has multiple images) */}
