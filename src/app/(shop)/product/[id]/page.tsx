@@ -139,8 +139,18 @@ export default function ProductDetails() {
   // Update active image dynamically when size changes
   useEffect(() => {
     if (product && product.category !== 'gifts' && selectedSizeMl !== null) {
-      const sizeImg = getSizeImage(product.name, selectedSizeMl);
-      setActiveImage(sizeImg);
+      const sizes = product.sizes || [];
+      const sizeIndex = sizes.findIndex(s => s.ml === selectedSizeMl);
+      const imgs = product.images || [];
+      
+      if (sizeIndex === 0 && imgs[1]) {
+        setActiveImage(imgs[1]);
+      } else if (sizeIndex === 1 && imgs[2]) {
+        setActiveImage(imgs[2]);
+      } else {
+        const sizeImg = getSizeImage(product.name, selectedSizeMl);
+        setActiveImage(sizeImg);
+      }
     }
   }, [selectedSizeMl, product]);
 
@@ -180,32 +190,7 @@ export default function ProductDetails() {
     .slice(0, 4);
 
   // Get dynamic gallery images
-  const galleryImages = (() => {
-    if (!product) return [];
-    if (product.category === 'gifts') return product.images || [product.image];
-
-    const baseImages = product.images || [product.image];
-    
-    // If no size is selected yet, we only show the original product photos
-    if (selectedSizeMl === null) {
-      if (baseImages.length >= 3) {
-        // Skip the size image at index 1
-        return [baseImages[0], ...baseImages.slice(2)];
-      }
-      return baseImages;
-    }
-
-    const sizeImg = getSizeImage(product.name, selectedSizeMl);
-    const gallery = [...baseImages];
-    if (gallery.length > 2) {
-      gallery[1] = sizeImg;
-    } else if (gallery.length === 2) {
-      gallery.splice(1, 0, sizeImg);
-    } else {
-      gallery.push(sizeImg);
-    }
-    return gallery;
-  })();
+  const galleryImages = product ? (product.images || [product.image]) : [];
 
   const handlePrevImage = () => {
     if (!galleryImages || galleryImages.length === 0) return;
