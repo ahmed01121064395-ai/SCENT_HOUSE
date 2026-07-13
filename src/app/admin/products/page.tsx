@@ -28,6 +28,8 @@ export default function AdminProducts() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'men' | 'women' | 'unisex' | 'gifts'>('men');
   const [price, setPrice] = useState('');
+  const [priceBeforeDiscount, setPriceBeforeDiscount] = useState('');
+  const [priceAfterDiscount, setPriceAfterDiscount] = useState('');
   const [stock, setStock] = useState('15');
   const [description, setDescription] = useState('');
   const [topNotes, setTopNotes] = useState('');
@@ -119,6 +121,8 @@ export default function AdminProducts() {
     setContents('');
     setIsBestSeller(false);
     setIsNew(true);
+    setPriceBeforeDiscount('');
+    setPriceAfterDiscount('');
     setSize30Checked(false);
     setSize30Price('');
     setSize50Checked(true);
@@ -135,6 +139,8 @@ export default function AdminProducts() {
     setName(product.name);
     setCategory(product.category);
     setPrice(String(product.price));
+    setPriceBeforeDiscount(product.price_before_discount ? String(product.price_before_discount) : '');
+    setPriceAfterDiscount(product.price_after_discount ? String(product.price_after_discount) : '');
     setStock(String(product.stock || 15));
     setDescription(product.description || '');
     setTopNotes(product.notes?.top || '');
@@ -226,6 +232,8 @@ export default function AdminProducts() {
         categoryNameAr,
         price: Number(price) || sizesArray[0].price,
         stock: Number(stock) || 0,
+        price_before_discount: priceBeforeDiscount ? Number(priceBeforeDiscount) : null,
+        price_after_discount: priceAfterDiscount ? Number(priceAfterDiscount) : null,
         image: imageUrl,
         images: [imageUrl],
         isBestSeller,
@@ -617,6 +625,28 @@ export default function AdminProducts() {
                     className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-white text-right font-english"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#D4AF37]">السعر قبل الخصم (اختياري)</label>
+                  <input
+                    type="number"
+                    placeholder="مثال: 450"
+                    className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-white text-right font-english"
+                    value={priceBeforeDiscount}
+                    onChange={(e) => setPriceBeforeDiscount(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#D4AF37]">السعر بعد الخصم (اختياري)</label>
+                  <input
+                    type="number"
+                    placeholder="مثال: 350"
+                    className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-white text-right font-english"
+                    value={priceAfterDiscount}
+                    onChange={(e) => setPriceAfterDiscount(e.target.value)}
                   />
                 </div>
 
