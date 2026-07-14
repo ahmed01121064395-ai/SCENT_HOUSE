@@ -13,14 +13,15 @@ interface Slide {
   type: 'image' | 'video';
   src: string;
   alt?: string;
+  overlayClass?: string;
 }
 
 const HERO_SLIDES: Slide[] = [
-  { id: 1, type: 'image', src: '/images/back1.jpeg', alt: 'عطور سنت هاوس الفاخرة' },
-  { id: 2, type: 'image', src: '/images/back2.jpeg', alt: 'تشكيلة العطور الفاخرة' },
-  { id: 3, type: 'image', src: '/images/back3.jpeg', alt: 'روائح ساحرة ونادرة' },
-  { id: 4, type: 'image', src: '/images/back4.jpeg', alt: 'فخامة تناسب ذوقك' },
-  { id: 5, type: 'video', src: '/images/backv.mp4' }
+  { id: 1, type: 'image', src: '/images/back1.jpeg', alt: 'عطور سنت هاوس الفاخرة', overlayClass: 'bg-black/35' },
+  { id: 2, type: 'image', src: '/images/back2.jpeg', alt: 'تشكيلة العطور الفاخرة', overlayClass: 'bg-black/50' },
+  { id: 3, type: 'image', src: '/images/back3.jpeg', alt: 'روائح ساحرة ونادرة', overlayClass: 'bg-black/35' },
+  { id: 4, type: 'image', src: '/images/back4.jpeg', alt: 'فخامة تناسب ذوقك', overlayClass: 'bg-black/35' },
+  { id: 5, type: 'video', src: '/images/backv.mp4', overlayClass: 'bg-black/20' }
 ];
 
 export default function Home() {
@@ -184,7 +185,7 @@ export default function Home() {
 
           {/* 2. NEW IMAGE SLIDER/CAROUSEL in the MIDDLE */}
           <div 
-            className="hero-slider-container relative w-full aspect-[16/10] md:aspect-[16/9] max-w-[650px] mx-auto my-6 rounded-2xl overflow-hidden"
+            className="hero-slider-container relative w-full max-w-[650px] mx-auto my-6 rounded-2xl overflow-hidden h-[260px] md:h-[420px] max-h-[60vh] md:max-h-[500px]"
             style={{
               border: 'none',
               outline: 'none',
@@ -209,25 +210,33 @@ export default function Home() {
                 }}
               >
                 {slide.type === 'image' ? (
-                  <Image
-                    src={slide.src}
-                    alt={slide.alt || 'عطور سنت هاوس الفاخرة'}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 650px"
-                    priority={index === 0}
-                    className="object-cover w-full h-full select-none pointer-events-none"
-                    draggable="false"
-                  />
+                  <>
+                    <Image
+                      src={slide.src}
+                      alt={slide.alt || 'عطور سنت هاوس الفاخرة'}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 650px"
+                      priority={index === 0}
+                      className="object-cover w-full h-full select-none pointer-events-none"
+                      draggable="false"
+                    />
+                    {/* Dark overlays for text readability */}
+                    <div className={`absolute inset-0 ${slide.overlayClass || 'bg-black/35'} z-10 pointer-events-none`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent z-10 pointer-events-none" />
+                  </>
                 ) : (
-                  <video
-                    src={slide.src}
-                    autoPlay
-                    muted
-                    playsInline
-                    loop={true}
-                    onEnded={nextSlide}
-                    className="object-cover w-full h-full select-none"
-                  />
+                  <>
+                    <video
+                      src={slide.src}
+                      autoPlay
+                      muted
+                      playsInline
+                      loop={true}
+                      onEnded={nextSlide}
+                      className="object-cover w-full h-full select-none"
+                    />
+                    <div className={`absolute inset-0 ${slide.overlayClass || 'bg-black/20'} z-10 pointer-events-none`} />
+                  </>
                 )}
               </div>
             ))}
@@ -240,7 +249,7 @@ export default function Home() {
                     e.stopPropagation();
                     prevSlide();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-30"
                   title="الشريحة السابقة"
                 >
                   <i className="fa-solid fa-chevron-left text-sm"></i>
@@ -250,7 +259,7 @@ export default function Home() {
                     e.stopPropagation();
                     nextSlide();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-30"
                   title="الشريحة التالية"
                 >
                   <i className="fa-solid fa-chevron-right text-sm"></i>
