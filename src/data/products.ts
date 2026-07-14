@@ -86,7 +86,7 @@ export const productsDatabase: Product[] = [
     categoryNameAr: "العطور النسائية",
     price: 600,
     image: "/images/dalaa1.jpg",
-    images: ["/images/dalaa1.jpg", "/images/mm30ml.jpeg", "/images/dalaa2.jpg"],
+    images: ["/images/dalaa1.jpg", "/images/d30ml.jpeg", "/images/dalaa2.jpg"],
     isBestSeller: false,
     isNew: false,
     rating: 4.8,
