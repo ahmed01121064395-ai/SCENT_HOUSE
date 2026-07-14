@@ -86,14 +86,18 @@ function ShopContent() {
       return b.rating - a.rating;
     }
     if (sortBy === 'price-asc') {
-      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price_after_discount : a.price;
-      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price_after_discount : b.price;
-      return priceA - priceB;
+      const getDefPrice = (p: Product) => {
+        const sz = p.sizes && p.sizes.length > 0 ? (p.sizes.find(s => s.ml === 50) || p.sizes[0]) : null;
+        return sz ? sz.price_after_discount : p.price;
+      };
+      return getDefPrice(a) - getDefPrice(b);
     }
     if (sortBy === 'price-desc') {
-      const priceA = a.sizes && a.sizes.length > 0 ? a.sizes[0].price_after_discount : a.price;
-      const priceB = b.sizes && b.sizes.length > 0 ? b.sizes[0].price_after_discount : b.price;
-      return priceB - priceA;
+      const getDefPrice = (p: Product) => {
+        const sz = p.sizes && p.sizes.length > 0 ? (p.sizes.find(s => s.ml === 50) || p.sizes[0]) : null;
+        return sz ? sz.price_after_discount : p.price;
+      };
+      return getDefPrice(b) - getDefPrice(a);
     }
     return 0;
   });
