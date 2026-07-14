@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
 
           <h3 className="gold-text text-lg font-bold mt-6 mb-3" style={{ color: 'var(--primary-gold)' }}>5. حقوقك وحذف البيانات</h3>
           <p>
-            لك كامل الحق في طلب مراجعة بياناتك المسجلة لدينا، أو طلب تعديلها. كما يمكنك في أي وقت طلب حذف بياناتك الشخصية تماماً من سجلاتنا عن طريق التواصل مع خدمة عملاء الدار عبر البريد الإلكتروني المعتمد: <a href="mailto:sayedohod0@gmail.com" className="gold-text english-num">sayedohod0@gmail.com</a>.
+            لك كامل الحق في طلب مراجعة بياناتك المسجلة لدينا، أو طلب تعديلها. كما يمكنك في أي وقت طلب حذف بياناتك الشخصية تماماً من سجلاتنا عن طريق التواصل مع خدمة عملاء الدار عبر البريد الإلكتروني المعتمد: <a href="mailto:scenthouse80@gmail.com" className="gold-text english-num">scenthouse80@gmail.com</a>.
           </p>
         </div>
       </div>
