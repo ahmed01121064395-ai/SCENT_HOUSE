@@ -119,7 +119,8 @@ export default function ProductDetails() {
       } else if (product.sizes.length === 1) {
         setSelectedSizeMl(product.sizes[0].ml);
       } else {
-        setSelectedSizeMl(null);
+        const has50 = product.sizes.some(s => s.ml === 50);
+        setSelectedSizeMl(has50 ? 50 : (product.sizes[0]?.ml || null));
       }
       setActiveImage(product.image);
       setQty(1);
