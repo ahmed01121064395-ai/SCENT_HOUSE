@@ -176,8 +176,8 @@ export default function ProductDetails() {
     const imgs = product.images || [product.image];
     
     // Check if 30ml and 50ml images already exist in the gallery list
-    const has30 = imgs.some(img => img.includes('30ml') || img.includes('30_ml') || img.includes('30-ml') || img.includes('mm30ml'));
-    const has50 = imgs.some(img => img.includes('50ml') || img.includes('50_ml') || img.includes('50-ml') || img.includes('heeba2') || img.includes('sehr2') || img.includes('nabd2'));
+    const has30 = imgs.some(img => img.includes('30ml') || img.includes('30_ml') || img.includes('30-ml') || img.includes('mm30ml') || img.includes('d30ml'));
+    const has50 = imgs.some(img => img.includes('50ml') || img.includes('50_ml') || img.includes('50-ml') || img.includes('heeba2') || img.includes('sehr2') || img.includes('nabd2') || img.includes('dalaa2') || img.includes('magd2') || img.includes('gharam2') || img.includes('naqaa2'));
     
     const size30Img = getSizeImage(product.name, 30);
     const size50Img = getSizeImage(product.name, 50);
