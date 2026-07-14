@@ -87,6 +87,7 @@ export interface SiteSettings {
   women_category_subtitle: string;
   gift_category_title: string;
   gift_category_subtitle: string;
+  contact_email?: string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
