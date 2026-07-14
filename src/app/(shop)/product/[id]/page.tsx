@@ -173,6 +173,11 @@ export default function ProductDetails() {
     if (!product) return [];
     if (product.category === 'gifts') return product.images || [product.image];
 
+    const nameLower = product.name.toLowerCase();
+    if (nameLower.includes('دلع') || nameLower.includes('dala')) {
+      return ["/images/dalaa1.jpg", "/images/d30ml.jpeg", "/images/mm30ml.jpeg"];
+    }
+
     const imgs = product.images || [product.image];
     
     // Check if 30ml and 50ml images already exist in the gallery list
