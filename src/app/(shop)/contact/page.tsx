@@ -85,10 +85,24 @@ export default function Contact() {
             </div>
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>الموقع ومقر الدار</h3>
             <p style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '8px' }}>
-              {settings?.contact_address || "الفيوم مركز طامية خلف مسجد النصر"}
+              {settings?.contact_address || "القاهرة، مصر"}
             </p>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {settings?.working_hours || "السبت - الخميس: 9:00 ص - 10:00 م"}
+            </p>
+          </div>
+
+          {/* Card 4: Email & Support */}
+          <div className="value-card" style={{ padding: '30px', minHeight: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '60px', height: '60px', borderRadius: '50%', border: '1px solid var(--border-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', color: 'var(--primary-gold)', marginBottom: '20px' }}>
+              <i className="fa-solid fa-envelope"></i>
+            </div>
+            <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>البريد الإلكتروني</h3>
+            <a href={`mailto:${settings?.contact_email || 'sayedohod0@gmail.com'}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
+              {settings?.contact_email || 'sayedohod0@gmail.com'}
+            </a>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+              سنقوم بالرد عليك خلال 24 ساعة
             </p>
           </div>
         </div>
