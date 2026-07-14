@@ -14,12 +14,10 @@ function getSizeImage(productName: string, sizeMl: number): string {
   if (name.includes("غرام") || name.includes("gharam")) {
     return "/images/gh.jpeg";
   }
-  if (
-    name.includes("دلع") ||
-    name.includes("dala") ||
-    name.includes("مجد") ||
-    name.includes("majd")
-  ) {
+  if (name.includes("دلع") || name.includes("dala")) {
+    return sizeMl === 30 ? "/images/d30ml.jpeg" : "/images/mm30ml.jpeg";
+  }
+  if (name.includes("مجد") || name.includes("majd")) {
     return "/images/mm30ml.jpeg";
   }
   return sizeMl === 30 ? "/images/30ml.jpeg" : "/images/50ml.jpeg";
