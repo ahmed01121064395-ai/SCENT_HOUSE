@@ -8,6 +8,8 @@ export interface ProductSize {
   ml: number;
   price_after_discount: number;
   price_before_discount?: number | null;
+  price?: number; // backward compat alias
+  originalPrice?: number | null; // backward compat alias
 }
 
 export interface Product {
@@ -16,6 +18,7 @@ export interface Product {
   category: "men" | "women" | "gifts" | "unisex";
   categoryNameAr: string;
   price: number;
+  stock?: number;
   image: string;
   images?: string[];
   isBestSeller: boolean;
@@ -227,7 +230,7 @@ export const productsDatabase: Product[] = [
     reviewsCount: 34,
     description: "بوكس مناسبات معطر بشريط حريري فاخر يحتوي على عطر سحر الحب المثير للسهرات الخاصة.",
     contents: "عطر سحر الحب 50مل، وردة طبيعية مطلية بذهب عيار 24، شوكولاتة بلجيكية فاخرة.",
-    sizes: [{ ml: 100, price: 480 }]
+    sizes: [{ ml: 100, price_after_discount: 480, price_before_discount: null }]
   },
   {
     id: 13,
@@ -242,7 +245,7 @@ export const productsDatabase: Product[] = [
     reviewsCount: 51,
     description: "صندوق خشبي فاخر مطرز بالخيوط الذهبية يتيح لك اختيار أي عطرين وكتابة رسالة الإهداء الخاصة بك بخط مذهب يدوي.",
     contents: "عطرين من اختيارك (يحددان بالطلب)، بخور عود سيوفي طبيعي، فواحة سيراميك صغيرة.",
-    sizes: [{ ml: 100, price: 720 }]
+    sizes: [{ ml: 100, price_after_discount: 720, price_before_discount: null }]
   },
   {
     id: 14,
@@ -278,8 +281,8 @@ export const productsDatabase: Product[] = [
     },
     contents: "كحول عطري فاخر، زيوت عطرية فرنسية طبيعية، ماء مقطر عذب",
     sizes: [
-      { ml: 30, price: 600 },
-      { ml: 50, price: 800 }
+      { ml: 30, price_after_discount: 600, price_before_discount: null },
+      { ml: 50, price_after_discount: 800, price_before_discount: null }
     ]
   }
 ];
