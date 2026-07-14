@@ -22,7 +22,7 @@ export default function RefundPolicy() {
 
           <h3 className="gold-text text-lg font-bold mt-6 mb-3" style={{ color: 'var(--primary-gold)' }}>1. إلغاء الطلب قبل الشحن</h3>
           <p>
-            يمكن للعميل طلب إلغاء الطلب بالكامل واسترداد قيمته المدفوعة دون فرض أي رسوم في حال تم تقديم طلب الإلغاء <strong>قبل البدء في عملية شحن الطلب وتغير حالته إلى "تم الشحن"</strong>. لتعديل أو إلغاء طلبك، يرجى التواصل معنا فوراً عبر واتساب أو البريد الإلكتروني <a href="mailto:sayedohod0@gmail.com" className="gold-text english-num">sayedohod0@gmail.com</a>.
+            يمكن للعميل طلب إلغاء الطلب بالكامل واسترداد قيمته المدفوعة دون فرض أي رسوم في حال تم تقديم طلب الإلغاء <strong>قبل البدء في عملية شحن الطلب وتغير حالته إلى "تم الشحن"</strong>. لتعديل أو إلغاء طلبك، يرجى التواصل معنا فوراً عبر واتساب أو البريد الإلكتروني <a href="mailto:scenthouse80@gmail.com" className="gold-text english-num">scenthouse80@gmail.com</a>.
           </p>
 
           <h3 className="gold-text text-lg font-bold mt-6 mb-3" style={{ color: 'var(--primary-gold)' }}>2. شروط الاسترجاع والاستبدال</h3>
@@ -30,7 +30,7 @@ export default function RefundPolicy() {
             تخضع عملية الاسترجاع والاستبدال للشروط والأحكام التالية:
           </p>
           <ul style={{ listStyleType: 'disc', paddingRight: '20px', margin: '10px 0' }} className="space-y-1.5">
-            <li>يجب تقديم طلب الاسترجاع خلال <strong>14 يوماً</strong> كحد أقصى من تاريخ استلام الشحنة.</li>
+            <li>يجب تقديم طلب الاسترجاع خلال <strong>48 ساعة</strong> كحد أقصى من تاريخ استلام الشحنة.</li>
             <li>يجب أن يكون المنتج في حالته الأصلية تماماً: <strong>غير مفتوح، غير مستخدم، وبكامل تغليفه المذهب والأشرطة والملصقات وسلوفان الحماية الخاص به</strong> دون أي تلف أو تغيير.</li>
             <li>يجب إرفاق فاتورة الشراء الأصلية أو تفاصيل رقم الطلب مع المرتجع.</li>
           </ul>
@@ -55,7 +55,7 @@ export default function RefundPolicy() {
             لبدء عملية الاسترجاع، يرجى التواصل معنا عبر:
           </p>
           <ul style={{ listStyleType: 'disc', paddingRight: '20px', margin: '10px 0' }} className="space-y-1.5">
-            <li>البريد الإلكتروني: <a href="mailto:sayedohod0@gmail.com" className="gold-text english-num">sayedohod0@gmail.com</a></li>
+            <li>البريد الإلكتروني: <a href="mailto:scenthouse80@gmail.com" className="gold-text english-num">scenthouse80@gmail.com</a></li>
             <li>خدمة عملاء واتساب المباشرة المتاحة على المتجر.</li>
           </ul>
           <p>
