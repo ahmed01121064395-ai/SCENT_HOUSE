@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -8,10 +8,77 @@ import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 
+interface Slide {
+  id: number;
+  type: 'image' | 'video';
+  src: string;
+  alt?: string;
+}
+
+const HERO_SLIDES: Slide[] = [
+  { id: 1, type: 'image', src: '/images/back1.jpeg', alt: 'عطور سنت هاوس الفاخرة' },
+  { id: 2, type: 'image', src: '/images/back2.jpeg', alt: 'تشكيلة العطور الفاخرة' },
+  { id: 3, type: 'image', src: '/images/back3.jpeg', alt: 'روائح ساحرة ونادرة' },
+  { id: 4, type: 'image', src: '/images/back4.jpeg', alt: 'فخامة تناسب ذوقك' },
+  { id: 5, type: 'video', src: '/images/backv.mp4' }
+];
+
 export default function Home() {
   const router = useRouter();
   const { products, settings, homepageFeatures, testimonials: dbTestimonials, specialOffers, setBuyNowItem } = useApp();
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  // Hero Slider states
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  };
+
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    setTouchStart(e.clientX);
+    setTouchEnd(null);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (touchStart === null) return;
+    setTouchEnd(e.clientX);
+  };
+
+  const handlePointerUp = () => {
+    if (touchStart === null || touchEnd === null) {
+      setTouchStart(null);
+      setTouchEnd(null);
+      return;
+    }
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  useEffect(() => {
+    const current = HERO_SLIDES[activeSlide];
+    const delay = current && current.type === 'video' ? 10000 : 4500;
+    const timer = setTimeout(() => {
+      nextSlide();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [activeSlide]);
 
   // Best Sellers list
   const bestSellers = products.filter(p => p.isBestSeller);
@@ -104,12 +171,114 @@ export default function Home() {
   return (
     <div id="view-home" className="active">
       {/* Premium Fullscreen Hero Banner */}
-      <div className="hero-section" style={{ backgroundImage: "url('/images/hero_sharp.jpg')" }}>
+      <div className="hero-section">
         <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1 className="hero-title gold-text">{settings?.hero_title || "عطرٌ يليقُ بفخامتِك"}</h1>
-          <p className="hero-slogan">{settings?.hero_subtitle || "اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع"}</p>
-          <div className="hero-buttons">
+        <div className="hero-content" style={{ marginTop: '0px' }}>
+          {/* 1. Text content FIRST */}
+          <h1 className="hero-title gold-text" style={{ marginBottom: '10px' }}>
+            {settings?.hero_title || "عطرٌ يليقُ بفخامتِك"}
+          </h1>
+          <p className="hero-slogan" style={{ marginBottom: '20px', fontSize: '1.2rem' }}>
+            {settings?.hero_subtitle || "اكتشف أرقى زجاجات العطور النادرة والروائح الساحرة المصممة خصيصاً لذوقك الرفيع"}
+          </p>
+
+          {/* 2. NEW IMAGE SLIDER/CAROUSEL in the MIDDLE */}
+          <div 
+            className="hero-slider-container relative w-full aspect-[16/10] md:aspect-[16/9] max-w-[650px] mx-auto my-6 rounded-2xl overflow-hidden"
+            style={{
+              border: 'none',
+              outline: 'none',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02)',
+              backgroundColor: '#FAFAFA',
+              cursor: touchStart !== null ? 'grabbing' : 'grab',
+              touchAction: 'pan-y'
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+          >
+            {HERO_SLIDES.map((slide, index) => (
+              <div
+                key={slide.id}
+                className="absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out"
+                style={{
+                  opacity: index === activeSlide ? 1 : 0,
+                  pointerEvents: index === activeSlide ? 'auto' : 'none',
+                  zIndex: index === activeSlide ? 2 : 1
+                }}
+              >
+                {slide.type === 'image' ? (
+                  <Image
+                    src={slide.src}
+                    alt={slide.alt || 'عطور سنت هاوس الفاخرة'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 650px"
+                    priority={index === 0}
+                    className="object-cover w-full h-full select-none pointer-events-none"
+                    draggable="false"
+                  />
+                ) : (
+                  <video
+                    src={slide.src}
+                    autoPlay
+                    muted
+                    playsInline
+                    loop={true}
+                    onEnded={nextSlide}
+                    className="object-cover w-full h-full select-none"
+                  />
+                )}
+              </div>
+            ))}
+
+            {/* Navigation Arrows */}
+            {HERO_SLIDES.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevSlide();
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-10"
+                  title="الشريحة السابقة"
+                >
+                  <i className="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextSlide();
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-white backdrop-blur-md bg-black/15 hover:bg-black/30 hover:text-[#D4AF37] border-none outline-none transition-all duration-300 cursor-pointer z-10"
+                  title="الشريحة التالية"
+                >
+                  <i className="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Dots Indicator below the slider */}
+          {HERO_SLIDES.length > 1 && (
+            <div className="flex justify-center gap-2 mb-6 mt-1">
+              {HERO_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 border-none outline-none cursor-pointer ${
+                    index === activeSlide 
+                      ? 'bg-[#D4AF37] scale-125' 
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                  title={`الذهاب إلى الشريحة ${index + 1}`}
+                ></button>
+              ))}
+            </div>
+          )}
+
+          {/* 3. The two buttons move BELOW the slider */}
+          <div className="hero-buttons" style={{ marginTop: '10px' }}>
             <button onClick={handleScrollToNewArrivals} className="btn-luxury-outline">
               اكتشف الجديد
             </button>
