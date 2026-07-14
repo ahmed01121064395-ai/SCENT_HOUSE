@@ -655,7 +655,7 @@ export default function AdminProducts() {
                   <select
                     className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-gray-300 focus:ring-1 focus:ring-opacity-20 text-right"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => setCategory(e.target.value as 'men' | 'women' | 'unisex' | 'gifts')}
                   >
                     <option value="men">رجالي</option>
                     <option value="women">نسائي</option>
@@ -676,27 +676,6 @@ export default function AdminProducts() {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-[#D4AF37]">السعر قبل الخصم (اختياري)</label>
-                  <input
-                    type="number"
-                    placeholder="مثال: 450"
-                    className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-white text-right font-english"
-                    value={priceBeforeDiscount}
-                    onChange={(e) => setPriceBeforeDiscount(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-[#D4AF37]">السعر بعد الخصم (اختياري)</label>
-                  <input
-                    type="number"
-                    placeholder="مثال: 350"
-                    className="w-full bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2.5 px-3 outline-none text-xs md:text-sm text-white text-right font-english"
-                    value={priceAfterDiscount}
-                    onChange={(e) => setPriceAfterDiscount(e.target.value)}
-                  />
-                </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-gray-300">كمية المخزون (الستوك)</label>
