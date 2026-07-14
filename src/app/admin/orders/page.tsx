@@ -33,6 +33,17 @@ interface OrderItem {
   size?: {
     ml: number;
     price: number;
+    price_after_discount?: number | null;
+    price_before_discount?: number | null;
+    perfumes?: any[];
+    perfume1?: string;
+    perfume1Size?: number;
+    perfume2?: string;
+    perfume2Size?: number;
+    perfume3?: string;
+    perfume3Size?: number;
+    isCustomGift?: boolean;
+    [key: string]: any;
   };
   productName: string;
   productImage: string;
@@ -755,8 +766,8 @@ ${itemListText}
                         </div>
 
                         <div className="text-left shrink-0">
-                          <span className="text-xs font-bold text-gray-400 block font-english">{formatPriceVal(item.size?.price_after_discount ?? item.size?.price)}ج × {item.quantity}</span>
-                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{formatPriceFull((item.size?.price_after_discount ?? item.size?.price) * item.quantity)}</span>
+                          <span className="text-xs font-bold text-gray-400 block font-english">{formatPriceVal(item.size?.price_after_discount ?? item.size?.price ?? 0)}ج × {item.quantity}</span>
+                          <span className="text-xs font-black text-[#D4AF37] block mt-1 font-english">{formatPriceFull(((item.size?.price_after_discount ?? item.size?.price) || 0) * item.quantity)}</span>
                         </div>
                       </div>
                     ))}
