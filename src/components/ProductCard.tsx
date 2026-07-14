@@ -23,8 +23,10 @@ export default function ProductCard({ product, overridePrice }: ProductCardProps
     <div className="product-card-badge">جديد بالدار</div>
   ) : null;
 
-  // Show first size price on card (with size-level price_before_discount if available)
-  const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+  // Show 50ml size price on card as the default basic price, otherwise fall back to first size
+  const defaultSize = product.sizes && product.sizes.length > 0
+    ? (product.sizes.find(s => s.ml === 50) || product.sizes[0])
+    : null;
   const displayPrice = overridePrice !== undefined
     ? overridePrice
     : (defaultSize ? defaultSize.price_after_discount : product.price);
