@@ -13,7 +13,7 @@ export default function Footer() {
   const phone1 = rawPhone1?.trim();
   const phone2 = rawPhone2?.trim();
   const address = hasSettings ? settings.contact_address : "القاهرة، مصر";
-  const email = (settings as any)?.contact_email || "sayedohod0@gmail.com";
+  const email = (settings as any)?.contact_email || "scenthouse80@gmail.com";
 
   return (
     <footer>
