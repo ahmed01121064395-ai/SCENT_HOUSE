@@ -98,8 +98,8 @@ export default function Contact() {
               <i className="fa-solid fa-envelope"></i>
             </div>
             <h3 className="gold-text" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '15px' }}>البريد الإلكتروني</h3>
-            <a href={`mailto:${settings?.contact_email || 'sayedohod0@gmail.com'}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
-              {settings?.contact_email || 'sayedohod0@gmail.com'}
+            <a href={`mailto:${settings?.contact_email || 'scenthouse80@gmail.com'}`} className="english-num" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', direction: 'ltr', display: 'block' }}>
+              {settings?.contact_email || 'scenthouse80@gmail.com'}
             </a>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
               سنقوم بالرد عليك خلال 24 ساعة
