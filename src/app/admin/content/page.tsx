@@ -28,6 +28,7 @@ export default function AdminContent() {
   const [contactPhone2, setContactPhone2] = useState('');
   const [contactAddress, setContactAddress] = useState('');
   const [workingHours, setWorkingHours] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [menCategoryTitle, setMenCategoryTitle] = useState('');
   const [menCategorySubtitle, setMenCategorySubtitle] = useState('');
   const [womenCategoryTitle, setWomenCategoryTitle] = useState('');
@@ -186,6 +187,7 @@ export default function AdminContent() {
           setContactPhone2(settingsData.contact_phone_2 || '');
           setContactAddress(settingsData.contact_address || '');
           setWorkingHours(settingsData.working_hours || '');
+          setContactEmail(settingsData.contact_email || '');
           setMenCategoryTitle(settingsData.men_category_title || '');
           setMenCategorySubtitle(settingsData.men_category_subtitle || '');
           setWomenCategoryTitle(settingsData.women_category_title || '');
@@ -1077,7 +1079,8 @@ export default function AdminContent() {
                   contact_phone_1: contactPhone1,
                   contact_phone_2: contactPhone2,
                   contact_address: contactAddress,
-                  working_hours: workingHours
+                  working_hours: workingHours,
+                  contact_email: contactEmail
                 })}
                 disabled={savingSection === 'contact'}
                 className="bg-gradient-to-r from-[#AA7C11] to-[#D4AF37] hover:brightness-110 text-black text-xs font-bold py-1.5 px-4 rounded-lg transition-all duration-300 disabled:opacity-50 cursor-pointer"
@@ -1122,6 +1125,16 @@ export default function AdminContent() {
                   value={workingHours}
                   onChange={(e) => setWorkingHours(e.target.value)}
                   className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-right text-gray-200"
+                />
+              </div>
+              <div className="form-group flex flex-col gap-2">
+                <label className="text-xs text-gray-400 font-bold">البريد الإلكتروني للدار</label>
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="bg-[#1A1A1A] border border-gray-800 focus:border-[#D4AF37] rounded-xl py-2 px-3 outline-none text-xs md:text-sm text-left text-gray-200 font-english"
+                  dir="ltr"
                 />
               </div>
             </div>
