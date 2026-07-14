@@ -2618,7 +2618,7 @@ header {
 footer {
     background-color: #FFFFFF;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    padding: 70px 20px 30px;
+    padding: 35px 20px 20px;
 }
 
 .footer-container {
@@ -2626,34 +2626,34 @@ footer {
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 50px;
+    gap: 30px;
+    margin-bottom: 30px;
 }
 
 .footer-column h4 {
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .footer-column p {
     color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.8;
+    font-size: 0.8rem;
+    line-height: 1.6;
 }
 
 .footer-column ul {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .footer-column ul li a {
     color: #444444; /* was var(--text-muted) dark; now dark on light bg */
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: var(--transition-quick);
     cursor: pointer;
 }
@@ -2670,9 +2670,9 @@ footer {
 .contact-info-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .contact-info-list li {
@@ -2688,7 +2688,7 @@ footer {
 .footer-bottom {
     max-width: 1200px;
     margin: 0 auto;
-    padding-top: 25px;
+    padding-top: 15px;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
@@ -2700,7 +2700,7 @@ footer {
 
 .footer-copy {
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
 }
 
 .footer-payments {
