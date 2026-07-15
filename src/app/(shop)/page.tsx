@@ -17,11 +17,7 @@ interface Slide {
 }
 
 const HERO_SLIDES: Slide[] = [
-  { id: 1, type: 'image', src: '/images/back1.jpeg', alt: 'عطور سنت هاوس الفاخرة', overlayClass: 'bg-black/35' },
-  { id: 2, type: 'image', src: '/images/back2.jpeg', alt: 'تشكيلة العطور الفاخرة', overlayClass: 'bg-black/50' },
-  { id: 3, type: 'image', src: '/images/back3.jpeg', alt: 'روائح ساحرة ونادرة', overlayClass: 'bg-black/35' },
-  { id: 4, type: 'image', src: '/images/back4.jpeg', alt: 'فخامة تناسب ذوقك', overlayClass: 'bg-black/35' },
-  { id: 5, type: 'video', src: '/images/backv.mp4', overlayClass: 'bg-black/20' }
+  { id: 1, type: 'image', src: '/images/back1.jpeg', alt: 'عطور سنت هاوس الفاخرة', overlayClass: 'bg-black/35' }
 ];
 
 export default function Home() {
