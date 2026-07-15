@@ -48,16 +48,10 @@ function CheckoutContent() {
     setIsAppleDevice(isApple || hasApplePay);
   }, []);
 
-  const handleDisabledPaymentSelect = (method: 'card' | 'wallet' | 'applepay', subType?: 'mobile' | 'instapay') => {
-    setPaymentMethod(method);
-    if (method === 'wallet' && subType) {
-      setWalletType(subType);
-    } else if (method === 'wallet' && !subType) {
-      setWalletType('mobile');
-    } else {
-      setWalletType(null);
-    }
-    setActiveTooltip('هذه الطريقة ستكون متاحة قريباً. تم توفيرها للتجربة البصرية فقط.');
+  const handleDisabledPaymentSelect = (method: 'card' | 'wallet' | 'applepay' | 'kiosk', subType?: 'mobile' | 'instapay') => {
+    setPaymentMethod('cod');
+    setWalletType(null);
+    setActiveTooltip('بوابة الدفع الإلكتروني قيد التفعيل حالياً وسنتيح الدفع بالبطاقة والمحافظ قريباً. يرجى استخدام الدفع عند الاستلام لإتمام طلبك الآن.');
   };
 
   // UI state
@@ -83,8 +77,8 @@ function CheckoutContent() {
     setIsSubmitting(true);
     setDbError('');
 
-    if (paymentMethod !== 'cod' && paymentMethod !== 'card' && paymentMethod !== 'wallet' && paymentMethod !== 'kiosk') {
-      setActiveTooltip('طريقة الدفع المحددة غير مفعلة حالياً. يرجى اختيار أحد الخيارات المفعلة لإتمام الطلب.');
+    if (paymentMethod !== 'cod') {
+      setActiveTooltip('بوابة الدفع الإلكتروني قيد التفعيل حالياً. يرجى اختيار الدفع عند الاستلام لإتمام الطلب.');
       setIsSubmitting(false);
       return;
     }
@@ -430,52 +424,40 @@ function CheckoutContent() {
                     <span className="payment-option-title text-xs mt-1 block">الدفع عند الاستلام</span>
                   </div>
 
-                  {/* Option 2: Credit/Debit Card */}
+                  {/* Option 2: Credit/Debit Card (Disabled) */}
                   <div
-                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'card' ? 'active' : ''}`}
-                    onClick={() => {
-                      setPaymentMethod('card');
-                      setWalletType(null);
-                      setActiveTooltip(null);
-                      setPaymobError('');
-                    }}
+                    className="payment-option-btn disabled cursor-pointer"
+                    onClick={() => handleDisabledPaymentSelect('card')}
                   >
+                    <span className="payment-option-badge-soon">قريباً</span>
                     <i className="fa-solid fa-credit-card text-xl"></i>
                     <span className="payment-option-title text-xs mt-1 block">بطاقة بنكية</span>
                   </div>
 
-                  {/* Option 3: Digital Wallet */}
+                  {/* Option 3: Digital Wallet (Disabled) */}
                   <div
-                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'wallet' ? 'active' : ''}`}
-                    onClick={() => {
-                      setPaymentMethod('wallet');
-                      setWalletType('mobile');
-                      setActiveTooltip(null);
-                      setPaymobError('');
-                    }}
+                    className="payment-option-btn disabled cursor-pointer"
+                    onClick={() => handleDisabledPaymentSelect('wallet')}
                   >
+                    <span className="payment-option-badge-soon">قريباً</span>
                     <i className="fa-solid fa-wallet text-xl"></i>
                     <span className="payment-option-title text-xs mt-1 block">المحفظة الإلكترونية</span>
                   </div>
 
-                  {/* Option 4: Aman/Masary Cash Kiosk */}
+                  {/* Option 4: Aman/Masary Cash Kiosk (Disabled) */}
                   <div
-                    className={`payment-option-btn cursor-pointer ${paymentMethod === 'kiosk' ? 'active' : ''}`}
-                    onClick={() => {
-                      setPaymentMethod('kiosk');
-                      setWalletType(null);
-                      setActiveTooltip(null);
-                      setPaymobError('');
-                    }}
+                    className="payment-option-btn disabled cursor-pointer"
+                    onClick={() => handleDisabledPaymentSelect('kiosk')}
                   >
+                    <span className="payment-option-badge-soon">قريباً</span>
                     <i className="fa-solid fa-shop text-xl"></i>
                     <span className="payment-option-title text-xs mt-1 block">أمان / مصاري (نقداً)</span>
                   </div>
 
-                  {/* Option 5: Apple Pay (Only for Safari/Apple users) */}
+                  {/* Option 5: Apple Pay (Only for Safari/Apple users - Disabled) */}
                   {isAppleDevice && (
                     <div
-                      className={`payment-option-btn disabled cursor-pointer ${paymentMethod === 'applepay' ? 'active' : ''}`}
+                      className="payment-option-btn disabled cursor-pointer"
                       onClick={() => handleDisabledPaymentSelect('applepay')}
                     >
                       <span className="payment-option-badge-soon">قريباً</span>
