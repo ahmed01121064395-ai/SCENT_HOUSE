@@ -145,6 +145,39 @@ export default function AdminOrders() {
     }
   };
 
+  // Delete order and associated order_items permanently from Supabase
+  const handleDeletePermanently = async (orderId: string) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا الطلب نهائياً من قاعدة البيانات؟ لا يمكن التراجع عن هذه الخطوة.')) {
+      return;
+    }
+    try {
+      // First delete associated order_items
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', orderId);
+
+      if (itemsError) throw itemsError;
+
+      // Then delete the order row
+      const { error: orderError } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (orderError) throw orderError;
+
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      if (expandedOrder && expandedOrder.id === orderId) {
+        setExpandedOrder(null);
+      }
+      setToast({ message: 'تم حذف الطلب نهائياً بنجاح', type: 'success' });
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء الحذف.';
+      setToast({ message: `خطأ في الحذف النهائي للطلب: ${errMsg}`, type: 'error' });
+    }
+  };
+
   // Expand order detail & load its items
   const handleExpandOrder = async (order: Order) => {
     setExpandedOrder(order);
@@ -256,6 +289,8 @@ ${itemListText}
     // Status Filter
     if (selectedStatus !== 'all') {
       list = list.filter(o => o.status === selectedStatus);
+    } else {
+      list = list.filter(o => o.status !== 'سلة المهملات');
     }
 
     // Hide failed/pending payments by default
@@ -321,12 +356,13 @@ ${itemListText}
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="all">جميع الحالات</option>
+            <option value="all">جميع الحالات النشطة</option>
             <option value="جديد">جديد (بانتظار المراجعة)</option>
             <option value="قيد التجهيز">قيد التجهيز</option>
             <option value="تم الشحن">تم الشحن</option>
             <option value="تم التسليم">تم التسليم</option>
             <option value="ملغي">ملغي</option>
+            <option value="سلة المهملات">🗑️ سلة المهملات (المحذوفة)</option>
           </select>
         </div>
 
@@ -464,16 +500,46 @@ ${itemListText}
                         <option value="تم الشحن" className="bg-[#121212] text-purple-400">تم الشحن</option>
                         <option value="تم التسليم" className="bg-[#121212] text-green-400">تم التسليم</option>
                         <option value="ملغي" className="bg-[#121212] text-red-400">ملغي</option>
+                        <option value="سلة المهملات" className="bg-[#121212] text-gray-400">سلة المهملات</option>
                       </select>
                     </td>
-                    {/* Open Details Button */}
+                    {/* Open Details & Delete/Restore Action Buttons */}
                     <td className="py-4 px-6 text-center">
-                      <button
-                        onClick={() => handleExpandOrder(o)}
-                        className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                      >
-                        عرض الطلب
-                      </button>
+                      <div className="flex items-center gap-2 justify-center">
+                        <button
+                          onClick={() => handleExpandOrder(o)}
+                          className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          title="عرض الفاتورة بالتفصيل"
+                        >
+                          عرض
+                        </button>
+                        {selectedStatus === 'سلة المهملات' ? (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(o.id, 'جديد')}
+                              className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                              title="استعادة الطلب ليكون جديداً"
+                            >
+                              <i className="fa-solid fa-rotate-left"></i>
+                            </button>
+                            <button
+                              onClick={() => handleDeletePermanently(o.id)}
+                              className="bg-red-950/60 hover:bg-red-900 text-red-400 border border-red-800 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                              title="حذف نهائي من قاعدة البيانات"
+                            >
+                              <i className="fa-solid fa-circle-xmark"></i>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => handleStatusChange(o.id, 'سلة المهملات')}
+                            className="bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                            title="نقل إلى سلة المهملات"
+                          >
+                            <i className="fa-solid fa-trash-can"></i>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -550,9 +616,9 @@ ${itemListText}
                 </div>
 
                 {/* Inline Status Dropdown & Details click button */}
-                <div className="flex gap-2 pt-2 border-t border-gray-800/40">
+                <div className="flex gap-2 pt-2 border-t border-gray-800/40 items-center">
                   <select
-                    className={`flex-1 text-xs font-bold rounded-xl py-2 px-3 outline-none border cursor-pointer text-center ${getStatusBadgeStyle(o.status)}`}
+                    className={`flex-1 text-[11px] font-bold rounded-xl py-2 px-2 outline-none border cursor-pointer text-center ${getStatusBadgeStyle(o.status)}`}
                     value={o.status}
                     onChange={(e) => handleStatusChange(o.id, e.target.value)}
                   >
@@ -561,13 +627,40 @@ ${itemListText}
                     <option value="تم الشحن" className="bg-[#121212] text-purple-400">تم الشحن</option>
                     <option value="تم التسليم" className="bg-[#121212] text-green-400">تم التسليم</option>
                     <option value="ملغي" className="bg-[#121212] text-red-400">ملغي</option>
+                    <option value="سلة المهملات" className="bg-[#121212] text-gray-400">سلة المهملات</option>
                   </select>
                   <button
                     onClick={() => handleExpandOrder(o)}
-                    className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 py-2 px-4 rounded-xl text-xs font-bold text-center cursor-pointer"
+                    className="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 py-2 px-3 rounded-xl text-[11px] font-bold text-center cursor-pointer"
                   >
-                    عرض التفاصيل
+                    تفاصيل
                   </button>
+                  {selectedStatus === 'سلة المهملات' ? (
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleStatusChange(o.id, 'جديد')}
+                        className="bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 py-2 px-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                        title="استعادة الطلب"
+                      >
+                        <i className="fa-solid fa-rotate-left"></i>
+                      </button>
+                      <button
+                        onClick={() => handleDeletePermanently(o.id)}
+                        className="bg-red-950/60 hover:bg-red-900 text-red-400 border border-red-800 py-2 px-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                        title="حذف نهائي"
+                      >
+                        <i className="fa-solid fa-circle-xmark"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleStatusChange(o.id, 'سلة المهملات')}
+                      className="bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 py-2 px-3 rounded-xl text-xs font-bold cursor-pointer"
+                      title="نقل إلى سلة المهملات"
+                    >
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  )}
                 </div>
 
               </div>
