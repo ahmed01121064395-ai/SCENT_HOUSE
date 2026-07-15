@@ -18,7 +18,7 @@ function getSizeImage(productName: string, sizeMl: number): string {
     return sizeMl === 30 ? "/images/d30ml.jpeg" : "/images/mm30ml.jpeg";
   }
   if (name.includes("مجد") || name.includes("majd")) {
-    return sizeMl === 30 ? "/images/mm30ml.jpeg" : "/images/magd2.jpg";
+    return sizeMl === 30 ? "/images/d30ml.jpeg" : "/images/magd2.jpg";
   }
   return sizeMl === 30 ? "/images/30ml.jpeg" : "/images/50ml.jpeg";
 }
@@ -195,7 +195,7 @@ export default function ProductDetails() {
       return ["/images/dalaa1.jpg", "/images/d30ml.jpeg", "/images/mm30ml.jpeg"];
     }
     if (nameLower.includes('مجد') || nameLower.includes('majd')) {
-      return ["/images/magd1.jpg", "/images/magd2.jpg", "/images/mm30ml.jpeg"];
+      return ["/images/magd1.jpg", "/images/magd2.jpg", "/images/d30ml.jpeg"];
     }
 
     const imgs = product.images || [product.image];
