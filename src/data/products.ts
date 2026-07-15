@@ -132,7 +132,7 @@ export const productsDatabase: Product[] = [
     categoryNameAr: "العطور الرجالية",
     price: 600,
     image: "/images/magd1.jpg",
-    images: ["/images/magd1.jpg", "/images/mm30ml.jpeg", "/images/magd2.jpg"],
+    images: ["/images/magd1.jpg", "/images/d30ml.jpeg", "/images/magd2.jpg"],
     isBestSeller: true,
     isNew: true,
     rating: 5.0,
