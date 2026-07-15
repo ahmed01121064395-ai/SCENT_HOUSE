@@ -122,21 +122,50 @@ export default function AdminOrders() {
   // Update order status instantly in Supabase
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      let updatePayload: any = { status: newStatus };
+
+      if (newStatus === 'سلة المهملات') {
+        const currentLabel = order.paymentMethodLabel || '';
+        const cleanLabel = currentLabel.replace(' [سلة المهملات]', '');
+        updatePayload = {
+          status: 'ملغي',
+          paymentMethodLabel: cleanLabel + ' [سلة المهملات]'
+        };
+      } else {
+        const currentLabel = order.paymentMethodLabel || '';
+        const cleanLabel = currentLabel.replace(' [سلة المهملات]', '');
+        updatePayload = {
+          status: newStatus,
+          paymentMethodLabel: cleanLabel
+        };
+      }
+
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update(updatePayload)
         .eq('id', orderId);
 
       if (error) throw error;
       
       // Update local orders list state
       setOrders(prevOrders => 
-        prevOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o)
+        prevOrders.map(o => o.id === orderId ? { 
+          ...o, 
+          status: updatePayload.status,
+          paymentMethodLabel: updatePayload.paymentMethodLabel
+        } : o)
       );
 
       // If this order is currently expanded in the details modal, update it too
       if (expandedOrder && expandedOrder.id === orderId) {
-        setExpandedOrder((prev) => prev ? { ...prev, status: newStatus } : null);
+        setExpandedOrder((prev) => prev ? { 
+          ...prev, 
+          status: updatePayload.status,
+          paymentMethodLabel: updatePayload.paymentMethodLabel
+        } : null);
       }
       setToast({ message: 'تم تحديث حالة الطلب بنجاح', type: 'success' });
     } catch (err) {
@@ -175,6 +204,51 @@ export default function AdminOrders() {
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'حدث خطأ أثناء الحذف.';
       setToast({ message: `خطأ في الحذف النهائي للطلب: ${errMsg}`, type: 'error' });
+    }
+  };
+
+  // Move all current active orders to the Trash Bin
+  const handleTrashAllCurrentOrders = async () => {
+    const activeOrders = orders.filter(o => !o.paymentMethodLabel?.includes('[سلة المهملات]'));
+    if (activeOrders.length === 0) {
+      setToast({ message: 'لا توجد طلبات نشطة لنقلها إلى السلة', type: 'error' });
+      return;
+    }
+    if (!window.confirm(`هل أنت متأكد من نقل جميع الطلبات النشطة (${activeOrders.length} طلب) إلى سلة المهملات؟`)) {
+      return;
+    }
+    
+    setLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const o of activeOrders) {
+      try {
+        const currentLabel = o.paymentMethodLabel || '';
+        const cleanLabel = currentLabel.replace(' [سلة المهملات]', '');
+        const { error } = await supabase
+          .from('orders')
+          .update({
+            status: 'ملغي',
+            paymentMethodLabel: cleanLabel + ' [سلة المهملات]'
+          })
+          .eq('id', o.id);
+          
+        if (error) throw error;
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to trash order ${o.orderId}:`, err);
+        failCount++;
+      }
+    }
+    
+    await fetchOrdersData();
+    setLoading(false);
+    
+    if (failCount > 0) {
+      setToast({ message: `تم نقل ${successCount} طلب إلى السلة، وفشل ${failCount} طلب`, type: 'error' });
+    } else {
+      setToast({ message: `تم نقل جميع الطلبات (${successCount} طلب) إلى سلة المهملات بنجاح`, type: 'success' });
     }
   };
 
@@ -287,10 +361,13 @@ ${itemListText}
     let list = [...orders];
 
     // Status Filter
-    if (selectedStatus !== 'all') {
-      list = list.filter(o => o.status === selectedStatus);
+    if (selectedStatus === 'سلة المهملات') {
+      list = list.filter(o => o.paymentMethodLabel?.includes('[سلة المهملات]'));
     } else {
-      list = list.filter(o => o.status !== 'سلة المهملات');
+      list = list.filter(o => !o.paymentMethodLabel?.includes('[سلة المهملات]'));
+      if (selectedStatus !== 'all') {
+        list = list.filter(o => o.status === selectedStatus);
+      }
     }
 
     // Hide failed/pending payments by default
@@ -366,18 +443,30 @@ ${itemListText}
           </select>
         </div>
 
-        {/* Failed/Pending Payment Filter Checkbox */}
-        <div className="flex items-center gap-2 mt-1 justify-end text-xs text-gray-400">
-          <label htmlFor="failed-payments-toggle" className="cursor-pointer select-none">
-            إظهار محاولات الدفع الإلكتروني المعلقة والفاشلة / غير المكتملة
-          </label>
-          <input
-            type="checkbox"
-            id="failed-payments-toggle"
-            checked={showFailedPayments}
-            onChange={(e) => setShowFailedPayments(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-800 bg-[#1A1A1A] text-[#D4AF37] focus:ring-0 focus:ring-offset-0 cursor-pointer"
-          />
+        {/* Failed/Pending Payment Filter Checkbox & Trash All button */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mt-1.5 border-t border-gray-800/50 pt-3">
+          {orders.filter(o => !o.paymentMethodLabel?.includes('[سلة المهملات]')).length > 0 && (
+            <button
+              onClick={handleTrashAllCurrentOrders}
+              className="bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 self-start md:self-auto"
+            >
+              <i className="fa-solid fa-trash-can"></i>
+              <span>نقل كافة الطلبات النشطة الحالية إلى السلة (لتنظيف لوحة التحكم)</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 justify-end text-xs text-gray-400">
+            <label htmlFor="failed-payments-toggle" className="cursor-pointer select-none">
+              إظهار محاولات الدفع الإلكتروني المعلقة والفاشلة / غير المكتملة
+            </label>
+            <input
+              type="checkbox"
+              id="failed-payments-toggle"
+              checked={showFailedPayments}
+              onChange={(e) => setShowFailedPayments(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-800 bg-[#1A1A1A] text-[#D4AF37] focus:ring-0 focus:ring-offset-0 cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 
@@ -491,8 +580,8 @@ ${itemListText}
                     {/* Status inline change */}
                     <td className="py-4 px-6 text-center">
                       <select
-                        className={`text-xs font-bold rounded-lg py-1.5 px-2 outline-none border cursor-pointer w-full text-center ${getStatusBadgeStyle(o.status)}`}
-                        value={o.status}
+                        className={`text-xs font-bold rounded-lg py-1.5 px-2 outline-none border cursor-pointer w-full text-center ${getStatusBadgeStyle(o.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : o.status)}`}
+                        value={o.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : o.status}
                         onChange={(e) => handleStatusChange(o.id, e.target.value)}
                       >
                         <option value="جديد" className="bg-[#121212] text-yellow-400">جديد</option>
@@ -618,8 +707,8 @@ ${itemListText}
                 {/* Inline Status Dropdown & Details click button */}
                 <div className="flex gap-2 pt-2 border-t border-gray-800/40 items-center">
                   <select
-                    className={`flex-1 text-[11px] font-bold rounded-xl py-2 px-2 outline-none border cursor-pointer text-center ${getStatusBadgeStyle(o.status)}`}
-                    value={o.status}
+                    className={`flex-1 text-[11px] font-bold rounded-xl py-2 px-2 outline-none border cursor-pointer text-center ${getStatusBadgeStyle(o.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : o.status)}`}
+                    value={o.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : o.status}
                     onChange={(e) => handleStatusChange(o.id, e.target.value)}
                   >
                     <option value="جديد" className="bg-[#121212] text-yellow-400">جديد</option>
@@ -714,8 +803,8 @@ ${itemListText}
                 </div>
                 <div>
                   <span className="text-gray-400 block mb-2 text-[11px]">حالة الطلب</span>
-                  <span className={`inline-block text-[10px] font-black rounded-full py-1 px-3 border ${getStatusBadgeStyle(expandedOrder.status)}`}>
-                    {expandedOrder.status}
+                  <span className={`inline-block text-[10px] font-black rounded-full py-1 px-3 border ${getStatusBadgeStyle(expandedOrder.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : expandedOrder.status)}`}>
+                    {expandedOrder.paymentMethodLabel?.includes('[سلة المهملات]') ? 'سلة المهملات' : expandedOrder.status}
                   </span>
                 </div>
                 <div className="text-left">
