@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -100,6 +100,24 @@ function ConfirmationContent() {
   }, [orderIdParam, lastPlacedOrder, txnParam]);
 
   const order = lastPlacedOrder || dbOrder;
+
+  const purchasedRef = useRef(false);
+  useEffect(() => {
+    if (order && !purchasedRef.current && typeof window !== 'undefined' && window.ttq) {
+      window.ttq.track('Purchase', {
+        contents: order.items.map((item: any) => ({
+          content_id: String(item.product.id || 'custom'),
+          content_name: item.product.name,
+          content_type: 'product',
+          price: item.size?.price_after_discount ?? item.size?.price ?? 0,
+          quantity: item.quantity
+        })),
+        value: order.grandTotal,
+        currency: 'EGP'
+      });
+      purchasedRef.current = true;
+    }
+  }, [order]);
   
   const isKiosk = order?.paymentMethodLabel && order.paymentMethodLabel.includes('كود الدفع:');
   const kioskCode = isKiosk ? order.paymentMethodLabel.split('كود الدفع:')[1]?.trim() : '';
