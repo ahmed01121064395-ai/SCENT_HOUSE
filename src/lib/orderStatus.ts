@@ -10,6 +10,8 @@ export const getStatusBadgeStyle = (status: string): string => {
       return 'bg-green-500/10 text-green-400 border border-green-500/20';
     case 'ملغي':
       return 'bg-red-500/10 text-red-400 border border-red-500/20';
+    case 'سلة المهملات':
+      return 'bg-red-950/40 text-red-400 border border-red-800/40';
     default:
       return 'bg-gray-500/10 text-gray-400 border border-gray-500/20';
   }
