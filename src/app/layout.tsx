@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppProvider } from "@/context/AppContext";
 import { Cairo, Cinzel, Montserrat } from "next/font/google";
+import TikTokPixel from "@/components/TikTokPixel";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -41,6 +42,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AppProvider>
+          <TikTokPixel />
           {children}
         </AppProvider>
       </body>
