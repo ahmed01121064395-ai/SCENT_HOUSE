@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
@@ -70,6 +70,24 @@ function CheckoutContent() {
     : cartDiscount;
   const shippingCost = checkoutItems.length > 0 ? 80 : 0;
   const grandTotal = subtotal - discount + shippingCost;
+
+  const initiatedCheckoutRef = useRef(false);
+  useEffect(() => {
+    if (checkoutItems.length > 0 && !initiatedCheckoutRef.current && typeof window !== 'undefined' && window.ttq) {
+      window.ttq.track('InitiateCheckout', {
+        contents: checkoutItems.map(item => ({
+          content_id: String(item.product.id),
+          content_name: item.product.name,
+          content_type: 'product',
+          price: item.size.price_after_discount ?? item.size.price ?? item.product.price,
+          quantity: item.quantity
+        })),
+        value: grandTotal,
+        currency: 'EGP'
+      });
+      initiatedCheckoutRef.current = true;
+    }
+  }, [checkoutItems, grandTotal]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
