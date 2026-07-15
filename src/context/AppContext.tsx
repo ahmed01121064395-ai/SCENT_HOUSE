@@ -402,6 +402,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     saveCart(newCart);
     setCartOpen(true); // Open drawer on add
+
+    // Trigger TikTok Pixel AddToCart
+    if (typeof window !== 'undefined' && window.ttq) {
+      const price = sizeObj?.price_after_discount ?? sizeObj?.price ?? product.price;
+      window.ttq.track('AddToCart', {
+        contents: [
+          {
+            content_id: String(product.id),
+            content_name: product.name,
+            content_type: 'product',
+            price: price,
+            quantity: quantity
+          }
+        ],
+        value: price * quantity,
+        currency: 'EGP'
+      });
+    }
   };
 
   // buyNow: sets the temporary checkout item and does NOT open the drawer or change persistent cart
