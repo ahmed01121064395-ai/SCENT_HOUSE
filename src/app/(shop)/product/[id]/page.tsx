@@ -129,6 +129,23 @@ export default function ProductDetails() {
       setMixedVariant('2');
       setSelectedSlots([]);
       setUniformSizeMl(30);
+
+      // Trigger TikTok Pixel ViewContent
+      if (typeof window !== 'undefined' && window.ttq) {
+        window.ttq.track('ViewContent', {
+          contents: [
+            {
+              content_id: String(product.id),
+              content_name: product.name,
+              content_type: 'product',
+              price: product.price,
+              quantity: 1
+            }
+          ],
+          value: product.price,
+          currency: 'EGP'
+        });
+      }
     }
   }, [product]);
 
