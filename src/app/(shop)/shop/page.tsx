@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { Product } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
+import { trackSearch } from '@/lib/facebookPixel';
 
 function ShopContent() {
   const { products, wishlist, settings } = useApp();
@@ -15,6 +16,7 @@ function ShopContent() {
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
   const [viewWishlistOnly, setViewWishlistOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Initialize filters from search parameters
   useEffect(() => {
@@ -64,6 +66,19 @@ function ShopContent() {
     // 4. Wishlist Only Filter
     if (viewWishlistOnly && !wishlist.includes(product.id)) {
       return false;
+    }
+
+    // 5. Search Query Filter
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = product.name.toLowerCase().includes(q) || 
+                            product.description.toLowerCase().includes(q) ||
+                            (product.notes && (
+                              product.notes.top.toLowerCase().includes(q) ||
+                              product.notes.heart.toLowerCase().includes(q) ||
+                              product.notes.base.toLowerCase().includes(q)
+                            ));
+      if (!matchesSearch) return false;
     }
 
     return true;
@@ -283,6 +298,28 @@ function ShopContent() {
 
           {/* Grid list or No Results placeholder */}
           <div className="flex-1">
+            {/* Premium Search Bar */}
+            <div className="mb-6 relative">
+              <input
+                type="text"
+                placeholder="ابحث عن عطرك المفضل (مثال: مجد، غرام، دلع)..."
+                className="w-full bg-[#121212] border border-[#D4AF37]/30 focus:border-[#D4AF37] rounded-xl py-3 px-4 outline-none text-xs md:text-sm text-right pr-10 text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-[#D4AF37]/30"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim() !== '') {
+                    trackSearch(searchQuery.trim());
+                  }
+                }}
+                onBlur={() => {
+                  if (searchQuery.trim() !== '') {
+                    trackSearch(searchQuery.trim());
+                  }
+                }}
+              />
+              <i className="fa-solid fa-magnifying-glass absolute right-3.5 top-4 text-[#D4AF37]/50 text-sm"></i>
+            </div>
+
             {sortedProducts.length === 0 ? (
               <div id="shop-no-results" className="text-center py-24 text-gray-500">
                 <i className="fa-solid fa-magnifying-glass-minus text-5xl mb-4 gold-text opacity-40"></i>
