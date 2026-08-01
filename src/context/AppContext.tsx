@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, productsDatabase } from '../data/products';
 import { supabase } from '../lib/supabase';
+import { trackAddToCart, trackAddToWishlist } from '../lib/facebookPixel';
 
 export interface CartItem {
   product: Product;
@@ -420,6 +421,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         currency: 'EGP'
       });
     }
+
+    // Trigger Facebook Pixel AddToCart
+    const fbPrice = sizeObj?.price_after_discount ?? sizeObj?.price ?? product.price;
+    trackAddToCart(product.name, [String(product.id)], fbPrice, quantity);
   };
 
   // buyNow: sets the temporary checkout item and does NOT open the drawer or change persistent cart
@@ -436,6 +441,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       boxType,
       giftMessage
     });
+
+    // Trigger Facebook Pixel AddToCart for Buy Now
+    const fbPrice = sizeObj?.price_after_discount ?? sizeObj?.price ?? product.price;
+    trackAddToCart(product.name, [String(product.id)], fbPrice, quantity);
   };
 
   const removeFromCart = (productId: number, sizeMl: number) => {
@@ -468,6 +477,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('scent_session_id', sid);
     }
 
+    const product = products.find(p => p.id === productId);
+
     if (index > -1) {
       newWishlist.splice(index, 1);
       // Remove like/wishlist log from Supabase
@@ -482,6 +493,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await supabase
         .from('product_likes')
         .insert({ product_id: productId, session_id: sid });
+
+      // Trigger Facebook Pixel AddToWishlist
+      if (product) {
+        trackAddToWishlist(product.name, [String(product.id)], product.price);
+      }
     }
     saveWishlist(newWishlist);
   };
