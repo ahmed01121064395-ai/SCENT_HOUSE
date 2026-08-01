@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+import { trackPurchase } from '@/lib/facebookPixel';
 
 function ConfirmationContent() {
   const { lastPlacedOrder, clearCart, setCartOpen } = useApp();
@@ -103,18 +104,25 @@ function ConfirmationContent() {
 
   const purchasedRef = useRef(false);
   useEffect(() => {
-    if (order && !purchasedRef.current && typeof window !== 'undefined' && window.ttq) {
-      window.ttq.track('Purchase', {
-        contents: order.items.map((item: any) => ({
-          content_id: String(item.product.id || 'custom'),
-          content_name: item.product.name,
-          content_type: 'product',
-          price: item.size?.price_after_discount ?? item.size?.price ?? 0,
-          quantity: item.quantity
-        })),
-        value: order.grandTotal,
-        currency: 'EGP'
-      });
+    if (order && !purchasedRef.current) {
+      // 1. TikTok Purchase
+      if (typeof window !== 'undefined' && window.ttq) {
+        window.ttq.track('Purchase', {
+          contents: order.items.map((item: any) => ({
+            content_id: String(item.product.id || 'custom'),
+            content_name: item.product.name,
+            content_type: 'product',
+            price: item.size?.price_after_discount ?? item.size?.price ?? 0,
+            quantity: item.quantity
+          })),
+          value: order.grandTotal,
+          currency: 'EGP'
+        });
+      }
+
+      // 2. Facebook Purchase
+      trackPurchase(order.grandTotal, order.items.map((item: any) => String(item.product.id || 'custom')));
+
       purchasedRef.current = true;
     }
   }, [order]);
@@ -216,7 +224,7 @@ function ConfirmationContent() {
                 </tr>
               </thead>
               <tbody>
-                {order.items.map((item, index) => (
+                {order.items.map((item: any, index: number) => (
                   <tr
                     key={index}
                     className="border-b border-yellow-600/5 text-gray-300 text-sm last:border-0"
