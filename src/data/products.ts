@@ -15,7 +15,7 @@ export interface ProductSize {
 export interface Product {
   id: number;
   name: string;
-  category: "men" | "women" | "gifts" | "unisex";
+  category: "men" | "women" | "gifts" | "unisex" | "offer";
   categoryNameAr: string;
   price: number;
   stock?: number;
