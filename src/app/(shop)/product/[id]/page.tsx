@@ -8,6 +8,7 @@ import { useApp } from '@/context/AppContext';
 import ProductCard from '@/components/ProductCard';
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/data/products';
+import { trackViewContent } from '@/lib/facebookPixel';
 
 function getSizeImage(productName: string, sizeMl: number): string {
   const name = productName.toLowerCase();
@@ -146,6 +147,9 @@ export default function ProductDetails() {
           currency: 'EGP'
         });
       }
+
+      // Trigger Facebook Pixel ViewContent
+      trackViewContent(product.name, [String(product.id)], product.price);
     }
   }, [product]);
 
