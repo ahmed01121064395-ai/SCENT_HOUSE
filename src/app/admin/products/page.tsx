@@ -26,7 +26,7 @@ export default function AdminProducts() {
 
   // Form Fields State
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<'men' | 'women' | 'unisex' | 'gifts'>('men');
+  const [category, setCategory] = useState<'men' | 'women' | 'unisex' | 'gifts' | 'offer'>('men');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('15');
   const [description, setDescription] = useState('');
