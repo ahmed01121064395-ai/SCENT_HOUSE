@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AppProvider } from "@/context/AppContext";
 import { Cairo, Cinzel, Montserrat } from "next/font/google";
 import TikTokPixel from "@/components/TikTokPixel";
+import FacebookPixel from "@/components/FacebookPixel";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -43,6 +44,16 @@ export default function RootLayout({
       <body className="antialiased">
         <AppProvider>
           <TikTokPixel />
+          <FacebookPixel />
+          <noscript>
+            <img 
+              height="1" 
+              width="1" 
+              style={{ display: 'none' }}
+              src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_FB_PIXEL_ID || '4688660308082742'}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
           {children}
         </AppProvider>
       </body>
