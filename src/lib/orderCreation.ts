@@ -21,6 +21,19 @@ export interface PaymobOrderData {
     city: string;
     state: string; // paymentMethod
   };
+  extras?: {
+    merchant_order_id?: string;
+    phone2?: string | null;
+    discount?: number;
+    cart_items?: Array<{
+      productId: number;
+      ml: number;
+      price: number;
+      quantity: number;
+      boxType?: string | null;
+      giftMessage?: string | null;
+    }>;
+  };
 }
 
 // Log order creation errors
@@ -100,10 +113,10 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
 
     const fullname = `${sData.first_name || ''} ${sData.last_name || ''}`.trim() || 'عميل دفع إلكتروني';
     const phone = sData.phone_number || '';
-    const phone2 = sData.apartment !== 'NA' ? sData.apartment : null;
+    const phone2 = orderData.extras?.phone2 || (sData.apartment !== 'NA' ? sData.apartment : null);
     const city = sData.city || 'الفيوم';
     const address = sData.street || 'NA';
-    const discount = Number(sData.postal_code) || 0;
+    const discount = orderData.extras?.discount !== undefined ? Number(orderData.extras.discount) : (Number(sData.postal_code) || 0);
     const grandTotal = Number(orderData.amount_cents) / 100;
     
     // Map payment labels
@@ -120,38 +133,56 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
 
     // 3. Decode items
     let subtotal = 0;
-    const decodedItems = (orderData.items || []).map((item) => {
-      let productId = 0;
-      let ml = 50;
-      let boxType = null;
-      let giftMessage = null;
+    let decodedItems;
 
-      try {
-        if (item.description && item.description.startsWith('{')) {
-          const meta = JSON.parse(item.description);
-          productId = Number(meta.productId) || 0;
-          ml = Number(meta.ml) || 50;
-          boxType = meta.boxType || null;
-          giftMessage = meta.giftMessage || null;
+    if (orderData.extras?.cart_items && orderData.extras.cart_items.length > 0) {
+      decodedItems = orderData.extras.cart_items.map(item => {
+        subtotal += Number(item.price) * item.quantity;
+        return {
+          productId: Number(item.productId),
+          quantity: item.quantity,
+          size: {
+            ml: Number(item.ml),
+            price: Number(item.price)
+          },
+          boxType: item.boxType || null,
+          giftMessage: item.giftMessage || null
+        };
+      });
+    } else {
+      decodedItems = (orderData.items || []).map((item) => {
+        let productId = 0;
+        let ml = 50;
+        let boxType = null;
+        let giftMessage = null;
+
+        try {
+          if (item.description && item.description.startsWith('{')) {
+            const meta = JSON.parse(item.description);
+            productId = Number(meta.productId) || 0;
+            ml = Number(meta.ml) || 50;
+            boxType = meta.boxType || null;
+            giftMessage = meta.giftMessage || null;
+          }
+        } catch (err: any) {
+          console.warn(`[Order Creation] Failed parsing description for item ${item.name}:`, err.message);
         }
-      } catch (err: any) {
-        console.warn(`[Order Creation] Failed parsing description for item ${item.name}:`, err.message);
-      }
 
-      const itemPrice = Number(item.amount_cents) / 100;
-      subtotal += itemPrice * item.quantity;
+        const itemPrice = Number(item.amount_cents) / 100;
+        subtotal += itemPrice * item.quantity;
 
-      return {
-        productId,
-        quantity: item.quantity,
-        size: {
-          ml: ml,
-          price: itemPrice
-        },
-        boxType,
-        giftMessage
-      };
-    });
+        return {
+          productId,
+          quantity: item.quantity,
+          size: {
+            ml: ml,
+            price: itemPrice
+          },
+          boxType,
+          giftMessage
+        };
+      });
+    }
 
     console.log(`[Order Creation] Inserting order row for ${merchantOrderId}...`);
 
