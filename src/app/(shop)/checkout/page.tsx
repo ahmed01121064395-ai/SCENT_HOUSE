@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
+import { trackInitiateCheckout, trackAddPaymentInfo, initFacebookPixelWithPhone } from '@/lib/facebookPixel';
 
 function CheckoutContent() {
   const router = useRouter();
@@ -52,6 +53,7 @@ function CheckoutContent() {
     setPaymentMethod('cod');
     setWalletType(null);
     setActiveTooltip('بوابة الدفع الإلكتروني قيد التفعيل حالياً وسنتيح الدفع بالبطاقة والمحافظ قريباً. يرجى استخدام الدفع عند الاستلام لإتمام طلبك الآن.');
+    trackAddPaymentInfo(grandTotal);
   };
 
   // UI state
@@ -73,18 +75,24 @@ function CheckoutContent() {
 
   const initiatedCheckoutRef = useRef(false);
   useEffect(() => {
-    if (checkoutItems.length > 0 && !initiatedCheckoutRef.current && typeof window !== 'undefined' && window.ttq) {
-      window.ttq.track('InitiateCheckout', {
-        contents: checkoutItems.map(item => ({
-          content_id: String(item.product.id),
-          content_name: item.product.name,
-          content_type: 'product',
-          price: item.size.price_after_discount ?? item.size.price ?? item.product.price,
-          quantity: item.quantity
-        })),
-        value: grandTotal,
-        currency: 'EGP'
-      });
+    if (checkoutItems.length > 0 && !initiatedCheckoutRef.current) {
+      if (typeof window !== 'undefined' && window.ttq) {
+        window.ttq.track('InitiateCheckout', {
+          contents: checkoutItems.map(item => ({
+            content_id: String(item.product.id),
+            content_name: item.product.name,
+            content_type: 'product',
+            price: item.size.price_after_discount ?? item.size.price ?? item.product.price,
+            quantity: item.quantity
+          })),
+          value: grandTotal,
+          currency: 'EGP'
+        });
+      }
+      
+      // Trigger Facebook InitiateCheckout
+      trackInitiateCheckout(grandTotal, checkoutItems.length);
+      
       initiatedCheckoutRef.current = true;
     }
   }, [checkoutItems, grandTotal]);
@@ -95,13 +103,18 @@ function CheckoutContent() {
     setIsSubmitting(true);
     setDbError('');
 
+    // Pre-initialize Facebook Pixel with Advanced Matching right before order submission
+    if (phone.trim()) {
+      initFacebookPixelWithPhone(phone.trim());
+    }
+
     if (paymentMethod !== 'cod') {
       setActiveTooltip('بوابة الدفع الإلكتروني قيد التفعيل حالياً. يرجى اختيار الدفع عند الاستلام لإتمام الطلب.');
       setIsSubmitting(false);
       return;
     }
 
-    if (paymentMethod === 'wallet' && (!walletType || walletType !== 'mobile' || !walletNumber.trim())) {
+    if ((paymentMethod as any) === 'wallet' && (!walletType || walletType !== 'mobile' || !walletNumber.trim())) {
       setActiveTooltip('يرجى إدخال رقم محفظة الهاتف المحمول بشكل صحيح.');
       setIsSubmitting(false);
       return;
@@ -112,13 +125,13 @@ function CheckoutContent() {
     });
 
     let paymentMethodLabel = 'الدفع عند الاستلام';
-    if (paymentMethod === 'applepay') {
+    if ((paymentMethod as any) === 'applepay') {
       paymentMethodLabel = 'Apple Pay';
-    } else if (paymentMethod === 'card') {
+    } else if ((paymentMethod as any) === 'card') {
       paymentMethodLabel = 'بطاقة بنكية - قيد الدفع';
-    } else if (paymentMethod === 'wallet') {
+    } else if ((paymentMethod as any) === 'wallet') {
       paymentMethodLabel = 'محفظة هاتف محمول - قيد الدفع';
-    } else if (paymentMethod === 'kiosk') {
+    } else if ((paymentMethod as any) === 'kiosk') {
       paymentMethodLabel = 'دفع كشك (أمان/مصاري) - قيد الدفع';
     }
 
@@ -126,7 +139,7 @@ function CheckoutContent() {
     const merchantOrderId = `SH-${Math.floor(1000 + Math.random() * 9000)}-${Date.now().toString().slice(-8)}`;
 
     // ── Step 1: Handle card/wallet/kiosk payment redirect or Cash on Delivery completion ──
-    if (paymentMethod === 'card' || paymentMethod === 'wallet' || paymentMethod === 'kiosk') {
+    if ((paymentMethod as any) === 'card' || (paymentMethod as any) === 'wallet' || (paymentMethod as any) === 'kiosk') {
       try {
         console.log(`[Checkout] Initiating Paymob ${paymentMethod} payment for order:`, merchantOrderId);
         const res = await fetch('/api/create-paymob-payment', {
@@ -155,7 +168,7 @@ function CheckoutContent() {
         const data = await res.json();
         
         let finalLabel = paymentMethodLabel;
-        if (paymentMethod === 'kiosk') {
+        if ((paymentMethod as any) === 'kiosk') {
           // Kiosk payment returns a reference code instead of redirecting
           const billRef = data.billReference;
           finalLabel = `دفع كشك (أمان/مصاري) - كود الدفع: ${billRef}`;
@@ -219,7 +232,7 @@ function CheckoutContent() {
 
         setIsSubmitting(false);
 
-        if (paymentMethod === 'kiosk') {
+        if ((paymentMethod as any) === 'kiosk') {
           // Kiosk option clears cart immediately because it doesn't leave the site
           if (buyNowItem) {
             setBuyNowItem(null);
@@ -359,6 +372,11 @@ function CheckoutContent() {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      onBlur={() => {
+                        if (phone.trim().length >= 10) {
+                          initFacebookPixelWithPhone(phone.trim());
+                        }
+                      }}
                     />
                   </div>
                   <div className="form-group-checkout">
@@ -369,6 +387,11 @@ function CheckoutContent() {
                       className="premium-input w-full"
                       value={phone2}
                       onChange={(e) => setPhone2(e.target.value)}
+                      onBlur={() => {
+                        if (phone2.trim().length >= 10) {
+                          initFacebookPixelWithPhone(phone2.trim());
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -436,6 +459,7 @@ function CheckoutContent() {
                       setPaymentMethod('cod');
                       setWalletType(null);
                       setActiveTooltip(null);
+                      trackAddPaymentInfo(grandTotal);
                     }}
                   >
                     <i className="fa-solid fa-hand-holding-dollar text-xl"></i>
@@ -494,6 +518,7 @@ function CheckoutContent() {
                         setWalletType('mobile');
                         setActiveTooltip(null);
                         setPaymobError('');
+                        trackAddPaymentInfo(grandTotal);
                       }}
                     >
                       <i className="fa-solid fa-mobile-screen-button text-xl"></i>
