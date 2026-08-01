@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     };
 
     console.log('[Paymob Intention API] Sending request to Paymob...');
-    const response = await fetch('https://accept.paymob.com/api/intention/v1/', {
+    const response = await fetch('https://accept.paymob.com/v1/intention/', {
       method: 'POST',
       headers: {
         'Authorization': `Token ${secretKey}`,
