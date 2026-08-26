@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Paymob Integration Constants (hardcoded fallbacks)
-const PAYMOB_CARD_INTEGRATION_ID = 5771591;
-const PAYMOB_WALLET_INTEGRATION_ID = 5774297;
-const PAYMOB_KIOSK_INTEGRATION_ID = 5774294;
+const PAYMOB_CARD_INTEGRATION_ID = 5815860;
+const PAYMOB_WALLET_INTEGRATION_ID = 5815858;
+const PAYMOB_APPLEPAY_INTEGRATION_ID = 5815859;
 
 export async function POST(req: NextRequest) {
   console.log('[Paymob Intention API] Creating payment intention...');
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const cardId = Number(process.env.PAYMOB_CARD_INTEGRATION_ID) || PAYMOB_CARD_INTEGRATION_ID;
     const walletId = Number(process.env.PAYMOB_WALLET_INTEGRATION_ID) || PAYMOB_WALLET_INTEGRATION_ID;
-    const kioskId = Number(process.env.PAYMOB_KIOSK_INTEGRATION_ID) || PAYMOB_KIOSK_INTEGRATION_ID;
+    const applePayId = Number(process.env.PAYMOB_APPLEPAY_INTEGRATION_ID) || PAYMOB_APPLEPAY_INTEGRATION_ID;
 
     // Split fullname into first & last name for billing_data compliance
     const nameParts = fullname.trim().split(/\s+/);
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const requestBody = {
       amount: amountCents,
       currency: 'EGP',
-      payment_methods: [cardId, walletId, kioskId],
+      payment_methods: [cardId, walletId, applePayId],
       billing_data: {
         first_name: firstName,
         last_name: lastName,
