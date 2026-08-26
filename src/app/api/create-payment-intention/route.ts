@@ -118,10 +118,13 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
     console.log('[Paymob Intention API] Intention created successfully:', data.id);
 
-    // Return the client_secret and the newly created Paymob intention ID
+    const publicKey = process.env.PAYMOB_PUBLIC_KEY || 'egy_pk_live_Ii5iE3TWaB4gJDV1EKry0NWsq9LDwTPo';
+
+    // Return the client_secret, public key and the newly created Paymob intention ID
     return NextResponse.json({ 
       clientSecret: data.client_secret,
-      intentionId: data.id
+      intentionId: data.id,
+      publicKey: publicKey
     });
 
   } catch (err: any) {
