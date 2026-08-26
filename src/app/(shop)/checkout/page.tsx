@@ -152,9 +152,8 @@ function CheckoutContent() {
 
         setIsSubmitting(false);
 
-        // Redirect to Paymob's Unified Checkout page using the public key from env or fallback
-        const publicKey = process.env.NEXT_PUBLIC_PAYMOB_PUBLIC_KEY || 'egy_pk_live_Ii5iE3TWaB4gJDV1EKry0NWsq9LDwTPo';
-        const redirectUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${data.clientSecret}`;
+        // Redirect to Paymob's Unified Checkout page using the public key returned from our secure server API
+        const redirectUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${data.publicKey}&clientSecret=${data.clientSecret}`;
         
         console.log('[Checkout] Redirecting to unified checkout:', redirectUrl);
         window.location.href = redirectUrl;
