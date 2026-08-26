@@ -121,8 +121,10 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
     
     // Map payment labels
     let paymentMethodLabel = 'بطاقة بنكية - تم الدفع';
-    if (integrationId === 5774297) {
+    if (integrationId === 5815858 || integrationId === 5774297) {
       paymentMethodLabel = 'محفظة هاتف محمول - تم الدفع';
+    } else if (integrationId === 5815859) {
+      paymentMethodLabel = 'Apple Pay - تم الدفع';
     } else if (integrationId === 5774294) {
       paymentMethodLabel = 'دفع كشك (أمان/مصاري) - تم الدفع';
     }
