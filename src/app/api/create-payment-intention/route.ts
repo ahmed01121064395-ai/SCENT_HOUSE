@@ -110,7 +110,9 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[Paymob Intention API] Paymob error response:', errorText);
-      return NextResponse.json({ error: `Paymob API failure: ${errorText}` }, { status: 400 });
+      return NextResponse.json({ 
+        error: `Paymob API failure: ${errorText} (Integrations used: Card=${cardId}, Wallet=${walletId}, ApplePay=${applePayId})` 
+      }, { status: 400 });
     }
 
     const data = await response.json();
