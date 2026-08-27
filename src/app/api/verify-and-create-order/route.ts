@@ -11,30 +11,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing orderId or txnId' }, { status: 400 });
     }
 
-    const apiKey = process.env.PAYMOB_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Missing Paymob API Key configuration' }, { status: 500 });
+    const secretKey = process.env.PAYMOB_SECRET_KEY || process.env.PAYMOB_API_KEY;
+    if (!secretKey) {
+      return NextResponse.json({ error: 'Missing Paymob Secret Key configuration' }, { status: 500 });
     }
 
-    // 1. Authenticate with Paymob
-    console.log('[Verify & Create Order API] Authenticating with Paymob...');
-    const authRes = await fetch('https://accept.paymob.com/api/auth/tokens', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: apiKey })
-    });
-    if (!authRes.ok) {
-      const errText = await authRes.text();
-      return NextResponse.json({ error: `Paymob Authentication failed: ${errText}` }, { status: 400 });
-    }
-    const { token: authToken } = await authRes.json();
-
-    // 2. Query Transaction Status from Paymob API
+    // 1. Query Transaction Status directly from Paymob API using Secret Key
     console.log(`[Verify & Create Order API] Fetching transaction ${txnId} from Paymob...`);
     const txRes = await fetch(`https://accept.paymob.com/api/acceptance/transactions/${txnId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': `Token ${secretKey}`,
         'Content-Type': 'application/json'
       }
     });
