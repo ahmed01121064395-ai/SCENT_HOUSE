@@ -69,6 +69,10 @@ export async function POST(req: NextRequest) {
       amount: amountCents,
       currency: 'EGP',
       payment_methods: [cardId, walletId, applePayId],
+      special_reference: orderId,
+      items: formattedItems,
+      notification_url: 'https://www.scenthouse.online/api/paymob-webhook',
+      redirection_url: 'https://www.scenthouse.online/api/paymob-callback',
       billing_data: {
         first_name: firstName,
         last_name: lastName,
