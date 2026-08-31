@@ -62,7 +62,13 @@ export async function logOrderCreationError(merchantOrderId: string, errorMsg: s
 
 // Creates the order dynamically from Paymob transaction/order payload
 export async function createOrderFromPaymob(orderData: PaymobOrderData, integrationId: number) {
-  const merchantOrderId = orderData.merchant_order_id;
+  const rawExtras = (orderData as any).extras?.creation_extras || (orderData as any).extras || {};
+  const merchantOrderId = 
+    orderData.merchant_order_id || 
+    (orderData as any).special_reference || 
+    rawExtras.merchant_order_id || 
+    `SH-${orderData.id || Date.now().toString().slice(-6)}`;
+
   console.log(`[Order Creation] Starting creation for merchant order: ${merchantOrderId}...`);
 
   try {
@@ -83,8 +89,10 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
       // If the order status is currently 'ملغي' (unpaid default), update it to 'جديد' since payment is now verified
       if (existingOrder.status === 'ملغي') {
         let paymentLabel = 'بطاقة بنكية - تم الدفع';
-        if (integrationId === 5774297) {
+        if (integrationId === 5815858 || integrationId === 5774297) {
           paymentLabel = 'محفظة هاتف محمول - تم الدفع';
+        } else if (integrationId === 5815859) {
+          paymentLabel = 'Apple Pay - تم الدفع';
         } else if (integrationId === 5774294) {
           paymentLabel = 'دفع كشك (أمان/مصاري) - تم الدفع';
         }
@@ -106,17 +114,14 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
     }
 
     // 2. Parse billing details from shipping_data
-    const sData = orderData.shipping_data;
-    if (!sData) {
-      throw new Error('Missing shipping_data in order payload');
-    }
+    const sData = orderData.shipping_data || {} as any;
 
     const fullname = `${sData.first_name || ''} ${sData.last_name || ''}`.trim() || 'عميل دفع إلكتروني';
     const phone = sData.phone_number || '';
-    const phone2 = orderData.extras?.phone2 || (sData.apartment !== 'NA' ? sData.apartment : null);
-    const city = sData.city || 'الفيوم';
-    const address = sData.street || 'NA';
-    const discount = orderData.extras?.discount !== undefined ? Number(orderData.extras.discount) : (Number(sData.postal_code) || 0);
+    const phone2 = rawExtras.phone2 || (sData.apartment !== 'NA' ? sData.apartment : null);
+    const city = sData.city && sData.city !== 'NA' ? sData.city : 'القاهرة';
+    const address = sData.street && sData.street !== 'NA' ? sData.street : 'تم الشراء أونلاين';
+    const discount = rawExtras.discount !== undefined ? Number(rawExtras.discount) : (Number(sData.postal_code) || 0);
     const grandTotal = Number(orderData.amount_cents) / 100;
     
     // Map payment labels
@@ -135,25 +140,27 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
 
     // 3. Decode items
     let subtotal = 0;
-    let decodedItems;
+    let decodedItems: any[] = [];
 
-    if (orderData.extras?.cart_items && orderData.extras.cart_items.length > 0) {
-      decodedItems = orderData.extras.cart_items.map(item => {
+    const cartItems = rawExtras.cart_items || (orderData.extras as any)?.cart_items;
+
+    if (cartItems && cartItems.length > 0) {
+      decodedItems = cartItems.map((item: any) => {
         subtotal += Number(item.price) * item.quantity;
         return {
-          productId: Number(item.productId),
+          productId: Number(item.productId) || 1,
           quantity: item.quantity,
           size: {
-            ml: Number(item.ml),
+            ml: Number(item.ml) || 50,
             price: Number(item.price)
           },
           boxType: item.boxType || null,
           giftMessage: item.giftMessage || null
         };
       });
-    } else {
-      decodedItems = (orderData.items || []).map((item) => {
-        let productId = 0;
+    } else if (orderData.items && orderData.items.length > 0) {
+      decodedItems = orderData.items.map((item) => {
+        let productId = 1;
         let ml = 50;
         let boxType = null;
         let giftMessage = null;
@@ -161,7 +168,7 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
         try {
           if (item.description && item.description.startsWith('{')) {
             const meta = JSON.parse(item.description);
-            productId = Number(meta.productId) || 0;
+            productId = Number(meta.productId) || 1;
             ml = Number(meta.ml) || 50;
             boxType = meta.boxType || null;
             giftMessage = meta.giftMessage || null;
@@ -184,6 +191,21 @@ export async function createOrderFromPaymob(orderData: PaymobOrderData, integrat
           giftMessage
         };
       });
+    }
+
+    // Safety fallback: if no items decoded, insert a placeholder perfume item so order is never dropped
+    if (decodedItems.length === 0) {
+      decodedItems = [{
+        productId: 1,
+        quantity: 1,
+        size: {
+          ml: 50,
+          price: grandTotal
+        },
+        boxType: null,
+        giftMessage: null
+      }];
+      subtotal = grandTotal;
     }
 
     console.log(`[Order Creation] Inserting order row for ${merchantOrderId}...`);
