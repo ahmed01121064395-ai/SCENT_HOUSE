@@ -18,9 +18,13 @@ export async function GET(req: NextRequest) {
 
     const baseUrl = PRODUCTION_URL;
 
-    if (success === 'true' && merchantOrderId) {
-      console.log(`[Paymob Callback GET] Payment succeeded! Redirecting to confirmation for ${merchantOrderId}`);
-      return NextResponse.redirect(`${baseUrl}/confirmation?orderId=${merchantOrderId}&success=true&txn=${txnId}`);
+    const resolvedOrderId = (merchantOrderId && merchantOrderId !== 'null' && merchantOrderId !== 'undefined')
+      ? merchantOrderId 
+      : (orderId ? `SH-${orderId}` : `SH-${txnId || Date.now()}`);
+
+    if (success === 'true') {
+      console.log(`[Paymob Callback GET] Payment succeeded! Redirecting to confirmation for ${resolvedOrderId}`);
+      return NextResponse.redirect(`${baseUrl}/confirmation?orderId=${resolvedOrderId}&success=true&txn=${txnId}`);
     } else {
       console.warn(`[Paymob Callback GET] Payment failed or details missing. Redirecting to checkout.`);
       return NextResponse.redirect(`${baseUrl}/checkout?error=paymob_failed`);
